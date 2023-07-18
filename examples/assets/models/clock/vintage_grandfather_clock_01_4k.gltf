@@ -1,0 +1,408 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v1.6.16",
+    "version": "2.0"
+  },
+  "extensionsUsed": [
+    "KHR_materials_clearcoat"
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "vintage_grandfather_clock_01_Body"
+    },
+    {
+      "mesh": 1,
+      "name": "vintage_grandfather_clock_01_MinuteHand",
+      "translation": [
+        0,
+        1.7319387197494507,
+        0.1255318969488144
+      ]
+    },
+    {
+      "mesh": 2,
+      "name": "vintage_grandfather_clock_01_HourHand",
+      "translation": [
+        0,
+        1.7319387197494507,
+        0.1255318969488144
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "vintage_grandfather_clock_01",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    },
+    {
+      "alphaMode": "BLEND",
+      "doubleSided": true,
+      "extensions": {
+        "KHR_materials_clearcoat": {
+          "clearcoatFactor": 1,
+          "clearcoatRoughnessFactor": 0.029999999329447746
+        }
+      },
+      "name": "vintage_grandfather_clock_01_glass",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.03996057063341141,
+          0.035330645740032196,
+          0.02838568203151226,
+          0.4000000059604645
+        ],
+        "metallicRoughnessTexture": {
+          "index": 3
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Cylinder.001",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 4,
+            "NORMAL": 5,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 1
+        }
+      ]
+    },
+    {
+      "name": "Cylinder.007",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 8,
+            "NORMAL": 9,
+            "TEXCOORD_0": 10
+          },
+          "indices": 11,
+          "material": 0
+        }
+      ]
+    },
+    {
+      "name": "Cylinder.008",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 12,
+            "NORMAL": 13,
+            "TEXCOORD_0": 14
+          },
+          "indices": 15,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/jpeg",
+      "name": "vintage_grandfather_clock_01_nor_gl",
+      "uri": "textures/vintage_grandfather_clock_01_nor_gl_4k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "vintage_grandfather_clock_01_diff",
+      "uri": "textures/vintage_grandfather_clock_01_diff_4k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "vintage_grandfather_clock_01_metal-vintage_grandfather_clock_01_rough",
+      "uri": "textures/vintage_grandfather_clock_01_arm_4k.jpg"
+    },
+    {
+      "mimeType": "image/jpeg",
+      "name": "vintage_grandfather_clock_01_metal.png-vintage_grandfather_clock_01_rough.png",
+      "uri": "textures/vintage_grandfather_clock_01_arm_4k.jpg"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 8754,
+      "max": [
+        0.31281235814094543,
+        2.1905269622802734,
+        0.23840990662574768
+      ],
+      "min": [
+        -0.31281235814094543,
+        -0.00006496906280517578,
+        -0.18820664286613464
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 8754,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 8754,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 25089,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 20,
+      "max": [
+        0.1870325803756714,
+        2.046146869659424,
+        0.14483042061328888
+      ],
+      "min": [
+        -0.1870330274105072,
+        1.5593708753585815,
+        0.1448303759098053
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5126,
+      "count": 20,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 20,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5123,
+      "count": 57,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 221,
+      "max": [
+        0.006813596934080124,
+        0.11774266511201859,
+        -0.007476486265659332
+      ],
+      "min": [
+        -0.10490795224905014,
+        -0.00687825633212924,
+        -0.007476490922272205
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 221,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5126,
+      "count": 221,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 11,
+      "componentType": 5123,
+      "count": 348,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 12,
+      "componentType": 5126,
+      "count": 168,
+      "max": [
+        0.0013782214373350143,
+        0.0015370661858469248,
+        -0.0068830400705337524
+      ],
+      "min": [
+        -0.0659073069691658,
+        -0.061378441751003265,
+        -0.007313559763133526
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 13,
+      "componentType": 5126,
+      "count": 168,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 14,
+      "componentType": 5126,
+      "count": 168,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 15,
+      "componentType": 5123,
+      "count": 252,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 105048,
+      "byteOffset": 0
+    },
+    {
+      "buffer": 0,
+      "byteLength": 105048,
+      "byteOffset": 105048
+    },
+    {
+      "buffer": 0,
+      "byteLength": 70032,
+      "byteOffset": 210096
+    },
+    {
+      "buffer": 0,
+      "byteLength": 50178,
+      "byteOffset": 280128
+    },
+    {
+      "buffer": 0,
+      "byteLength": 240,
+      "byteOffset": 330308
+    },
+    {
+      "buffer": 0,
+      "byteLength": 240,
+      "byteOffset": 330548
+    },
+    {
+      "buffer": 0,
+      "byteLength": 160,
+      "byteOffset": 330788
+    },
+    {
+      "buffer": 0,
+      "byteLength": 114,
+      "byteOffset": 330948
+    },
+    {
+      "buffer": 0,
+      "byteLength": 2652,
+      "byteOffset": 331064
+    },
+    {
+      "buffer": 0,
+      "byteLength": 2652,
+      "byteOffset": 333716
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1768,
+      "byteOffset": 336368
+    },
+    {
+      "buffer": 0,
+      "byteLength": 696,
+      "byteOffset": 338136
+    },
+    {
+      "buffer": 0,
+      "byteLength": 2016,
+      "byteOffset": 338832
+    },
+    {
+      "buffer": 0,
+      "byteLength": 2016,
+      "byteOffset": 340848
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1344,
+      "byteOffset": 342864
+    },
+    {
+      "buffer": 0,
+      "byteLength": 504,
+      "byteOffset": 344208
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 344712,
+      "uri": "vintage_grandfather_clock_01.bin"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 09.06.2010 23:45:07
+
+newmtl bark_pine
+Ns 18.000005
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+#map_Bump -bm 0.500000 textures/pine-trunk-norm.dds
+map_Kd textures/pine-trunk-diff.dds
+
+newmtl leaf_pine
+Ns 18.000005
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+#map_Bump -bm 0.500000 textures/pine-leaf-norm.dds
+map_Kd textures/pine-leaf-diff.dds

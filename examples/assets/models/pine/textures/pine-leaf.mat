@@ -1,0 +1,16 @@
+texture0="abstract::pine-leaf-diff.dds"
+texture1="abstract::pine-leaf-norm.dds"
+clamp0=0,0,0
+blend=0
+depthmask=1
+depthtest=1
+overlay=0
+zsort=0
+cullface=0
+castshadows=1
+specular=2
+bumpscale=1
+gloss=1
+shader="abstract::mesh_diffuse_bumpmap_sway.vert","abstract::mesh_diffuse_bumpmap_specular_alphatest.frag"
+shadowshader="abstract::mesh_shadow_sway.vert","abstract::mesh_shadow.frag"
+

@@ -1,0 +1,6 @@
+*.DS_Store
+**/build/**
+**/xcode/**
+**/lib/**
+**/.temp/**
+.vscode/**

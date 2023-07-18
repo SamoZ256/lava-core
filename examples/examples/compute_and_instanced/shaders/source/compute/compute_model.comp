@@ -1,0 +1,79 @@
+#version 450
+
+layout (local_size_x = 16, local_size_y = 16) in;
+
+struct Transform {
+    vec3 position;
+    vec3 rotation;
+    vec3 scale;
+};
+
+layout (set = 0, binding = 0) readonly buffer TRANSFORM {
+    Transform transforms[];
+} u_transform;
+
+layout (set = 0, binding = 1) writeonly buffer MODEL {
+    mat4 models[];
+} u_model;
+
+void translate(inout mat4 model, in vec3 position) {
+    model[3] = model[0] * position[0] + model[1] * position[1] + model[2] * position[2] + model[3];
+}
+
+void rotate(inout mat4 model, in vec3 rotation) {
+    //Create quaternion
+    vec3 c = cos(rotation * 0.5);
+    vec3 s = sin(rotation * 0.5);
+
+    vec4 quat;
+
+    quat.w = c.x * c.y * c.z + s.x * s.y * s.z;
+    quat.x = s.x * c.y * c.z - c.x * s.y * s.z;
+    quat.y = c.x * s.y * c.z + s.x * c.y * s.z;
+    quat.z = c.x * c.y * s.z - s.x * s.y * c.z;
+
+    //Create matrix
+    mat3 rotationMat = mat3(1.0);
+    float qxx = quat.x * quat.x;
+    float qyy = quat.y * quat.y;
+    float qzz = quat.z * quat.z;
+    float qxz = quat.x * quat.z;
+    float qxy = quat.x * quat.y;
+    float qyz = quat.y * quat.z;
+    float qwx = quat.w * quat.x;
+    float qwy = quat.w * quat.y;
+    float qwz = quat.w * quat.z;
+
+    rotationMat[0][0] = 1.0 - 2.0 * (qyy +  qzz);
+    rotationMat[0][1] = 2.0 * (qxy + qwz);
+    rotationMat[0][2] = 2.0 * (qxz - qwy);
+
+    rotationMat[1][0] = 2.0 * (qxy - qwz);
+    rotationMat[1][1] = 1.0 - 2.0 * (qxx +  qzz);
+    rotationMat[1][2] = 2.0 * (qyz + qwx);
+
+    rotationMat[2][0] = 2.0 * (qxz + qwy);
+    rotationMat[2][1] = 2.0 * (qyz - qwx);
+    rotationMat[2][2] = 1.0 - 2.0 * (qxx +  qyy);
+
+    model *= mat4(rotationMat);
+}
+
+void scale(inout mat4 model, in vec3 aScale) {
+    model[0] *= aScale.x;
+    model[1] *= aScale.y;
+    model[2] *= aScale.z;
+}
+
+void main() {
+    uint drawIndex = gl_GlobalInvocationID.y * gl_NumWorkGroups.x * gl_WorkGroupSize.x + gl_GlobalInvocationID.x;
+
+    //const vec3 position = vec3((gl_GlobalInvocationID.x - gl_NumWorkGroups.x * gl_WorkGroupSize.x / 2) * 2, (gl_GlobalInvocationID.y - gl_NumWorkGroups.y * gl_WorkGroupSize.y / 2) * 2, 0.0);
+
+    mat4 model = mat4(1.0);
+    translate(model, u_transform.transforms[drawIndex].position);
+    rotate(model, u_transform.transforms[drawIndex].rotation);
+    scale(model, u_transform.transforms[drawIndex].scale);
+
+    u_model.models[drawIndex] = model;
+}

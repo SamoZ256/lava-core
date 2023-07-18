@@ -1,0 +1,16 @@
+texture0="abstract::pine-trunk-diff.dds"
+clamp0=0,0,0
+texture1="abstract::pine-trunk-norm.dds"
+clamp1=0,0,0
+blend=0
+depthmask=1
+depthtest=1
+overlay=1
+zsort=0
+cullface=1
+castshadows=1
+specular=1.00000000
+bumpscale=1
+gloss=0.500000000
+shader="abstract::mesh_diffuse_bumpmap.vert","abstract::mesh_diffuse_bumpmap.frag"
+shadowshader="abstract::mesh_shadow.vert",""
