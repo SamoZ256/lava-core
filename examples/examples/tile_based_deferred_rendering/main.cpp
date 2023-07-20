@@ -88,7 +88,7 @@ public:
 
         instance = new lv::Instance({
             .applicationName = exampleName.c_str(),
-            .validationEnable = LV_TRUE
+            .validationEnable = True
         });
 
         device = new lv::Device({
@@ -98,7 +98,7 @@ public:
 
         swapChain = new lv::SwapChain({
             .window = window,
-            .vsyncEnable = LV_TRUE,
+            .vsyncEnable = True,
             .maxFramesInFlight = 2
         });
 
@@ -305,7 +305,7 @@ public:
             .pipelineLayout = gbufferPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .vertexDescriptor = mainVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
+            .depthTestEnable = True,
             .cullMode = LV_CULL_MODE_BACK_BIT,
             .colorBlendAttachments = {
                 {0},
@@ -334,8 +334,8 @@ public:
             .pipelineLayout = deferredPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .subpassIndex = 1,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
+            .depthTestEnable = True,
+            .depthWriteEnable = False,
             .depthOp = LV_COMPARE_OP_NOT_EQUAL,
             .colorBlendAttachments = {
                 {0},

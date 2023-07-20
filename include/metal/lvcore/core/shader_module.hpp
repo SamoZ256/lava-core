@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "lvcore/core/core.hpp"
+
 #include "common.hpp"
 
 #include "enums.hpp"
@@ -18,7 +20,7 @@ struct Metal_SpecializationMapEntry {
 };
 
 struct Metal_ShaderModuleCreateInfo {
-    LvShaderStageFlags shaderStage;
+    ShaderStageFlags shaderStage;
     std::string source;
     std::vector<Metal_SpecializationMapEntry> specializationConstants;
     void* constantsData = nullptr;

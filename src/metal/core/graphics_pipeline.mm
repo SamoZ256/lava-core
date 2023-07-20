@@ -33,6 +33,9 @@ Metal_GraphicsPipeline::~Metal_GraphicsPipeline() {
 }
 
 void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInfo) {
+    MTLCompareFunction mtlCompareFunction;
+    GET_MTL_COMPARE_FUNCTION(createInfo.depthOp, mtlCompareFunction);
+
     descriptor = [[MTLRenderPipelineDescriptor alloc] init];
     descriptor.vertexFunction = _vertexShaderModule->function();
     descriptor.fragmentFunction = _fragmentShaderModule->function();
@@ -59,30 +62,47 @@ void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInf
         GET_MTL_PIXEL_FORMAT(renderPassAttachment->format, format);
         attachment.pixelFormat = format;
         if (createInfo.colorBlendAttachments[i].blendEnable) {
+            MTLBlendFactor sourceRGBMTLBlendFactor;
+            GET_MTL_BLEND_FACTOR(createInfo.colorBlendAttachments[i].srcRgbBlendFactor, sourceRGBMTLBlendFactor);
+            MTLBlendFactor destinationRGBMTLBlendFactor;
+            GET_MTL_BLEND_FACTOR(createInfo.colorBlendAttachments[i].dstRgbBlendFactor, destinationRGBMTLBlendFactor);
+            MTLBlendOperation rgbMTLBlendOperation;
+            GET_MTL_BLEND_OPERATION(createInfo.colorBlendAttachments[i].rgbBlendOp, rgbMTLBlendOperation);
+
+            MTLBlendFactor sourceAlphaMTLBlendFactor;
+            GET_MTL_BLEND_FACTOR(createInfo.colorBlendAttachments[i].srcAlphaBlendFactor, sourceAlphaMTLBlendFactor);
+            MTLBlendFactor destinationAlphaMTLBlendFactor;
+            GET_MTL_BLEND_FACTOR(createInfo.colorBlendAttachments[i].dstAlphaBlendFactor, destinationAlphaMTLBlendFactor);
+            MTLBlendOperation alphaMTLBlendOperation;
+            GET_MTL_BLEND_OPERATION(createInfo.colorBlendAttachments[i].alphaBlendOp, alphaMTLBlendOperation);
+
             attachment.blendingEnabled = true;
-            attachment.sourceRGBBlendFactor = (MTLBlendFactor)createInfo.colorBlendAttachments[i].srcRgbBlendFactor;
-            attachment.destinationRGBBlendFactor = (MTLBlendFactor)createInfo.colorBlendAttachments[i].dstRgbBlendFactor;
-            attachment.rgbBlendOperation = (MTLBlendOperation)createInfo.colorBlendAttachments[i].rgbBlendOp;
-            attachment.sourceAlphaBlendFactor = (MTLBlendFactor)createInfo.colorBlendAttachments[i].srcAlphaBlendFactor;
-            attachment.destinationAlphaBlendFactor = (MTLBlendFactor)createInfo.colorBlendAttachments[i].dstAlphaBlendFactor;
-            attachment.alphaBlendOperation = (MTLBlendOperation)createInfo.colorBlendAttachments[i].alphaBlendOp;
+            attachment.sourceRGBBlendFactor = sourceRGBMTLBlendFactor;
+            attachment.destinationRGBBlendFactor = destinationRGBMTLBlendFactor;
+            attachment.rgbBlendOperation = rgbMTLBlendOperation;
+            attachment.sourceAlphaBlendFactor = sourceAlphaMTLBlendFactor;
+            attachment.destinationAlphaBlendFactor = destinationAlphaMTLBlendFactor;
+            attachment.alphaBlendOperation = alphaMTLBlendOperation;
         }
     }
+
+    MTLTessellationPartitionMode mtlTessellationPartitionMode;
+    GET_MTL_TESSELLATION_PARTITION_MODE(createInfo.tessellationSpacing, mtlTessellationPartitionMode);
 
     descriptor.tessellationFactorScaleEnabled = NO;
     descriptor.tessellationFactorFormat = MTLTessellationFactorFormatHalf;
     descriptor.tessellationControlPointIndexType = MTLTessellationControlPointIndexTypeNone;
     descriptor.tessellationFactorStepFunction = MTLTessellationFactorStepFunctionPerPatch;
     descriptor.tessellationOutputWindingOrder = (MTLWinding)createInfo.windingOrder;
-    descriptor.tessellationPartitionMode = (MTLTessellationPartitionMode)createInfo.tessellationSpacing;
+    descriptor.tessellationPartitionMode = mtlTessellationPartitionMode;
     descriptor.maxTessellationFactor = createInfo.maxTessellationFactor;
 
     _LV_CREATE_GRAPHICS_PIPELINE;
 
     MTLDepthStencilDescriptor* depthStencilDesc = [[MTLDepthStencilDescriptor alloc] init];
     if (createInfo.depthTestEnable) {
-        depthStencilDesc.depthCompareFunction = (MTLCompareFunction)createInfo.depthOp;
-        depthStencilDesc.depthWriteEnabled = createInfo.depthWriteEnable;
+        depthStencilDesc.depthCompareFunction = mtlCompareFunction;
+        depthStencilDesc.depthWriteEnabled = (bool)createInfo.depthWriteEnable;
     }
 
     _depthStencilState = [g_metal_device->device() newDepthStencilStateWithDescriptor:depthStencilDesc];

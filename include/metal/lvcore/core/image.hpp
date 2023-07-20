@@ -20,21 +20,21 @@ struct Metal_ImageDescriptorInfo {
     std::vector<id /*MTLTexture*/> images;
     id /*MTLSamplerState*/ sampler;
     uint32_t binding;
-    LvDescriptorType descriptorType;
+    DescriptorType descriptorType;
 };
 
 struct Metal_ImageCreateInfo {
     uint8_t frameCount = 0;
-    lv::Format format;
+    Format format;
     uint16_t width;
     uint16_t height;
     uint16_t layerCount = 1;
     uint16_t mipCount = 1;
-    LvImageViewType imageType = LV_IMAGE_VIEW_TYPE_2D;
-    LvImageUsageFlags usage = 0;
-    LvImageAspectFlags aspectMask = LV_IMAGE_ASPECT_COLOR_BIT;
-    LvMemoryType memoryType = LV_MEMORY_TYPE_PRIVATE;
-    LvMemoryAllocationCreateFlags memoryAllocationFlags = 0;
+    ImageType imageType = ImageType::_2D;
+    ImageUsageFlags usage = ImageUsageFlags::None;
+    ImageAspectFlags aspectMask = ImageAspectFlags::Color;
+    MemoryType memoryType = MemoryType::Private;
+    MemoryAllocationCreateFlags memoryAllocationFlags = MemoryAllocationCreateFlags::None;
 };
 
 struct Metal_ImageLoadInfo {
@@ -45,7 +45,7 @@ struct Metal_ImageLoadInfo {
 
 struct Metal_ImageViewCreateInfo {
     Metal_Image* image;
-    LvImageViewType viewType;
+    ImageType viewType;
     uint16_t baseLayer;
     uint16_t layerCount;
     uint16_t baseMip;
@@ -58,7 +58,7 @@ private:
 
     std::vector<id /*MTLTexture*/> images;
 
-    lv::Format _format;
+    Format _format;
 
     uint16_t _width, _height;
 
@@ -83,9 +83,9 @@ public:
 
     ~Metal_Image();
 
-    Metal_ImageDescriptorInfo descriptorInfo(uint32_t binding, LvDescriptorType descriptorType = LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LvImageLayout imageLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, int8_t frameOffset = 0);
+    Metal_ImageDescriptorInfo descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::SampledImage, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0);
     
-    Metal_Image* newImageView(LvImageViewType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount);
+    Metal_Image* newImageView(lv::ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount);
 
     //Getters
     inline uint8_t frameCount() { return _frameCount; }

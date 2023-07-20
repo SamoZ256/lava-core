@@ -20,12 +20,6 @@
 #endif
 */
 
-//Bool
-#define LvBool bool
-
-#define LV_TRUE true
-#define LV_FALSE false
-
 //Shader stage
 #define LvShaderStageFlags uint8_t
 

@@ -29,10 +29,10 @@ struct Texture {
             .isSRGB = isSRGB,
             .generateMipmaps = generateMipmaps
         }, commandBuffer);
-        commandBuffer->cmdTransitionImageLayout(image, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        commandBuffer->cmdTransitionImageLayout(image, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
         sampler = new lv::Sampler({
-            .filter = LV_FILTER_LINEAR,
-            .addressMode = LV_SAMPLER_ADDRESS_MODE_REPEAT,
+            .filter = lv::Filter::Linear,
+            .addressMode = lv::SamplerAddressMode::Repeat,
             .maxLod = float(image->mipCount())
         });
     }

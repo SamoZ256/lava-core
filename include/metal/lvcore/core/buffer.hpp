@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "lvcore/core/common.hpp"
+
 #include "common.hpp"
 
 #include "enums.hpp"
@@ -12,15 +14,15 @@ namespace lv {
 struct Metal_BufferDescriptorInfo {
     std::vector<id /*MTLBuffer*/> buffers;
     uint32_t binding;
-    LvDescriptorType descriptorType;
+    DescriptorType descriptorType;
 };
 
 struct Metal_BufferCreateInfo {
     uint8_t frameCount = 0;
     size_t size;
-    LvBufferUsageFlags usage = 0;
-    LvMemoryType memoryType = LV_MEMORY_TYPE_PRIVATE;
-    LvMemoryAllocationCreateFlags memoryAllocationFlags = 0;
+    BufferUsageFlags usage = BufferUsageFlags::None;
+    MemoryType memoryType = MemoryType::Private;
+    MemoryAllocationCreateFlags memoryAllocationFlags = MemoryAllocationCreateFlags::None;
 };
 
 class Metal_Buffer {
@@ -37,7 +39,7 @@ public:
 
     void copyDataTo(void* data, size_t aSize = 0, uint32_t offset = 0);
 
-    Metal_BufferDescriptorInfo descriptorInfo(uint32_t binding, LvDescriptorType descriptorType = LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    Metal_BufferDescriptorInfo descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::UniformBuffer);
 
     static void copyBufferToBuffer(id /*MTLBlitCommandEncoder*/ encoder, id /*MTLBuffer*/ srcBuffer, id /*MTLBuffer*/ dstBuffer, uint32_t size);
 

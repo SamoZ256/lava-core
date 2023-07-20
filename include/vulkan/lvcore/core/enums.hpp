@@ -3,12 +3,6 @@
 
 #include <vk_mem_alloc.h>
 
-//Bool
-#define LvBool uint8_t
-
-#define LV_TRUE VK_TRUE
-#define LV_FALSE VK_FALSE
-
 //Shader stage
 #define LvShaderStageFlags VkShaderStageFlags
 

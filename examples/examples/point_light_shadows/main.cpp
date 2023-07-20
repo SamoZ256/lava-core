@@ -154,7 +154,7 @@ public:
             shadowRenderPass.depthImage.newImageView(shadowRenderPass.depthImageViews[i], LV_IMAGE_VIEW_TYPE_2D, i, 1, 0, 1);
         }
         shadowRenderPass.depthSampler.filter = LV_FILTER_LINEAR;
-        shadowRenderPass.depthSampler.compareEnable = LV_TRUE;
+        shadowRenderPass.depthSampler.compareEnable = True;
         shadowRenderPass.depthSampler.compareOp = LV_COMPARE_OP_LESS;
         shadowRenderPass.depthSampler.init();
 

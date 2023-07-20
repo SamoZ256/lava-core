@@ -228,7 +228,7 @@ public:
         gbufferGraphicsPipeline.renderPass = &gbufferRenderPass.renderPass;
         gbufferGraphicsPipeline.vertexDescriptor = &mainVertexDescriptor;
 
-        gbufferGraphicsPipeline.config.depthTestEnable = LV_TRUE;
+        gbufferGraphicsPipeline.config.depthTestEnable = True;
         gbufferGraphicsPipeline.config.cullMode = LV_CULL_MODE_BACK_BIT;
 
         gbufferGraphicsPipeline.addColorBlendAttachment({0});

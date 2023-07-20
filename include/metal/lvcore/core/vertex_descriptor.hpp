@@ -3,19 +3,21 @@
 
 #include "common.hpp"
 
+#include "lvcore/core/core.hpp"
+
 #include "enums.hpp"
 
 namespace lv {
 
 struct Metal_VertexDescriptorBinding {
     uint16_t location;
-    LvVertexFormat format;
+    Format format;
     uint32_t offset;
 };
 
 struct Metal_VertexDescriptorCreateInfo {
     size_t size;
-    LvVertexStepFunction stepFunction = LV_VERTEX_STEP_FUNCTION_PER_VERTEX;
+    VertexInputRate inputRate = VertexInputRate::PerVertex;
     std::vector<Metal_VertexDescriptorBinding> bindings;
 };
 

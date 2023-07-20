@@ -14,10 +14,10 @@ Metal_DescriptorSet::Metal_DescriptorSet(Metal_DescriptorSetCreateInfo createInf
         bufferBindingIndices.push_back(bufferBinding.binding);
     }
     for (auto& imageBinding : createInfo.imageBindings) {
-        if (imageBinding.descriptorType != LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT) {
+        if (imageBinding.descriptorType != DescriptorType::InputAttachment) {
             textures.push_back(imageBinding.images);
             textureBindingIndices.push_back(imageBinding.binding);
-            if (imageBinding.descriptorType == LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+            if (imageBinding.descriptorType == DescriptorType::CombinedImageSampler) {
                 samplers.push_back(imageBinding.sampler);
                 samplerBindingIndices.push_back(imageBinding.binding);
             }

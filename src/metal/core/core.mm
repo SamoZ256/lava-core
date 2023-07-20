@@ -1,5 +1,7 @@
 #include "metal/lvcore/core/core.hpp"
 
+namespace lv {
+
 //---------------- Texture usage ----------------
 MTLTextureUsage getMTLTextureUsage(ImageUsageFlags imageUsageFlags) {
     MTLTextureUsage mtlTextureUsage = 0;
@@ -8,8 +10,10 @@ MTLTextureUsage getMTLTextureUsage(ImageUsageFlags imageUsageFlags) {
         mtlTextureUsage |= MTLTextureUsageShaderRead;
     if ((int)imageUsageFlags & (int)ImageUsageFlags::ColorAttachment || (int)imageUsageFlags & (int)ImageUsageFlags::DepthStencilAttachment || (int)imageUsageFlags & (int)ImageUsageFlags::TransientAttachment || (int)imageUsageFlags & (int)ImageUsageFlags::InputAttachment)
         mtlTextureUsage |= MTLTextureUsageRenderTarget;
-    if ((int)imageUsageFlags & (int)ImageUsageFlags::Storage)
+    if ((int)imageUsageFlags & (int)ImageUsageFlags::StorageImage)
         mtlTextureUsage |= MTLTextureUsageShaderWrite;
     
     return mtlTextureUsage;
 }
+
+} //namespace lv

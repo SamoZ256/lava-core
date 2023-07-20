@@ -2,14 +2,32 @@
 #define LV_CORE_H
 
 #include <stdint.h>
+#include <type_traits>
 
 #define LV_SHADER_STAGE_VERTEX_INDEX 0
 #define LV_SHADER_STAGE_FRAGMENT_INDEX 1
 #define LV_SHADER_STAGE_COMPUTE_INDEX 2
 
+template<class T>
+constexpr std::underlying_type_t<T> toUnderlying(T e) {
+   return static_cast<typename std::underlying_type<T>::type>(e);
+}
+
+template<class T>
+constexpr T operator& (T l, T r) {
+    typedef std::underlying_type_t<T> ut;
+    return static_cast<T>(static_cast<ut>(l) & static_cast<ut>(r));
+}
+
+template<class T>
+constexpr T operator| (T l, T r) {
+    typedef std::underlying_type_t<T> ut;
+    return static_cast<T>(static_cast<ut>(l) | static_cast<ut>(r));
+}
+
 namespace lv {
 
-enum class Bool {
+enum Bool {
     False,
     True
 };
@@ -34,13 +52,14 @@ enum class Format {
     R16Sint,
     R16Unorm,
     R16Snorm,
+    R16Float,
 
     //RG
-    R8G8Uint,
-    R8G8Sint,
-    R8G8Unorm,
-    R8G8Snorm,
-    R8G8Unorm_sRGB,
+    RG8Uint,
+    RG8Sint,
+    RG8Unorm,
+    RG8Snorm,
+    RG8Unorm_sRGB,
 
     //D
     D16Unorm,
@@ -49,11 +68,19 @@ enum class Format {
     B5G6R5Unorm,
 
     //ABGR - packed
-    A1B5G5R5Unorm,
+    A1BGR5Unorm,
 
     //BGRA - packed
-    B4G4R4A4Unorm,
-    B5G5R5A1Unorm,
+    BGRA4Unorm,
+    BGR5A1Unorm,
+
+    //---------------- 24 ----------------
+
+    //RGB
+    RGB8Uint,
+    RGB8Sint,
+    RGB8Unorm,
+    RGB8Snorm,
 
     //---------------- 32 ----------------
 
@@ -63,20 +90,29 @@ enum class Format {
     R32Float,
 
     //RG
-    R16G16Uint,
-    R16G16Sint,
-    R16G16Unorm,
-    R16G16Snorm,
+    RG16Uint,
+    RG16Sint,
+    RG16Unorm,
+    RG16Snorm,
+    RG16Float,
 
     //RGBA
-    R8G8B8A8Uint,
-    R8G8B8A8Sint,
-    R8G8B8A8Unorm,
-    R8G8B8A8Snorm,
-    R8G8B8A8Unorm_sRGB,
+    RGBA8Uint,
+    RGBA8Sint,
+    RGBA8Unorm,
+    RGBA8Snorm,
+    RGBA8Unorm_sRGB,
 
     //BGRA
-    B8G8R8A8Unorm_sRGB,
+    BGRA8Unorm_sRGB,
+
+    //ABGR
+    A2BGR10Unorm,
+
+    //ARGB
+    A2RGB10Unorm,
+    A2RGB10Snorm,
+    A2RGB10Uint,
 
     //D
     D32Float,
@@ -85,42 +121,52 @@ enum class Format {
     D24Unorm_S8Uint,
 
     //BGR - packed
-    B10G11R11Float,
+    B10GR11Float,
 
     //ERGB - packed
-    E5R9G9B9Float,
-
-    //ABGR
-    A2B10G10R10Unorm,
-
-    //ARGB
-    A2R10G10B10Unorm,
-    A2R10G10B10Uint,
+    E5RGB9Float,
 
     //---------------- 40 ----------------
 
     //D_S
     D32Float_S8Uint,
 
+    //---------------- 48 ----------------
+
+    //RGB
+    RGB16Uint,
+    RGB16Sint,
+    RGB16Unorm,
+    RGB16Snorm,
+    RGB16Float,
+
     //---------------- 64 ----------------
 
     //RG
-    R32G32Uint,
-    R32G32Sint,
+    RG32Uint,
+    RG32Sint,
+    RG32Float,
 
     //RGBA
-    R16G16B16A16Uint,
-    R16G16B16A16Sint,
-    R16G16B16A16Unorm,
-    R16G16B16A16Snorm,
-    R16G16B16A16Float,
+    RGBA16Uint,
+    RGBA16Sint,
+    RGBA16Unorm,
+    RGBA16Snorm,
+    RGBA16Float,
+
+    //---------------- 96 ----------------
+
+    //RGB
+    RGB32Uint,
+    RGB32Sint,
+    RGB32Float,
 
     //---------------- 128 ----------------
 
     //RGBA
-    R32G32B32A32Uint,
-    R32G32B32A32Sint,
-    R32G32B32A32Float,
+    RGBA32Uint,
+    RGBA32Sint,
+    RGBA32Float,
 
     //---------------- ASTC ----------------
 
@@ -131,6 +177,7 @@ enum class Format {
 };
 
 enum class CullMode {
+    None,
     Front,
     Back,
 
@@ -281,18 +328,22 @@ enum class TessellationSpacing {
     Equal,
     FractionalOdd,
     FractionalEven,
+    Pow2,
 
     MaxEnum
 };
 
-enum class VertexStepFunction {
+enum class VertexInputRate {
+    Constant, //TODO: Not supported yet
     PerVertex,
+    PerInstance,
     PerPatch,
     PerPatchControlPoint,
 
     MaxEnum
 };
 
+//TODO: use this enum
 enum class CommandEncoderState {
     Render,
     Compute,
@@ -317,7 +368,7 @@ enum class ImageUsageFlags {
     DepthStencilAttachment = 0x4,
     TransientAttachment    = 0x8,
     InputAttachment        = 0x10,
-    Storage                = 0x20,
+    StorageImage           = 0x20,
     TransferSource         = 0x40,
     TransferDestination    = 0x80
 };

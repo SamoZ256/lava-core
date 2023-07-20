@@ -298,7 +298,7 @@ public:
         gbufferGraphicsPipeline.renderPass = &gbufferRenderPass.renderPass;
         gbufferGraphicsPipeline.vertexDescriptor = &mainVertexDescriptor;
 
-        gbufferGraphicsPipeline.config.depthTestEnable = LV_TRUE;
+        gbufferGraphicsPipeline.config.depthTestEnable = True;
         gbufferGraphicsPipeline.config.cullMode = LV_CULL_MODE_BACK_BIT;
 
         gbufferGraphicsPipeline.addColorBlendAttachment({0});
@@ -322,8 +322,8 @@ public:
         deferredGraphicsPipeline.pipelineLayout = &deferredPipelineLayout;
         deferredGraphicsPipeline.renderPass = &deferredRenderPass.renderPass;
 
-        deferredGraphicsPipeline.config.depthTestEnable = LV_TRUE;
-        deferredGraphicsPipeline.config.depthWriteEnable = LV_FALSE;
+        deferredGraphicsPipeline.config.depthTestEnable = True;
+        deferredGraphicsPipeline.config.depthWriteEnable = False;
         deferredGraphicsPipeline.config.depthOp = LV_COMPARE_OP_NOT_EQUAL;
 
         deferredGraphicsPipeline.addColorBlendAttachment({0});

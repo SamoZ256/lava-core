@@ -35,8 +35,8 @@ struct Vulkan_GraphicsPipelineCreateInfo {
     std::vector<Vulkan_ColorBlendAttachment> colorBlendAttachments;
 
     LvCullModeFlags cullMode = LV_CULL_MODE_NONE;
-    LvBool depthTestEnable = LV_FALSE;
-    LvBool depthWriteEnable = LV_TRUE;
+    Bool depthTestEnable = False;
+    Bool depthWriteEnable = True;
     LvCompareOp depthOp = LV_COMPARE_OP_LESS;
 };
 

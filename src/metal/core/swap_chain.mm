@@ -12,7 +12,7 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
     g_metal_swapChain = this;
 
     _maxFramesInFlight = createInfo.maxFramesInFlight;
-    loadOp = (createInfo.clearAttachment ? LV_ATTACHMENT_LOAD_OP_CLEAR : LV_ATTACHMENT_LOAD_OP_DONT_CARE);
+    loadOp = (createInfo.clearAttachment ? AttachmentLoadOperation::Clear : AttachmentLoadOperation::DontCare);
     hasDepthAttachment = createInfo.createDepthAttachment;
     _window = createInfo.window;
 
@@ -27,7 +27,7 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
     colorImage->_setFrameCount(_maxFramesInFlight);
     colorImage->_setWidth(_width);
     colorImage->_setHeight(_height);
-    colorImage->_setFormat(Format::B8G8R8A8Unorm_sRGB);
+    colorImage->_setFormat(Format::BGRA8Unorm_sRGB);
 
     Metal_SubpassCreateInfo subpassCreateInfo{};
     subpassCreateInfo.colorAttachments = {{0}};
@@ -44,7 +44,7 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
             .format = colorImage->format(),
             .index = 0,
             .loadOp = loadOp,
-            .storeOp = LV_ATTACHMENT_STORE_OP_STORE
+            .storeOp = AttachmentStoreOperation::Store
         }
     };
 
@@ -52,8 +52,8 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
         renderPassCreateInfo.attachments.push_back({
             .format = depthImage->format(),
             .index = 1,
-            .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-            .storeOp = LV_ATTACHMENT_STORE_OP_DONT_CARE
+            .loadOp = AttachmentLoadOperation::Clear,
+            .storeOp = AttachmentStoreOperation::DontCare
         });
     }
 
@@ -92,8 +92,8 @@ void Metal_SwapChain::create() {
             .format = Format::D32Float,
             .width = width,
             .height = height,
-            .usage = LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-            .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
+            .usage = ImageUsageFlags::DepthStencilAttachment,
+            .aspectMask = ImageAspectFlags::Depth
         });
     }
 }

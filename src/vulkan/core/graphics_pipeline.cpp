@@ -63,7 +63,7 @@ void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createI
     for (uint8_t i = 0; i < createInfo.colorBlendAttachments.size(); i++) {
         //uint8_t index = i;//colorBlendAttachments[i].index;
         configInfo.colorBlendAttachments[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        configInfo.colorBlendAttachments[i].blendEnable = createInfo.colorBlendAttachments[i].blendEnable;
+        configInfo.colorBlendAttachments[i].blendEnable = (VkBool32)createInfo.colorBlendAttachments[i].blendEnable;
         configInfo.colorBlendAttachments[i].srcColorBlendFactor = createInfo.colorBlendAttachments[i].srcRgbBlendFactor;
         configInfo.colorBlendAttachments[i].dstColorBlendFactor = createInfo.colorBlendAttachments[i].dstRgbBlendFactor;
         configInfo.colorBlendAttachments[i].colorBlendOp = createInfo.colorBlendAttachments[i].rgbBlendOp;
@@ -85,8 +85,8 @@ void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createI
 
     //Depth and stencil
     configInfo.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    configInfo.depthStencilInfo.depthTestEnable = createInfo.depthTestEnable;
-    configInfo.depthStencilInfo.depthWriteEnable = (createInfo.depthTestEnable == VK_TRUE ? createInfo.depthWriteEnable : VK_FALSE);
+    configInfo.depthStencilInfo.depthTestEnable = (VkBool32)createInfo.depthTestEnable;
+    configInfo.depthStencilInfo.depthWriteEnable = (createInfo.depthTestEnable ? (VkBool32)createInfo.depthWriteEnable : VK_FALSE);
     configInfo.depthStencilInfo.depthCompareOp = createInfo.depthOp;
     configInfo.depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
     configInfo.depthStencilInfo.minDepthBounds = 0.0f;  // Optional

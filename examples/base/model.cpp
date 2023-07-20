@@ -13,14 +13,14 @@ void Mesh::init(lv::CommandBuffer* commandBuffer, std::vector<MainVertex>& aVert
 	
     vertexBuffer = new lv::Buffer({
 		.frameCount = 1,
-		.usage = LV_BUFFER_USAGE_TRANSFER_DST_BIT | LV_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		.usage = lv::BufferUsageFlags::TransferDestination | lv::BufferUsageFlags::VertexBuffer,
 		.size = vertices.size() * sizeof(MainVertex)
 	});
     commandBuffer->cmdStagingCopyDataToBuffer(vertexBuffer, vertices.data());
 
 	indexBuffer = new lv::Buffer({
 		.frameCount = 1,
-		.usage = LV_BUFFER_USAGE_TRANSFER_DST_BIT | LV_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		.usage = lv::BufferUsageFlags::TransferDestination | lv::BufferUsageFlags::IndexBuffer,
 		.size = indices.size() * sizeof(uint32_t)
 	});
     commandBuffer->cmdStagingCopyDataToBuffer(indexBuffer, indices.data());
@@ -73,7 +73,7 @@ void Mesh::renderShadows(lv::CommandBuffer* commandBuffer, uint16_t instanceCoun
 
 void Mesh::renderNoTextures(lv::CommandBuffer* commandBuffer, uint16_t instanceCount) {
     commandBuffer->cmdBindVertexBuffer(vertexBuffer);
-    commandBuffer->cmdDrawIndexed(indexBuffer, LV_INDEX_TYPE_UINT32, indexBuffer->size() / sizeof(uint32_t), instanceCount);
+    commandBuffer->cmdDrawIndexed(indexBuffer, lv::IndexType::Uint32, indexBuffer->size() / sizeof(uint32_t), instanceCount);
 }
 
 void Mesh::createPlane(lv::CommandBuffer* commandBuffer) {
@@ -121,20 +121,20 @@ void Model::init(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipeline
 	if (!Mesh::neautralTexturesCreated) {
 		Texture* neautralTextures[2] = {&Mesh::neutralTexture, &Mesh::normalNeutralTexture};
 		glm::u8vec4 neautralColors[2] = {{255, 255, 255, 255}, {128, 128, 255, 0}};
-		lv::Format neutralTextureFormats[2] = {lv::Format::R8G8B8A8Unorm_sRGB, lv::Format::R8G8B8A8Unorm};
+		lv::Format neutralTextureFormats[2] = {lv::Format::RGBA8Unorm_sRGB, lv::Format::RGBA8Unorm};
 		for (uint8_t i = 0; i < 2; i++) {
 			neautralTextures[i]->image = new lv::Image({
 				.frameCount = 1,
 				.format = neutralTextureFormats[i],
 				.width = 1,
 				.height = 1,
-				.usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT
+				.usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::TransferDestination
 			});
 			commandBuffer->cmdStagingCopyDataToImage(neautralTextures[i]->image, &neautralColors[i]);
-			commandBuffer->cmdTransitionImageLayout(neautralTextures[i]->image, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			commandBuffer->cmdTransitionImageLayout(neautralTextures[i]->image, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
 			neautralTextures[i]->sampler = new lv::Sampler({
-				.filter = LV_FILTER_LINEAR,
-				.addressMode = LV_SAMPLER_ADDRESS_MODE_REPEAT
+				.filter = lv::Filter::Linear,
+				.addressMode = lv::SamplerAddressMode::Repeat
 			});
 		}
 	}

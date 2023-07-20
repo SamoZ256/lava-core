@@ -8,10 +8,10 @@
 namespace lv {
 
 struct Metal_SamplerCreateInfo {
-    LvFilter filter = LV_FILTER_NEAREST;
-    LvSamplerAddressMode addressMode = LV_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    LvBool compareEnable = LV_FALSE;
-    LvCompareOp compareOp = LV_COMPARE_OP_LESS;
+    Filter filter = Filter::Nearest;
+    SamplerAddressMode addressMode = SamplerAddressMode::ClampToEdge;
+    Bool compareEnable = False;
+    CompareOperation compareOp = CompareOperation::Less;
     float minLod = 0.0f;
     float maxLod = 0.0f;
 };
@@ -25,7 +25,7 @@ public:
 
     ~Metal_Sampler();
 
-    Metal_ImageDescriptorInfo descriptorInfo(Metal_Image* image, uint32_t binding, LvImageLayout imageLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, int8_t frameOffset = 0);
+    Metal_ImageDescriptorInfo descriptorInfo(Metal_Image* image, uint32_t binding, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0);
 };
 
 } //namespace lv

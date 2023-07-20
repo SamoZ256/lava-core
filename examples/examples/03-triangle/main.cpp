@@ -29,7 +29,7 @@ public:
 
         instance = new lv::Instance({
             .applicationName = exampleName.c_str(),
-            .validationEnable = LV_TRUE
+            .validationEnable = True
         });
 
         device = new lv::Device({
@@ -39,9 +39,9 @@ public:
 
         swapChain = new lv::SwapChain({
             .window = window,
-            .vsyncEnable = LV_TRUE,
+            .vsyncEnable = True,
             .maxFramesInFlight = 2,
-            .clearAttachment = LV_TRUE
+            .clearAttachment = True
         });
 
         //Pipeline layout

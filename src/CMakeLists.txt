@@ -1,9 +1,9 @@
 file(GLOB src
-    "vulkan/core/*.cpp"
-    "vulkan/libraries/*.cpp"
-    "filesystem/*.cpp"
-    "threading/*.cpp"
-    "libraries/*.cpp"
+    vulkan/core/*.cpp
+    vulkan/libraries/*.cpp
+    filesystem/*.cpp
+    threading/*.cpp
+    libraries/*.cpp
 )
 
 add_library(LAVA_CORE_LIB SHARED

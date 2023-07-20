@@ -5,6 +5,8 @@
 
 #include "lvnd/lvnd.h"
 
+#include "lvcore/core/core.hpp"
+
 #include "common.hpp"
 
 #include "enums.hpp"
@@ -17,9 +19,9 @@ struct Metal_DeviceCreateInfo {
     LvndWindow* window;
     ThreadPool* threadPool;
     uint32_t maxDescriptorSets = 1024;
-	std::map<LvDescriptorType, uint16_t> descriptorPoolSizes = {
-		{LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 4},
-    	{LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4}
+	std::map<DescriptorType, uint16_t> descriptorPoolSizes = {
+		{DescriptorType::UniformBuffer, 4},
+    	{DescriptorType::CombinedImageSampler, 4}
 	};
 };
 

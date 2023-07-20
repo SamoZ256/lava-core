@@ -31,17 +31,22 @@ Metal_Image::Metal_Image(Metal_ImageCreateInfo createInfo) {
 
     MTLPixelFormat mtlPixelFormat;
     GET_MTL_PIXEL_FORMAT(_format, mtlPixelFormat);
+    MTLTextureType mtlTextureType;
+    GET_MTL_TEXTURE_TYPE(createInfo.imageType, mtlTextureType);
+    MTLStorageMode mtlStorageMode;
+    GET_MTL_STORAGE_MODE(createInfo.memoryType, mtlStorageMode);
+    MTLTextureUsage mtlTextureUsage = getMTLTextureUsage(createInfo.usage);
     
-    if (createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE || createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
+    if (createInfo.imageType == ImageType::Cube || createInfo.imageType == ImageType::CubeArray)
         _layersPerLayer = 6;
 
     MTLTextureDescriptor* textureDesc = [[MTLTextureDescriptor alloc] init];
     textureDesc.width = _width;
     textureDesc.height = _height;
-    textureDesc.pixelFormat = (MTLPixelFormat)mtlPixelFormat;
-    textureDesc.textureType = (MTLTextureType)createInfo.imageType;
-    textureDesc.storageMode = (MTLStorageMode)createInfo.memoryType;
-    textureDesc.usage = createInfo.usage;
+    textureDesc.pixelFormat = mtlPixelFormat;
+    textureDesc.textureType = mtlTextureType;
+    textureDesc.storageMode = mtlStorageMode;
+    textureDesc.usage = mtlTextureUsage;
     textureDesc.arrayLength = _layerCount;
     textureDesc.mipmapLevelCount = _mipCount;
 
@@ -156,13 +161,18 @@ Metal_Image::Metal_Image(Metal_ImageViewCreateInfo viewCreateInfo) {
     _baseMip = viewCreateInfo.baseMip;
     _mipCount = viewCreateInfo.mipCount;
     
-    if (viewCreateInfo.viewType == LV_IMAGE_VIEW_TYPE_CUBE || viewCreateInfo.viewType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
+    if (viewCreateInfo.viewType == ImageType::Cube || viewCreateInfo.viewType == ImageType::CubeArray)
         _layersPerLayer = 6;
+    
+    MTLPixelFormat mtlPixelFormat;
+    GET_MTL_PIXEL_FORMAT(_format, mtlPixelFormat);
+    MTLTextureType mtlTextureType;
+    GET_MTL_TEXTURE_TYPE(viewCreateInfo.viewType, mtlTextureType);
 
     images.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
-        images[i] = [images[i] newTextureViewWithPixelFormat:(MTLPixelFormat)_format
-                                                          textureType:(MTLTextureType)viewCreateInfo.viewType
+        images[i] = [images[i] newTextureViewWithPixelFormat:mtlPixelFormat
+                                                          textureType:mtlTextureType
                                                                levels:NSMakeRange(_baseMip, _mipCount)
                                                                slices:NSMakeRange(_baseLayer, _layerCount)];
     }
@@ -175,7 +185,7 @@ Metal_Image::~Metal_Image() {
     }
 }
 
-Metal_ImageDescriptorInfo Metal_Image::descriptorInfo(uint32_t binding, LvDescriptorType descriptorType, LvImageLayout imageLayout, int8_t frameOffset) {
+Metal_ImageDescriptorInfo Metal_Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
     Metal_ImageDescriptorInfo info;
     info.images.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
@@ -190,7 +200,7 @@ Metal_ImageDescriptorInfo Metal_Image::descriptorInfo(uint32_t binding, LvDescri
     return info;
 }
     
-Metal_Image* Metal_Image::newImageView(LvImageViewType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
+Metal_Image* Metal_Image::newImageView(lv::ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
     Metal_Image* newImage = new Metal_Image({
         .image = this,
         .viewType = viewType,

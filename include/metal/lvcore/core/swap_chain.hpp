@@ -12,10 +12,10 @@ namespace lv {
 
 struct Metal_SwapChainCreateInfo {
 	LvndWindow* window;
-  	LvBool vsyncEnable = LV_TRUE;
+  	Bool vsyncEnable = True;
 	uint8_t maxFramesInFlight = 2;
-	LvBool clearAttachment = LV_FALSE;
-    LvBool createDepthAttachment = LV_FALSE;
+	Bool clearAttachment = False;
+    Bool createDepthAttachment = False;
 };
 
 class Metal_SwapChain {
@@ -26,9 +26,9 @@ private:
     uint32_t _width;
     uint32_t _height;
 
-    LvAttachmentLoadOp loadOp;
+    lv::AttachmentLoadOperation loadOp;
 
-    bool hasDepthAttachment;
+    Bool hasDepthAttachment;
 
     LvndWindow* _window;
     id /*CAMetalDrawable*/ _drawable;

@@ -291,13 +291,13 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
         
         tessellationFactorBuffer = new lv::Buffer({
             .size = PATCHES_PER_CHUNK * PATCHES_PER_CHUNK * size_t(12/* 4 * half (2) + 2 * half (2) */),
-            .usage = LV_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            .usage = lv::BufferUsageFlags::StorageBuffer
         });
         
         grassModelsBuffer = new lv::Buffer({
             .frameCount = 1,
             .size = grassModels.size() * sizeof(BasicModel),
-            .usage = LV_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            .usage = lv::BufferUsageFlags::StorageBuffer
         });
         commandBuffer->cmdStagingCopyDataToBuffer(grassModelsBuffer, grassModels.data());
 
@@ -306,16 +306,16 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
             .format = lv::Format::R16Unorm,
             .width = uint16_t(CHUNK_TEXTURE_SIZE + 1),
             .height = uint16_t(CHUNK_TEXTURE_SIZE + 1),
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::TransferDestination
         });
         commandBuffer->cmdStagingCopyDataToImage(noiseImage, noise, 2);
 
         normalImage = new lv::Image({
             .frameCount = 1,
-            .format = lv::Format::R8G8B8A8Snorm,
+            .format = lv::Format::RGBA8Snorm,
             .width = uint16_t(CHUNK_TEXTURE_SIZE + 1),
             .height = uint16_t(CHUNK_TEXTURE_SIZE + 1),
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::TransferDestination
         });
         commandBuffer->cmdStagingCopyDataToImage(normalImage, normals, 4);
 
@@ -359,9 +359,6 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
 
         commandBuffer->cmdBindTessellationFactorBuffer(tessellationFactorBuffer);
 
-        //commandBuffer->cmdBindVertexBuffer(patchCentersBuffer);
-
-        //commandBuffer->cmdDrawIndexed(indexBuffer, LV_INDEX_TYPE_UINT16, indexBuffer->size() / sizeof(uint16_t));
         commandBuffer->cmdDrawPatches(4, PATCHES_PER_CHUNK * PATCHES_PER_CHUNK);
     }
 
@@ -390,20 +387,7 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
     void renderGrass(lv::CommandBuffer* commandBuffer, lv::Buffer* quadIndexBuffer, const glm::vec3& cameraPosition) {
         commandBuffer->cmdBindDescriptorSet(grassDescriptorSet);
         if (glm::distance2(center, cameraPosition) < GRASS_RENDER_DISTANCE * GRASS_RENDER_DISTANCE) {
-            /*
-            for (auto& grass : grasses) {
-                PCModel model;
-                //std::cout << grass.position.x << ", " << grass.position.y << ", " << grass.position.z << std::endl;
-                model.model = glm::translate(glm::mat4(1.0f), grass.position) *
-                    glm::rotate(glm::radians(grass.angle), glm::vec3(0.0f, 1.0f, 0.0f)) *
-                    glm::scale(glm::vec3(GRASS_SIZE));
-                model.normalMatrix = glm::mat4(glm::transpose(glm::inverse(glm::mat3(model.model))));
-                commandBuffer->cmdPushConstants(&model, 0);
-
-                commandBuffer->cmdDrawIndexed(quadIndexBuffer, LV_INDEX_TYPE_UINT16, quadIndexBuffer->size() / sizeof(uint16_t));
-            }
-            */
-            commandBuffer->cmdDrawIndexed(quadIndexBuffer, LV_INDEX_TYPE_UINT16, quadIndexBuffer->size() / sizeof(uint16_t), grassModels.size());
+            commandBuffer->cmdDrawIndexed(quadIndexBuffer, lv::IndexType::Uint16, quadIndexBuffer->size() / sizeof(uint16_t), grassModels.size());
         }
     }
 
@@ -508,8 +492,8 @@ public:
         for (uint8_t i = 0; i < 3; i++) {
             treeBuffers[i] = new lv::Buffer({
                 .size = maxVisibleChunks() * TREE_CELLS_PER_SIDE * TREE_CELLS_PER_SIDE * sizeof(BasicModel),
-                .usage = LV_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                .memoryType = LV_MEMORY_TYPE_SHARED
+                .usage = lv::BufferUsageFlags::StorageBuffer,
+                .memoryType = lv::MemoryType::Shared
             });
 
             treeDescriptorSets[i] = new lv::DescriptorSet({
@@ -806,7 +790,7 @@ public:
 
         instance = new lv::Instance({
             .applicationName = exampleName.c_str(),
-            .validationEnable = LV_TRUE
+            .validationEnable = lv::True
         });
 
         device = new lv::Device({
@@ -816,7 +800,7 @@ public:
 
         swapChain = new lv::SwapChain({
             .window = window,
-            .vsyncEnable = LV_TRUE,
+            .vsyncEnable = lv::True,
             .maxFramesInFlight = 2
         });
 
@@ -827,32 +811,32 @@ public:
         shadowVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, position)}
+                {0, lv::Format::RGB32Float, offsetof(MainVertex, position)}
             }
         });
 
         shadowWithAlphaVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, position)},
-                {1, LV_VERTEX_FORMAT_RG32_SFLOAT, offsetof(MainVertex, texCoord)}
+                {0, lv::Format::RGB32Float, offsetof(MainVertex, position)},
+                {1, lv::Format::RG32Float, offsetof(MainVertex, texCoord)}
             }
         });
 
         mainVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, position)},
-                {1, LV_VERTEX_FORMAT_RG32_SFLOAT, offsetof(MainVertex, texCoord)},
-                {2, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, normal)}
+                {0, lv::Format::RGB32Float, offsetof(MainVertex, position)},
+                {1, lv::Format::RG32Float, offsetof(MainVertex, texCoord)},
+                {2, lv::Format::RGB32Float, offsetof(MainVertex, normal)}
             }
         });
 
         terrainVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(float) * 4,
-            .stepFunction = LV_VERTEX_STEP_FUNCTION_PER_PATCH_CONTROL_POINT,
+            .inputRate = lv::VertexInputRate::PerPatchControlPoint,
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, 0}
+                {0, lv::Format::RGB32Float, 0}
             }
         });
 
@@ -862,7 +846,7 @@ public:
         //Samplers
         basicSampler = new lv::Sampler({});
         linearSampler = new lv::Sampler({
-            .filter = LV_FILTER_LINEAR
+            .filter = lv::Filter::Linear
         });
 
         //Render passes
@@ -873,18 +857,17 @@ public:
             .width = SHADOW_MAP_SIZE,
             .height = SHADOW_MAP_SIZE,
             .layerCount = SHADOW_CASCADE_COUNT,
-            .imageType = LV_IMAGE_VIEW_TYPE_2D_ARRAY,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-            .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
+            .imageType = lv::ImageType::_2DArray,
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
+            .aspectMask = lv::ImageAspectFlags::Depth
         });
         shadowRenderPass.depthSampler = new lv::Sampler({
-            .filter = LV_FILTER_LINEAR,
-            .compareEnable = LV_TRUE,
-            .compareOp = LV_COMPARE_OP_LESS
+            .filter = lv::Filter::Linear,
+            .compareEnable = lv::True
         });
 
         shadowRenderPass.subpass = new lv::Subpass({
-            .depthAttachment = {0, LV_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL}
+            .depthAttachment = {0, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
         shadowRenderPass.renderPass = new lv::RenderPass({
@@ -893,9 +876,9 @@ public:
                 {
                     .index = 0,
                     .format = shadowRenderPass.depthImage->format(),
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
             }
         });
@@ -910,34 +893,34 @@ public:
 
         //Main
         mainRenderPass.colorImage = new lv::Image({
-            .format = lv::Format::R16G16B16A16Float,
+            .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         mainRenderPass.diffuseImage = new lv::Image({
-            .format = lv::Format::R8G8B8A8Unorm,
+            .format = lv::Format::RGBA8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            .memoryType = LV_MEMORY_TYPE_MEMORYLESS
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment,
+            .memoryType = lv::MemoryType::Memoryless
         });
 
         mainRenderPass.normalImage = new lv::Image({
-            .format = lv::Format::R16G16B16A16Snorm,
+            .format = lv::Format::RGBA16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            .memoryType = LV_MEMORY_TYPE_MEMORYLESS
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment,
+            .memoryType = lv::MemoryType::Memoryless
         });
 
         mainRenderPass.depthImage = new lv::Image({
             .format = lv::Format::D32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-            .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
+            .aspectMask = lv::ImageAspectFlags::Depth
         });
 
 #ifdef LV_BACKEND_METAL
@@ -945,34 +928,34 @@ public:
             .format = lv::Format::R32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            .memoryType = LV_MEMORY_TYPE_MEMORYLESS
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment,
+            .memoryType = lv::MemoryType::Memoryless
         });
 #endif
 
         mainRenderPass.gbufferSubpass = new lv::Subpass({
             .colorAttachments = {
-                {1, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {2, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                {1, lv::ImageLayout::ColorAttachmentOptimal},
+                {2, lv::ImageLayout::ColorAttachmentOptimal},
 #ifdef LV_BACKEND_METAL
-                {4, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {4, lv::ImageLayout::ColorAttachmentOptimal}
 #endif
             },
-            .depthAttachment = {3, LV_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL}
+            .depthAttachment = {3, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
         mainRenderPass.deferredSubpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                {0, lv::ImageLayout::ColorAttachmentOptimal},
             },
-            .depthAttachment = {3, LV_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
+            .depthAttachment = {3, lv::ImageLayout::DepthStencilAttachmentOptimal},
             .inputAttachments = {
-                {1, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
-                {2, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+                {1, lv::ImageLayout::ShaderReadOnlyOptimal},
+                {2, lv::ImageLayout::ShaderReadOnlyOptimal},
 #ifdef LV_BACKEND_VULKAN
-                {3, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL}
+                {3, lv::ImageLayout::DepthStencilReadOnlyOptimal}
 #elif defined(LV_BACKEND_METAL)
-                {4, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
+                {4, lv::ImageLayout::ShaderReadOnlyOptimal}
 #endif
             }
         });
@@ -983,32 +966,32 @@ public:
                 {
                     .format = mainRenderPass.colorImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.diffuseImage->format(),
                     .index = 1,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.normalImage->format(),
                     .index = 2,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.depthImage->format(),
                     .index = 3,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .initialLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-                    .finalLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .initialLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal,
+                    .finalLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal
                 },
 #ifdef LV_BACKEND_METAL
                 {
                     .format = mainRenderPass.depthAsColorImage->format(),
                     .index = 4,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
 #endif
             }
@@ -1043,10 +1026,10 @@ public:
         shadowPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_STORAGE_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
                 }}
             }
         });
@@ -1055,13 +1038,13 @@ public:
         shadowWithAlphaPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_STORAGE_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1070,14 +1053,14 @@ public:
         tescPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Compute,
                     .offset = 0,
                     .size = sizeof(glm::vec3)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_TESSELLATION_CONTROL_BIT},
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Compute},
                 }}
             }
         });
@@ -1086,20 +1069,20 @@ public:
         terrainPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Vertex,
                     .offset = 0,
                     .size = sizeof(glm::vec3)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_TESSELLATION_EVALUATION_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
+                    {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_TESSELLATION_EVALUATION_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_TESSELLATION_EVALUATION_BIT},
-                    {2, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Vertex},
+                    {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Vertex},
+                    {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1108,17 +1091,17 @@ public:
         gbufferPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_VERTEX_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Vertex,
                     .offset = 0,
                     .size = sizeof(PCModel)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1127,11 +1110,11 @@ public:
         treePipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_VERTEX_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_STORAGE_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
+                    {1, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1140,11 +1123,11 @@ public:
         grassPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_VERTEX_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
+                    {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_STORAGE_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
                 }}
             }
         });
@@ -1153,17 +1136,17 @@ public:
         deferredPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(PCDeferredVP)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {3, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
+                    {3, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1172,7 +1155,7 @@ public:
         hdrPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1181,12 +1164,12 @@ public:
 
         //Shadow
         vertShadowShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow.vert.json").c_str())
         });
 
         fragShadowShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow.frag.json").c_str())
         });;
 
@@ -1196,18 +1179,18 @@ public:
             .pipelineLayout = shadowPipelineLayout,
             .renderPass = shadowRenderPass.renderPass,
             .vertexDescriptor = shadowVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .cullMode = LV_CULL_MODE_BACK_BIT
+            .depthTestEnable = lv::True,
+            .cullMode = lv::CullMode::Back
         });
 
         //Shadow with alpha
         vertShadowWithAlphaShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow_with_alpha.vert.json").c_str())
         });
 
         fragShadowWithAlphaShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow_with_alpha.frag.json").c_str())
         });;
 
@@ -1217,18 +1200,18 @@ public:
             .pipelineLayout = shadowWithAlphaPipelineLayout,
             .renderPass = shadowRenderPass.renderPass,
             .vertexDescriptor = shadowWithAlphaVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .cullMode = LV_CULL_MODE_BACK_BIT
+            .depthTestEnable = lv::True,
+            .cullMode = lv::CullMode::Back
         });
 
         //Terrain
         teseTerrainShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/terrain.tese.json").c_str())
         });
 
         fragTerrainShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/terrain.frag.json").c_str())
         });
 
@@ -1238,8 +1221,8 @@ public:
             .pipelineLayout = terrainPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .vertexDescriptor = terrainVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .cullMode = LV_CULL_MODE_BACK_BIT,
+            .depthTestEnable = lv::True,
+            .cullMode = lv::CullMode::Back,
             .colorBlendAttachments = {
                 {0},
                 {1},
@@ -1252,12 +1235,12 @@ public:
 
         //GBuffer
         vertGBufferShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/gbuffer.vert.json").c_str())
         });
 
         fragGBufferShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/gbuffer.frag.json").c_str())
         });
 
@@ -1267,8 +1250,8 @@ public:
             .pipelineLayout = gbufferPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .vertexDescriptor = mainVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .cullMode = LV_CULL_MODE_BACK_BIT,
+            .depthTestEnable = lv::True,
+            .cullMode = lv::CullMode::Back,
             .colorBlendAttachments = {
                 {0},
                 {1},
@@ -1281,7 +1264,7 @@ public:
 
         //Tree
         vertTreeShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/tree.vert.json").c_str())
         });
 
@@ -1291,8 +1274,8 @@ public:
             .pipelineLayout = treePipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .vertexDescriptor = mainVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            //.cullMode = LV_CULL_MODE_BACK_BIT,
+            .depthTestEnable = lv::True,
+            //.cullMode = lv::CullMode::Back,
             .colorBlendAttachments = {
                 {0},
                 {1},
@@ -1305,12 +1288,12 @@ public:
 
         //Grass
         vertQuadShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/quad.vert.json").c_str())
         });
 
         fragGrassShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/grass.frag.json").c_str())
         });
 
@@ -1319,7 +1302,7 @@ public:
             .fragmentShaderModule = fragGrassShaderModule,
             .pipelineLayout = grassPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
-            .depthTestEnable = LV_TRUE,
+            .depthTestEnable = lv::True,
             .colorBlendAttachments = {
                 {0},
                 {1},
@@ -1332,12 +1315,12 @@ public:
 
         //Deferred
         vertTriangleShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/triangle.vert.json").c_str())
         });
 
         fragDeferredShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/deferred.frag.json").c_str())
         });
 
@@ -1347,13 +1330,13 @@ public:
             .pipelineLayout = deferredPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .subpassIndex = 1,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
-            .depthOp = LV_COMPARE_OP_NOT_EQUAL,
+            .depthTestEnable = lv::True,
+            .depthWriteEnable = lv::False,
+            .depthOp = lv::CompareOperation::NotEqual,
             .colorBlendAttachments = {
                 {
                     .index = 0,
-                    .blendEnable = LV_TRUE
+                    .blendEnable = lv::True
                 },
                 {1},
                 {2},
@@ -1365,7 +1348,7 @@ public:
 
         //HDR
         fragHdrShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/hdr.frag.json").c_str())
         });
 
@@ -1383,7 +1366,7 @@ public:
 
         //Terrain tessellation control
         tescTerrainShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+            .shaderStage = lv::ShaderStageFlags::Compute,
             .source = lv::readFile((assetDir + "/shaders/compiled/terrain.tesc.json").c_str())
         });
 
@@ -1400,27 +1383,27 @@ public:
 
         //Buffers
         shadowUniformBuffer = new lv::Buffer({
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            .memoryType = LV_MEMORY_TYPE_SHARED,
+            .usage = lv::BufferUsageFlags::UniformBuffer,
+            .memoryType = lv::MemoryType::Shared,
             .size = sizeof(glm::mat4) * SHADOW_CASCADE_COUNT
         });
 
         tescUniformBuffer = new lv::Buffer({
             .size = sizeof(glm::vec2),
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            .memoryType = LV_MEMORY_TYPE_SHARED
+            .usage = lv::BufferUsageFlags::UniformBuffer,
+            .memoryType = lv::MemoryType::Shared
         });
 
         mainUniformBuffer = new lv::Buffer({
             .size = sizeof(glm::mat4),
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            .memoryType = LV_MEMORY_TYPE_SHARED
+            .usage = lv::BufferUsageFlags::UniformBuffer,
+            .memoryType = lv::MemoryType::Shared
         });
 
         controlPointsBuffer = new lv::Buffer({
             .frameCount = 1,
             .size = PATCHES_PER_CHUNK * PATCHES_PER_CHUNK * 4 * sizeof(glm::vec4),
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT
+            .usage = lv::BufferUsageFlags::UniformBuffer
         });
 
         glm::vec4 controlPoints[PATCHES_PER_CHUNK][PATCHES_PER_CHUNK][4];
@@ -1490,12 +1473,12 @@ public:
         deferredDescriptorSet = new lv::DescriptorSet({
             .pipelineLayout = deferredPipelineLayout,
             .imageBindings = {
-                mainRenderPass.diffuseImage->descriptorInfo(0, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
-                mainRenderPass.normalImage->descriptorInfo(1, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
+                mainRenderPass.diffuseImage->descriptorInfo(0, lv::DescriptorType::InputAttachment),
+                mainRenderPass.normalImage->descriptorInfo(1, lv::DescriptorType::InputAttachment),
 #ifdef LV_BACKEND_VULKAN
-                mainRenderPass.depthImage->descriptorInfo(2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
+                mainRenderPass.depthImage->descriptorInfo(2, lv::DescriptorType::InputAttachment),
 #elif defined(LV_BACKEND_METAL)
-                mainRenderPass.depthAsColorImage->descriptorInfo(2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
+                mainRenderPass.depthAsColorImage->descriptorInfo(2, lv::DescriptorType::InputAttachment),
 #endif
                 shadowRenderPass.depthSampler->descriptorInfo(shadowRenderPass.depthImage, 3)
             }

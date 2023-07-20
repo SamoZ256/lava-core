@@ -115,7 +115,7 @@ public:
         shadowRenderPass.depthImage.aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT;
         shadowRenderPass.depthImage.init(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
         shadowRenderPass.depthSampler.filter = LV_FILTER_LINEAR;
-        shadowRenderPass.depthSampler.compareEnable = LV_TRUE;
+        shadowRenderPass.depthSampler.compareEnable = True;
         shadowRenderPass.depthSampler.compareOp = LV_COMPARE_OP_LESS;
         shadowRenderPass.depthSampler.init();
 

@@ -2,6 +2,8 @@
 
 #import <Metal/Metal.h>
 
+#include "metal/lvcore/core/core.hpp"
+
 #include "metal/lvcore/core/device.hpp"
 #include "metal/lvcore/core/swap_chain.hpp"
 
@@ -13,18 +15,13 @@ Metal_Buffer::Metal_Buffer(Metal_BufferCreateInfo createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_metal_swapChain->maxFramesInFlight() : createInfo.frameCount);
     _size = createInfo.size;
 
-    MTLResourceOptions options = 0;
-    if (createInfo.memoryType == LV_MEMORY_TYPE_PRIVATE)
-        options |= MTLResourceStorageModePrivate;
-    else if (createInfo.memoryType == LV_MEMORY_TYPE_SHARED)
-        options |= MTLResourceStorageModeShared;
-    else if (createInfo.memoryType == LV_MEMORY_TYPE_MEMORYLESS)
-        options |= MTLResourceStorageModeMemoryless;
+    MTLResourceOptions mtlResourceOptions;
+    GET_MTL_RESOURCE_OPTIONS(createInfo.memoryType, mtlResourceOptions);
 
     buffers.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++)
         buffers[i] = [g_metal_device->device() newBufferWithLength:_size
-                                                         options:options];
+                                                         options:mtlResourceOptions];
 }
 
 Metal_Buffer::~Metal_Buffer() {
@@ -39,7 +36,7 @@ void Metal_Buffer::copyDataTo(void* data, size_t aSize, uint32_t offset) {
     memcpy((char*)[buffers[g_metal_swapChain->crntFrame() % _frameCount] contents] + offset, data, aSize);
 }
 
-Metal_BufferDescriptorInfo Metal_Buffer::descriptorInfo(uint32_t binding, LvDescriptorType descriptorType) {
+Metal_BufferDescriptorInfo Metal_Buffer::descriptorInfo(uint32_t binding, DescriptorType descriptorType) {
 	Metal_BufferDescriptorInfo info;
 	info.buffers.resize(_frameCount);
 	for (uint8_t i = 0; i < _frameCount; i++) {

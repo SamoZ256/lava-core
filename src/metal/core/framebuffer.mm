@@ -1,5 +1,7 @@
 #include "metal/lvcore/core/framebuffer.hpp"
 
+#include "metal/lvcore/core/core.hpp"
+
 #include "metal/lvcore/core/device.hpp"
 #include "metal/lvcore/core/swap_chain.hpp"
 
@@ -28,9 +30,15 @@ Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
             MTLRenderPassColorAttachmentDescriptor* attachment = ((MTLRenderPassDescriptor*)renderPasses[i]).colorAttachments[j];
             //if (colorAttachments[i].clearValue.color.float32[0] != 0.0f)
             //    std::cout << "CLEAR COLOR X: " << colorAttachments[i].clearValue.color.float32[0] << std::endl;
+
+            MTLLoadAction mtlLoadAction;
+            GET_MTL_LOAD_ACTION(renderPassAttachment->loadOp, mtlLoadAction);
+            MTLStoreAction mtlStoreAction;
+            GET_MTL_STORE_ACTION(renderPassAttachment->storeOp, mtlStoreAction);
+
             attachment.clearColor = MTLClearColorMake(createInfo.colorAttachments[j].clearValue.color.float32[0], createInfo.colorAttachments[j].clearValue.color.float32[1], createInfo.colorAttachments[j].clearValue.color.float32[2], createInfo.colorAttachments[j].clearValue.color.float32[3]);
-            attachment.loadAction = MTLLoadAction(renderPassAttachment->loadOp);
-            attachment.storeAction = MTLStoreAction(renderPassAttachment->storeOp);
+            attachment.loadAction = mtlLoadAction;
+            attachment.storeAction = mtlStoreAction;
             attachment.texture = framebufferAttachment.image->image(i % framebufferAttachment.image->frameCount());
             maxArrayLength = std::max(maxArrayLength, uint16_t(framebufferAttachment.image->layerCount() * framebufferAttachment.image->layersPerLayer()));
             //std::cout << "Index: " << (int)subpassAttachment.index << std::endl;
@@ -40,10 +48,16 @@ Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
         if (createInfo.depthAttachment.index != -1) {
             //Metal_SubpassAttachment& subpassAttachment = subpass->depthAttachment;
             Metal_RenderPassAttachment* renderPassAttachment = createInfo.renderPass->sortedAttachments[createInfo.depthAttachment.index];
+
+            MTLLoadAction mtlLoadAction;
+            GET_MTL_LOAD_ACTION(renderPassAttachment->loadOp, mtlLoadAction);
+            MTLStoreAction mtlStoreAction;
+            GET_MTL_STORE_ACTION(renderPassAttachment->storeOp, mtlStoreAction);
+
             MTLRenderPassDepthAttachmentDescriptor* attachment = ((MTLRenderPassDescriptor*)renderPasses[i]).depthAttachment;
             attachment.clearDepth = createInfo.depthAttachment.clearValue.depthStencil.depth;
-            attachment.loadAction = MTLLoadAction(renderPassAttachment->loadOp);
-            attachment.storeAction = MTLStoreAction(renderPassAttachment->storeOp);
+            attachment.loadAction = mtlLoadAction;
+            attachment.storeAction = mtlStoreAction;
             attachment.texture = createInfo.depthAttachment.image->image(i % createInfo.depthAttachment.image->frameCount());
             maxArrayLength = std::max(maxArrayLength, uint16_t(createInfo.depthAttachment.image->layerCount() * createInfo.depthAttachment.image->layersPerLayer()));
         }

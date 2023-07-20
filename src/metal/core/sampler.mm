@@ -2,25 +2,34 @@
 
 #include <string>
 
+#include "metal/lvcore/core/core.hpp"
+
 #include "metal/lvcore/core/device.hpp"
 #include "metal/lvcore/core/swap_chain.hpp"
 
 namespace lv {
 
 Metal_Sampler::Metal_Sampler(Metal_SamplerCreateInfo createInfo) {
+    MTLSamplerMinMagFilter mtlSamplerMinMagFilter;
+    GET_MTL_SAMPLER_MIN_MAG_FILTER(createInfo.filter, mtlSamplerMinMagFilter);
+    MTLSamplerAddressMode mtlSamplerAddressMode;
+    GET_MTL_SAMPLER_ADDRESS_MODE(createInfo.addressMode, mtlSamplerAddressMode);
+    MTLCompareFunction mtlCompareFunction;
+    GET_MTL_COMPARE_FUNCTION(createInfo.compareOp, mtlCompareFunction);
+
     MTLSamplerDescriptor* descriptor = [[MTLSamplerDescriptor alloc] init];
-    descriptor.magFilter = (MTLSamplerMinMagFilter)createInfo.filter;
-    descriptor.rAddressMode = (MTLSamplerAddressMode)createInfo.addressMode;
-    descriptor.sAddressMode = (MTLSamplerAddressMode)createInfo.addressMode;
-    descriptor.tAddressMode = (MTLSamplerAddressMode)createInfo.addressMode;
+    descriptor.magFilter = mtlSamplerMinMagFilter;
+    descriptor.rAddressMode = mtlSamplerAddressMode;
+    descriptor.sAddressMode = mtlSamplerAddressMode;
+    descriptor.tAddressMode = mtlSamplerAddressMode;
     if (createInfo.compareEnable)
-        descriptor.compareFunction = (MTLCompareFunction)createInfo.compareOp;
+        descriptor.compareFunction = mtlCompareFunction;
     descriptor.lodMinClamp = createInfo.minLod;
     descriptor.lodMaxClamp = createInfo.maxLod;
     if (createInfo.maxLod > 0.0f) {
+        //TODO: let the user specify defferent filters
         descriptor.mipFilter = MTLSamplerMipFilterLinear;
         descriptor.minFilter = MTLSamplerMinMagFilterLinear;
-        //std::cout << "Sampler lod: " << maxLod << std::endl;
     }
 
     _sampler = [g_metal_device->device() newSamplerStateWithDescriptor:descriptor];
@@ -30,7 +39,7 @@ Metal_Sampler::~Metal_Sampler() {
     [_sampler release];
 }
 
-Metal_ImageDescriptorInfo Metal_Sampler::descriptorInfo(Metal_Image* image, uint32_t binding, LvImageLayout imageLayout, int8_t frameOffset) {
+Metal_ImageDescriptorInfo Metal_Sampler::descriptorInfo(Metal_Image* image, uint32_t binding, ImageLayout imageLayout, int8_t frameOffset) {
     Metal_ImageDescriptorInfo info;
     info.images.resize(image->frameCount());
     for (uint8_t i = 0; i < image->frameCount(); i++) {
@@ -41,7 +50,7 @@ Metal_ImageDescriptorInfo Metal_Sampler::descriptorInfo(Metal_Image* image, uint
     }
     info.sampler = _sampler;
     info.binding = binding;
-    info.descriptorType = LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    info.descriptorType = DescriptorType::CombinedImageSampler;
 
     return info;
 }

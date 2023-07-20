@@ -3,25 +3,27 @@
 
 #include <vector>
 
+#include "lvcore/core/core.hpp"
+
 #include "enums.hpp"
 
 namespace lv {
 
 struct Metal_SortedDescriptorSetLayoutBinding {
-    LvDescriptorType descriptorType;
-    LvShaderStageFlags shaderStage;
+    DescriptorType descriptorType;
+    ShaderStageFlags shaderStage;
 };
 
 struct Metal_PushConstantRange {
-    LvShaderStageFlags stageFlags;
+    ShaderStageFlags stageFlags;
     uint32_t offset;
     uint32_t size;
 };
 
 struct Metal_DescriptorSetLayoutBinding {
     uint32_t binding;
-    LvDescriptorType descriptorType;
-    LvShaderStageFlags shaderStage;
+    DescriptorType descriptorType;
+    ShaderStageFlags shaderStage;
 };
 
 class Metal_DescriptorSetLayout {

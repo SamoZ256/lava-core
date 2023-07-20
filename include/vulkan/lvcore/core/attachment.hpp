@@ -1,13 +1,15 @@
 #ifndef LV_VULKAN_ATTACHMENT_H
 #define LV_VULKAN_ATTACHMENT_H
 
+#include "lvcore/core/common.hpp"
+
 #include "image.hpp"
 
 namespace lv {
 
 struct Vulkan_ColorBlendAttachment {
     uint8_t index = 0;
-    bool blendEnable = LV_FALSE;
+    Bool blendEnable = False;
     LvBlendFactor srcRgbBlendFactor = LV_BLEND_FACTOR_SRC_ALPHA;
     LvBlendFactor dstRgbBlendFactor = LV_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     LvBlendOp rgbBlendOp = LV_BLEND_OP_ADD;

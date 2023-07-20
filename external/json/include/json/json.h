@@ -8381,7 +8381,7 @@ class binary_reader
 
     @param[in] is_array Determines if the element list being read is to be
                         treated as an object (@a is_array == false), or as an
-                        array (@a is_array == true).
+                        array (@a is_array).
     @return whether a valid BSON-object/array was passed to the SAX parser
     */
     bool parse_bson_element_list(const bool is_array)
@@ -24318,7 +24318,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     @throw out_of_range.409  if a key in `j` contains a NULL (U+0000)
     @throw type_error.317    if `!j.is_object()`
 
-    @pre The input `j` is required to be an object: `j.is_object() == true`.
+    @pre The input `j` is required to be an object: `j.is_object()`.
 
     @note Any BSON output created via @ref to_bson can be successfully parsed
           by @ref from_bson.
@@ -24351,7 +24351,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
            corresponding BSON-representation to the given output_adapter `o`.
     @param j The JSON object to convert to BSON.
     @param o The output adapter that receives the binary BSON representation.
-    @pre The input `j` shall be an object: `j.is_object() == true`
+    @pre The input `j` shall be an object: `j.is_object()`
     @sa see @ref to_bson(const basic_json&)
     */
     static void to_bson(const basic_json& j, detail::output_adapter<uint8_t> o)

@@ -70,7 +70,7 @@ public:
 
     void cmdDraw(uint32_t vertexCount, uint32_t instanceCount = 1);
 
-    void cmdDrawIndexed(Metal_Buffer* indexBuffer, LvIndexType indexType, uint32_t indexCount, uint32_t instanceCount = 1);
+    void cmdDrawIndexed(Metal_Buffer* indexBuffer, IndexType indexType, uint32_t indexCount, uint32_t instanceCount = 1);
 
     //TODO: add option to specify index buffer?
     void cmdDrawPatches(uint32_t controlPointCount, uint32_t patchCount, uint32_t instanceCount = 1); //Metal only
@@ -104,7 +104,7 @@ public:
 
     void cmdStagingCopyDataToImage(Metal_Image* image, void* data, uint8_t bytesPerPixel = 4);
 
-    void cmdTransitionImageLayout(Metal_Image* image, uint8_t imageIndex, LvImageLayout srcLayout, LvImageLayout dstLayout) {}
+    void cmdTransitionImageLayout(Metal_Image* image, uint8_t imageIndex, ImageLayout srcLayout, ImageLayout dstLayout) {}
 
     void cmdGenerateMipmapsForImage(Metal_Image* image, uint8_t aFrameCount = 0);
 

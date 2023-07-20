@@ -19,12 +19,12 @@ struct Metal_GraphicsPipelineCreateInfo {
     Metal_VertexDescriptor* vertexDescriptor = nullptr;
     std::vector<Metal_ColorBlendAttachment> colorBlendAttachments;
 
-    LvCullModeFlags cullMode = LV_CULL_MODE_NONE;
-    LvBool depthTestEnable = LV_FALSE;
-    LvBool depthWriteEnable = LV_TRUE;
-    LvCompareOp depthOp = LV_COMPARE_OP_LESS;
+    CullMode cullMode = CullMode::None;
+    Bool depthTestEnable = False;
+    Bool depthWriteEnable = True;
+    CompareOperation depthOp = CompareOperation::Less;
     LvWindingOrder windingOrder = LV_WINDING_ORDER_CLOCKWISE;
-    LvTessellationSpacing tessellationSpacing = LV_TESSELLATION_SPACING_EQUAL;
+    TessellationSpacing tessellationSpacing = TessellationSpacing::Equal;
     uint32_t maxTessellationFactor = 16;
 };
 
@@ -40,7 +40,7 @@ private:
     Metal_ShaderModule* _fragmentShaderModule;
     Metal_PipelineLayout* _pipelineLayout;
 
-    LvCullModeFlags _cullMode;
+    lv::CullMode _cullMode;
 
 public:
     Metal_GraphicsPipeline(Metal_GraphicsPipelineCreateInfo createInfo);
@@ -62,7 +62,7 @@ public:
 
     inline Metal_PipelineLayout* pipelineLayout() { return _pipelineLayout; }
 
-    inline LvCullModeFlags cullMode() { return _cullMode; }
+    inline lv::CullMode cullMode() { return _cullMode; }
 };
 
 } //namespace lv

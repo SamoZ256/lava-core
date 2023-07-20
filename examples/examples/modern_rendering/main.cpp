@@ -306,7 +306,7 @@ public:
 
         instance = new lv::Instance({
             .applicationName = exampleName.c_str(),
-            .validationEnable = true
+            .validationEnable = lv::True
         });
 
         device = new lv::Device({
@@ -356,17 +356,17 @@ public:
 
         //Shadow
         shadowRenderPass.depthImage = new lv::Image({
-            .format = LV_FORMAT_D32_SFLOAT,
+            .format = lv::Format::D32Float,
             .width = SHADOW_MAP_SIZE,
             .height = SHADOW_MAP_SIZE,
             .layerCount = SHADOW_CASCADE_COUNT,
-            .imageType = LV_IMAGE_VIEW_TYPE_2D_ARRAY,
+            .imageType = lv::ImageType::_2DArray,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
             .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
         });
         shadowRenderPass.depthSampler = new lv::Sampler({
-            .filter = LV_FILTER_LINEAR,
-            .compareEnable = LV_TRUE,
+            .filter = lv::Filter::Linear,
+            .compareEnable = lv::True,
             .compareOp = LV_COMPARE_OP_LESS
         });
 
@@ -397,7 +397,7 @@ public:
 
         //Main
         mainRenderPass.colorImage = new lv::Image({
-            .format = LV_FORMAT_R16G16B16A16_SFLOAT,
+            .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -407,7 +407,7 @@ public:
         //mainRenderPass.colorSampler.init();
 
         mainRenderPass.albedoMetallicImage = new lv::Image({
-            .format = LV_FORMAT_R8G8B8A8_UNORM,
+            .format = lv::Format::RGBA8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
@@ -415,14 +415,14 @@ public:
         });
 
         mainRenderPass.normalRoughnessImage = new lv::Image({
-            .format = LV_FORMAT_R16G16B16A16_SNORM,
+            .format = lv::Format::RGBA16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
         });
 
         mainRenderPass.motionImage = new lv::Image({
-            .format = LV_FORMAT_R16G16_SNORM,
+            .format = lv::Format::RG16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -430,9 +430,9 @@ public:
 
         mainRenderPass.f0Image = new lv::Image({
 #ifdef LV_BACKEND_VULKAN //TODO: query whether the device supports this format instead
-            .format = LV_FORMAT_B10R11G11_UFLOAT,
+            .format = lv::Format::B10G11R11Ufloat,
 #elif defined(LV_BACKEND_METAL)
-            .format = LV_FORMAT_B5G6R5_UNORM,
+            .format = lv::Format::B5G6R5Unorm,
 #endif
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -440,7 +440,7 @@ public:
         });
 
         mainRenderPass.depthImage = new lv::Image({
-            .format = LV_FORMAT_D32_SFLOAT,
+            .format = lv::Format::D32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | LV_IMAGE_USAGE_TRANSFER_SRC_BIT,
@@ -448,7 +448,7 @@ public:
         });
 
         mainRenderPass.halfDepthImage = new lv::Image({
-            .format = LV_FORMAT_D32_SFLOAT,
+            .format = lv::Format::D32Float,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT,
@@ -457,7 +457,7 @@ public:
 
 #ifdef LV_BACKEND_METAL
         mainRenderPass.depthAsColorImage = new lv::Image({
-            .format = LV_FORMAT_R32_SFLOAT,
+            .format = lv::Format::R32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
@@ -576,7 +576,7 @@ public:
 
         //SSR
         ssrRenderPass.colorImage = new lv::Image({
-            .format = LV_FORMAT_R16G16B16A16_SFLOAT,
+            .format = lv::Format::RGBA16Float,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -622,7 +622,7 @@ public:
 
         //Light shaft
         lightShaftRenderPass.colorImage = new lv::Image({
-            .format = LV_FORMAT_R8_UNORM,
+            .format = lv::Format::R8Unorm,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -667,7 +667,7 @@ public:
 
         //Blur
         blurRenderPass.lightShaftBlurImage = new lv::Image({
-            .format = LV_FORMAT_R8_UNORM,
+            .format = lv::Format::R8Unorm,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -703,7 +703,7 @@ public:
 
         //Composite
         compositeRenderPass.ssaoImage = new lv::Image({
-            .format = LV_FORMAT_R8_UNORM,
+            .format = lv::Format::R8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
@@ -712,7 +712,7 @@ public:
 
         compositeRenderPass.resolvedSsrImage = new lv::Image({
             .frameCount = 2, //Set the frame count to 2 so as to be able to accumulate the results over the time
-            .format = LV_FORMAT_B10R11G11_UFLOAT,
+            .format = lv::Format::B10GR11Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -720,7 +720,7 @@ public:
 
         compositeRenderPass.resolvedSsaoImage = new lv::Image({
             .frameCount = 2,
-            .format = LV_FORMAT_R8_UNORM,
+            .format = lv::Format::R8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -728,7 +728,7 @@ public:
 
         compositeRenderPass.resolvedColorImage = new lv::Image({
             .frameCount = 2,
-            .format = LV_FORMAT_R16G16B16A16_SFLOAT,
+            .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -736,7 +736,7 @@ public:
 
         compositeRenderPass.finalColorImage = new lv::Image({
             .frameCount = 2,
-            .format = LV_FORMAT_R16G16B16A16_SFLOAT,
+            .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -833,7 +833,7 @@ public:
 
         //Motion blur
         motionBlurRenderPass.colorImage = new lv::Image({
-            .format = LV_FORMAT_R16G16B16A16_SFLOAT,
+            .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
@@ -1119,8 +1119,8 @@ public:
             .pipelineLayout = shadowPipelineLayout,
             .renderPass = shadowRenderPass.renderPass,
             .vertexDescriptor = shadowVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .cullMode = LV_CULL_MODE_BACK_BIT
+            .depthTestEnable = lv::True,
+            .cullMode = lv::CullMode::Back
         });
 
         //GBuffer
@@ -1140,8 +1140,8 @@ public:
             .pipelineLayout = gbufferPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .vertexDescriptor = mainVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .cullMode = LV_CULL_MODE_BACK_BIT,
+            .depthTestEnable = lv::True,
+            .cullMode = lv::CullMode::Back,
             .colorBlendAttachments = {
 #ifdef LV_BACKEND_METAL
                 {0},
@@ -1175,8 +1175,8 @@ public:
             .pipelineLayout = deferredPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .subpassIndex = 1,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
+            .depthTestEnable = lv::True,
+            .depthWriteEnable = lv::False,
             .depthOp = LV_COMPARE_OP_NOT_EQUAL,
             .colorBlendAttachments = {
                 {0},
@@ -1210,9 +1210,9 @@ public:
             .renderPass = mainRenderPass.renderPass,
             .subpassIndex = 2,
             .vertexDescriptor = skyboxVertexDescriptor,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
-            .cullMode = LV_CULL_MODE_BACK_BIT,
+            .depthTestEnable = lv::True,
+            .depthWriteEnable = lv::False,
+            .cullMode = lv::CullMode::Back,
             .colorBlendAttachments = {
                 {0}
             }
@@ -1229,8 +1229,8 @@ public:
             .fragmentShaderModule = fragSsrShaderModule,
             .pipelineLayout = ssrPipelineLayout,
             .renderPass = ssrRenderPass.renderPass,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
+            .depthTestEnable = lv::True,
+            .depthWriteEnable = lv::False,
             .depthOp = LV_COMPARE_OP_NOT_EQUAL,
             .colorBlendAttachments = {
                 {0}
@@ -1248,8 +1248,8 @@ public:
             .fragmentShaderModule = fragLightShaftShaderModule,
             .pipelineLayout = lightShaftPipelineLayout,
             .renderPass = lightShaftRenderPass.renderPass,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
+            .depthTestEnable = lv::True,
+            .depthWriteEnable = lv::False,
             .depthOp = LV_COMPARE_OP_NOT_EQUAL,
             .colorBlendAttachments = {
                 {0}
@@ -1283,8 +1283,8 @@ public:
             .fragmentShaderModule = fragSsaoShaderModule,
             .pipelineLayout = ssaoPipelineLayout,
             .renderPass = compositeRenderPass.renderPass,
-            .depthTestEnable = LV_TRUE,
-            .depthWriteEnable = LV_FALSE,
+            .depthTestEnable = lv::True,
+            .depthWriteEnable = lv::False,
             .depthOp = LV_COMPARE_OP_NOT_EQUAL,
             .colorBlendAttachments = {
                 {0}
@@ -1485,7 +1485,7 @@ public:
 
         aoNoiseImage = new lv::Image({
             .frameCount = 1,
-            .format = (AO_TYPE == AO_TYPE_SSAO ? LV_FORMAT_R8G8_SNORM : LV_FORMAT_R8_UNORM),
+            .format = (AO_TYPE == AO_TYPE_SSAO ? lv::Format::RG8Snorm : lv::Format::R8Unorm),
             .width = AO_NOISE_TEX_SIZE,
             .height = AO_NOISE_TEX_SIZE,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT
@@ -1496,7 +1496,7 @@ public:
             copyCommandBuffer->cmdStagingCopyDataToImage(aoNoiseImage, hbaoNoise.data(), 1);
         copyCommandBuffer->cmdTransitionImageLayout(aoNoiseImage, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         
-        brdfLUTImage = new lv::Image({"../assets/textures/brdf_lut.png"}, copyCommandBuffer);
+        brdfLUTImage = new lv::Image({"../examples/assets/textures/brdf_lut.png"}, copyCommandBuffer);
         copyCommandBuffer->cmdTransitionImageLayout(brdfLUTImage, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         //Descriptor sets
@@ -1626,7 +1626,7 @@ public:
 
         //Model
         sponzaModel.scale = glm::vec3(0.01f);
-        sponzaModel.init(copyCommandBuffer, gbufferPipelineLayout, nullptr, "../assets/models/sponza/scene.gltf", 3, 1, 0); //TODO: make the model class play nicely with the rest of the API
+        sponzaModel.init(copyCommandBuffer, gbufferPipelineLayout, nullptr, "../examples/assets/models/sponza/scene.gltf", 3, 1, 0); //TODO: make the model class play nicely with the rest of the API
         //backpackModel.scale = glm::vec3(32.0f, 2.0f, 32.0f);
         //backpackModel.init(gbufferPipelineLayout, "../assets/models/pan/brass_pan_01_4k.gltf", 3, 1);
 
@@ -1998,10 +1998,10 @@ public:
     void precomputeSkylight() {
         skylightImage = new lv::Image({
             .frameCount = 1,
-            .format = LV_FORMAT_B10R11G11_UFLOAT,
+            .format = lv::Format::B10GR11Float,
             .width = SKYLIGHT_IMAGE_SIZE,
             .height = SKYLIGHT_IMAGE_SIZE,
-            .imageType = LV_IMAGE_VIEW_TYPE_CUBE,
+            .imageType = lv::ImageType::Cube,
             .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
         });
 

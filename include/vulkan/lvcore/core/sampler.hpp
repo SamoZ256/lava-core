@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "lvcore/core/common.hpp"
+
 #include "image.hpp"
 
 namespace lv {
@@ -10,7 +12,7 @@ namespace lv {
 struct Vulkan_SamplerCreateInfo {
     LvFilter filter = LV_FILTER_NEAREST;
     LvSamplerAddressMode addressMode = LV_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    LvBool compareEnable = LV_FALSE;
+    Bool compareEnable = False;
     LvCompareOp compareOp = LV_COMPARE_OP_LESS;
     float minLod = 0.0f;
     float maxLod = 0.0f;
