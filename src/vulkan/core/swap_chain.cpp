@@ -51,7 +51,7 @@ Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
 		.subpasses = {subpass},
 		.attachments = {
 			{
-				.format = VK_FORMAT_B8G8R8A8_SRGB,
+				.format = Format::BGRA8Unorm_sRGB,
 				.index = 0,
 				.loadOp = loadOp,
 				.storeOp = LV_ATTACHMENT_STORE_OP_STORE,
@@ -255,7 +255,7 @@ void Vulkan_SwapChain::createSwapChain() {
 	image->_setBaseMip(0);
 	image->_setMipCount(1);
 	vkGetSwapchainImagesKHR(g_vulkan_device->device(), swapChain, &imageCount, image->_imagesData());
-	image->_setFormat(surfaceFormat.format);
+	image->_setFormat(Format::BGRA8Unorm_sRGB); //TODO: set this to the surface format
 	image->_setAspectMask(LV_IMAGE_ASPECT_COLOR_BIT);
 
 	if (oldSwapChain != VK_NULL_HANDLE)

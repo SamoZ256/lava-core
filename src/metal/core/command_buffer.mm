@@ -22,7 +22,7 @@ Metal_CommandBuffer::Metal_CommandBuffer(Metal_CommandBufferCreateInfo createInf
     commandBuffers.resize(frameCount);
 }
 
-void Metal_CommandBuffer::beginRecording(LvCommandBufferUsageFlags usage) {
+void Metal_CommandBuffer::beginRecording(CommandBufferUsageFlags usage) {
     commandBuffers[g_metal_swapChain->crntFrame() % frameCount] = [g_metal_device->commandQueue() commandBuffer];
 }
 

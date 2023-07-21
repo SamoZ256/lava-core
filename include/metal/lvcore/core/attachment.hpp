@@ -3,8 +3,6 @@
 
 #include "lvcore/core/common.hpp"
 
-#include "enums.hpp"
-
 #include "image.hpp"
 
 namespace lv {
@@ -37,7 +35,7 @@ struct Metal_SubpassAttachment {
 struct Metal_FramebufferAttachment {
     int8_t index = -1;
     Metal_Image* image = nullptr;
-    LvClearValue clearValue{};
+    ClearValue clearValue{};
 };
 
 } //namespace lv

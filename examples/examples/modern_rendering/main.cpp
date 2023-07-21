@@ -326,24 +326,24 @@ public:
         shadowVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, position)}
+                {0, lv::Format::RGB32Float, offsetof(MainVertex, position)}
             }
         });
 
         mainVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, position)},
-                {1, LV_VERTEX_FORMAT_RG32_SFLOAT, offsetof(MainVertex, texCoord)},
-                {2, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, normal)},
-                {3, LV_VERTEX_FORMAT_RGBA32_SFLOAT, offsetof(MainVertex, tangent)}
+                {0, lv::Format::RGB32Float, offsetof(MainVertex, position)},
+                {1, lv::Format::RG32Float, offsetof(MainVertex, texCoord)},
+                {2, lv::Format::RGB32Float, offsetof(MainVertex, normal)},
+                {3, lv::Format::RGBA32Float, offsetof(MainVertex, tangent)}
             }
         });
 
         skyboxVertexDescriptor = new lv::VertexDescriptor({
             .size = sizeof(glm::vec3),
             .bindings = {
-                {0, LV_VERTEX_FORMAT_RGB32_SFLOAT, 0}
+                {0, lv::Format::RGB32Float, 0}
             }
         });
 
@@ -351,7 +351,7 @@ public:
 
         basicSampler = new lv::Sampler({});
         repeatSampler = new lv::Sampler({
-            .addressMode = LV_SAMPLER_ADDRESS_MODE_REPEAT
+            .addressMode = lv::SamplerAddressMode::Repeat
         });
 
         //Shadow
@@ -361,17 +361,16 @@ public:
             .height = SHADOW_MAP_SIZE,
             .layerCount = SHADOW_CASCADE_COUNT,
             .imageType = lv::ImageType::_2DArray,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-            .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
+            .aspectMask = lv::ImageAspectFlags::Depth
         });
         shadowRenderPass.depthSampler = new lv::Sampler({
             .filter = lv::Filter::Linear,
-            .compareEnable = lv::True,
-            .compareOp = LV_COMPARE_OP_LESS
+            .compareEnable = lv::True
         });
 
         shadowRenderPass.subpass = new lv::Subpass({
-            .depthAttachment = {0, LV_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL}
+            .depthAttachment = {0, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
         shadowRenderPass.renderPass = new lv::RenderPass({
@@ -380,9 +379,9 @@ public:
                 {
                     .index = 0,
                     .format = shadowRenderPass.depthImage->format(),
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
             }
         });
@@ -400,7 +399,7 @@ public:
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
         //mainRenderPass.colorSampler.filter = LV_FILTER_LINEAR;
         //mainRenderPass.colorSampler.maxLod = SSR_MIP_COUNT;
@@ -410,22 +409,22 @@ public:
             .format = lv::Format::RGBA8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-            .memoryType = LV_MEMORY_TYPE_MEMORYLESS
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment,
+            .memoryType = lv::MemoryType::Memoryless
         });
 
         mainRenderPass.normalRoughnessImage = new lv::Image({
             .format = lv::Format::RGBA16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment
         });
 
         mainRenderPass.motionImage = new lv::Image({
             .format = lv::Format::RG16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         mainRenderPass.f0Image = new lv::Image({
@@ -436,23 +435,23 @@ public:
 #endif
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         mainRenderPass.depthImage = new lv::Image({
             .format = lv::Format::D32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | LV_IMAGE_USAGE_TRANSFER_SRC_BIT,
-            .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment | lv::ImageUsageFlags::InputAttachment | lv::ImageUsageFlags::TransferSource,
+            .aspectMask = lv::ImageAspectFlags::Depth
         });
 
         mainRenderPass.halfDepthImage = new lv::Image({
             .format = lv::Format::D32Float,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT,
-            .aspectMask = LV_IMAGE_ASPECT_DEPTH_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment | lv::ImageUsageFlags::TransferDestination,
+            .aspectMask = lv::ImageAspectFlags::Depth
         });
 
 #ifdef LV_BACKEND_METAL
@@ -460,45 +459,45 @@ public:
             .format = lv::Format::R32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-            .memoryType = LV_MEMORY_TYPE_MEMORYLESS
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment,
+            .memoryType = lv::MemoryType::Memoryless
         });
 #endif
 
         mainRenderPass.gbufferSubpass = new lv::Subpass({
             .colorAttachments = {
-                {1, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {2, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {3, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                {1, lv::ImageLayout::ColorAttachmentOptimal},
+                {2, lv::ImageLayout::ColorAttachmentOptimal},
+                {3, lv::ImageLayout::ColorAttachmentOptimal},
 #ifdef LV_BACKEND_METAL
-                {6, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {6, lv::ImageLayout::ColorAttachmentOptimal}
 #endif
             },
-            .depthAttachment = {5, LV_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL}
+            .depthAttachment = {5, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
         mainRenderPass.deferredSubpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {4, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal},
+                {4, lv::ImageLayout::ColorAttachmentOptimal}
             },
-            .depthAttachment = {5, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL},
+            .depthAttachment = {5, lv::ImageLayout::DepthStencilReadOnlyOptimal},
             .inputAttachments = {
-                {1, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
-                {2, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+                {1, lv::ImageLayout::ShaderReadOnlyOptimal},
+                {2, lv::ImageLayout::ShaderReadOnlyOptimal},
 #ifdef LV_BACKEND_VULKAN
-                {5, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL}
+                {5, lv::ImageLayout::DepthStencilReadOnlyOptimal}
 #elif defined(LV_BACKEND_METAL)
-                {6, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
+                {6, lv::ImageLayout::ShaderReadOnlyOptimal}
 #endif
             }
         });
 
         mainRenderPass.skyboxSubpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                {0, lv::ImageLayout::ColorAttachmentOptimal},
             },
-            .depthAttachment = {5, LV_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL}
+            .depthAttachment = {5, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
         mainRenderPass.renderPass = new lv::RenderPass({
@@ -507,50 +506,50 @@ public:
                 {
                     .format = mainRenderPass.colorImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.albedoMetallicImage->format(),
                     .index = 1,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.normalRoughnessImage->format(),
                     .index = 2,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.motionImage->format(),
                     .index = 3,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.f0Image->format(),
                     .index = 4,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.depthImage->format(),
                     .index = 5,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .initialLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-                    .finalLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .initialLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal,
+                    .finalLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal
                 },
         #ifdef LV_BACKEND_METAL
                 {
                     .format = mainRenderPass.depthAsColorImage->format(),
                     .index = 6,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
         #endif
             }
@@ -579,14 +578,14 @@ public:
             .format = lv::Format::RGBA16Float,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         ssrRenderPass.subpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal}
             },
-            .depthAttachment = {1, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL}
+            .depthAttachment = {1, lv::ImageLayout::DepthStencilReadOnlyOptimal}
         });
 
         ssrRenderPass.renderPass = new lv::RenderPass({
@@ -595,17 +594,16 @@ public:
                 {
                     .format = ssrRenderPass.colorImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.depthImage->format(),
                     .index = 1,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_LOAD,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_DONT_CARE,
-                    .initialLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Load,
+                    .initialLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
             }
         });
@@ -625,14 +623,14 @@ public:
             .format = lv::Format::R8Unorm,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         lightShaftRenderPass.subpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal}
             },
-            .depthAttachment = {1, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL}
+            .depthAttachment = {1, lv::ImageLayout::DepthStencilReadOnlyOptimal}
         });
 
         lightShaftRenderPass.renderPass = new lv::RenderPass({
@@ -641,16 +639,16 @@ public:
                 {
                     .format = lightShaftRenderPass.colorImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.halfDepthImage->format(),
                     .index = 1,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_LOAD,
-                    .initialLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                    .finalLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Load,
+                    .initialLayout = lv::ImageLayout::ShaderReadOnlyOptimal,
+                    .finalLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal
                 }
             }
         });
@@ -670,12 +668,12 @@ public:
             .format = lv::Format::R8Unorm,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         blurRenderPass.subpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal}
             }
         });
 
@@ -685,9 +683,9 @@ public:
                 {
                     .format = blurRenderPass.lightShaftBlurImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
             }
         });
@@ -706,16 +704,16 @@ public:
             .format = lv::Format::R8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-            .memoryType = LV_MEMORY_TYPE_MEMORYLESS
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment,
+            .memoryType = lv::MemoryType::Memoryless
         });
 
         compositeRenderPass.resolvedSsrImage = new lv::Image({
             .frameCount = 2, //Set the frame count to 2 so as to be able to accumulate the results over the time
-            .format = lv::Format::B10GR11Float,
+            .format = lv::Format::B10GR11UFloat,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         compositeRenderPass.resolvedSsaoImage = new lv::Image({
@@ -723,7 +721,7 @@ public:
             .format = lv::Format::R8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         compositeRenderPass.resolvedColorImage = new lv::Image({
@@ -731,7 +729,7 @@ public:
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         compositeRenderPass.finalColorImage = new lv::Image({
@@ -739,26 +737,26 @@ public:
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         compositeRenderPass.ssaoSubpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal}
             },
-            .depthAttachment = {5, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL}
+            .depthAttachment = {5, lv::ImageLayout::DepthStencilReadOnlyOptimal}
         });
 
         compositeRenderPass.temporalResolveSubpass = new lv::Subpass({
             .colorAttachments = {
-                {1, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {2, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {3, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                {4, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {1, lv::ImageLayout::ColorAttachmentOptimal},
+                {2, lv::ImageLayout::ColorAttachmentOptimal},
+                {3, lv::ImageLayout::ColorAttachmentOptimal},
+                {4, lv::ImageLayout::ColorAttachmentOptimal}
             },
-            .depthAttachment = {5, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL},
+            .depthAttachment = {5, lv::ImageLayout::DepthStencilReadOnlyOptimal},
             .inputAttachments = {
-                {0, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
+                {0, lv::ImageLayout::ShaderReadOnlyOptimal}
             }
         });
         
@@ -768,42 +766,42 @@ public:
                 {
                     .format = compositeRenderPass.ssaoImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = compositeRenderPass.resolvedSsrImage->format(),
                     .index = 1,
                     //.loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = compositeRenderPass.resolvedSsaoImage->format(),
                     .index = 2,
                     //.loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = compositeRenderPass.resolvedColorImage->format(),
                     .index = 3,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = compositeRenderPass.finalColorImage->format(),
                     .index = 4,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 },
                 {
                     .format = mainRenderPass.depthImage->format(),
                     .index = 5,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_LOAD,
-                    .initialLayout = LV_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                    .finalLayout = LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Load,
+                    .initialLayout = lv::ImageLayout::TransferSourceOptimal,
+                    .finalLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal
                 }
             }
         });
@@ -836,12 +834,12 @@ public:
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         motionBlurRenderPass.subpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal}
             }
         });
 
@@ -851,9 +849,9 @@ public:
                 {
                     .format = motionBlurRenderPass.colorImage->format(),
                     .index = 0,
-                    .loadOp = LV_ATTACHMENT_LOAD_OP_CLEAR,
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .loadOp = lv::AttachmentLoadOperation::Clear,
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
             }
         });
@@ -873,14 +871,14 @@ public:
         shadowPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_VERTEX_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Vertex,
                     .offset = 0,
                     .size = sizeof(glm::mat4)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_VERTEX_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
                 }}
             }
         });
@@ -889,7 +887,7 @@ public:
         gbufferPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_VERTEX_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Vertex,
                     .offset = 0,
                     .size = sizeof(PCModel)
                 }
@@ -898,25 +896,25 @@ public:
                 {{
                     {
                         .binding = 0,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                        .shaderStage = LV_SHADER_STAGE_VERTEX_BIT
+                        .descriptorType = lv::DescriptorType::UniformBuffer,
+                        .shaderStage = lv::ShaderStageFlags::Vertex
                     }
                 }},
                 {{
                     {
                         .binding = 0,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                     {
                         .binding = 1,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                     {
                         .binding = 2,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                 }}
             }
@@ -926,7 +924,7 @@ public:
         deferredPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(PCDeferredVP)
                 }
@@ -935,28 +933,28 @@ public:
                 {{
                     {
                         .binding = 0,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::InputAttachment,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                     {
                         .binding = 1,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::InputAttachment,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                     {
                         .binding = 2,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::InputAttachment,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                     {
                         .binding = 3,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     },
                     {
                         .binding = 4,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::UniformBuffer,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     }
                 }}
             }
@@ -966,7 +964,7 @@ public:
         skyboxPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_VERTEX_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Vertex,
                     .offset = 0,
                     .size = sizeof(PCSkyboxVP)
                 }
@@ -975,8 +973,8 @@ public:
                 {{
                     {
                         .binding = 0,
-                        .descriptorType = LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                        .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT
+                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
+                        .shaderStage = lv::ShaderStageFlags::Fragment
                     }
                 }}
             }
@@ -986,15 +984,15 @@ public:
         ssrPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(PCSsrVP)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1003,15 +1001,15 @@ public:
         lightShaftPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(PCLightShaftVP)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1020,7 +1018,7 @@ public:
         blurPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1029,16 +1027,16 @@ public:
         ssaoPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(PCSsaoVP)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {2, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1047,29 +1045,29 @@ public:
         temporalResolvePipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(PCTemporalVP)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {2, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {3, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {4, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {3, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {4, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {2, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {3, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {3, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
                 }},
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1078,15 +1076,15 @@ public:
         motionBlurPipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_FRAGMENT_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Fragment,
                     .offset = 0,
                     .size = sizeof(float)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LV_SHADER_STAGE_FRAGMENT_BIT},
-                    {1, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1095,7 +1093,7 @@ public:
         hdrPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
@@ -1104,12 +1102,12 @@ public:
 
         //Shadow
         vertShadowShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/shadow.json").c_str())
         });
 
         fragShadowShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/shadow.json").c_str())
         });;
 
@@ -1125,12 +1123,12 @@ public:
 
         //GBuffer
         vertGBufferShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/gbuffer.json").c_str())
         });
 
         fragGBufferShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/gbuffer.json").c_str())
         });
 
@@ -1160,12 +1158,12 @@ public:
 
         //Deferred
         vertTriangleShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/triangle.json").c_str())
         });
 
         fragDeferredShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/deferred.json").c_str())
         });
 
@@ -1177,7 +1175,7 @@ public:
             .subpassIndex = 1,
             .depthTestEnable = lv::True,
             .depthWriteEnable = lv::False,
-            .depthOp = LV_COMPARE_OP_NOT_EQUAL,
+            .depthOp = lv::CompareOperation::NotEqual,
             .colorBlendAttachments = {
                 {0},
 #ifdef LV_BACKEND_METAL
@@ -1194,12 +1192,12 @@ public:
 
         //Skybox
         vertSkyboxShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/skybox.json").c_str())
         });
 
         fragSkyboxShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/skybox.json").c_str())
         });
 
@@ -1220,7 +1218,7 @@ public:
 
         //SSR
         fragSsrShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/ssr.json").c_str())
         });
 
@@ -1231,7 +1229,7 @@ public:
             .renderPass = ssrRenderPass.renderPass,
             .depthTestEnable = lv::True,
             .depthWriteEnable = lv::False,
-            .depthOp = LV_COMPARE_OP_NOT_EQUAL,
+            .depthOp = lv::CompareOperation::NotEqual,
             .colorBlendAttachments = {
                 {0}
             }
@@ -1239,7 +1237,7 @@ public:
 
         //Light shaft
         fragLightShaftShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/light_shaft.json").c_str())
         });
 
@@ -1250,7 +1248,7 @@ public:
             .renderPass = lightShaftRenderPass.renderPass,
             .depthTestEnable = lv::True,
             .depthWriteEnable = lv::False,
-            .depthOp = LV_COMPARE_OP_NOT_EQUAL,
+            .depthOp = lv::CompareOperation::NotEqual,
             .colorBlendAttachments = {
                 {0}
             }
@@ -1258,7 +1256,7 @@ public:
 
         //Blur
         fragBlurShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/blur.json").c_str())
         });
 
@@ -1274,7 +1272,7 @@ public:
 
         //SSAO
         fragSsaoShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/ssao.json").c_str())
         });
 
@@ -1285,7 +1283,7 @@ public:
             .renderPass = compositeRenderPass.renderPass,
             .depthTestEnable = lv::True,
             .depthWriteEnable = lv::False,
-            .depthOp = LV_COMPARE_OP_NOT_EQUAL,
+            .depthOp = lv::CompareOperation::NotEqual,
             .colorBlendAttachments = {
                 {0}
             }
@@ -1293,7 +1291,7 @@ public:
 
         //Temporal resolve
         fragTemporalResolveShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/temporal_resolve.json").c_str())
         });
 
@@ -1316,7 +1314,7 @@ public:
 
         //Motion blur
         fragMotionBlurShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/motion_blur.json").c_str())
         });
 
@@ -1332,7 +1330,7 @@ public:
 
         //HDR
         fragHdrShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/hdr.json").c_str())
         });
 
@@ -1348,20 +1346,20 @@ public:
 
         //Uniform buffers
         shadowUniformBuffer = new lv::Buffer({
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            .memoryType = LV_MEMORY_TYPE_SHARED,
+            .usage = lv::BufferUsageFlags::UniformBuffer,
+            .memoryType = lv::MemoryType::Shared,
             .size = sizeof(glm::mat4) * SHADOW_CASCADE_COUNT
         });
 
         gbufferUniformBuffer = new lv::Buffer({
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            .memoryType = LV_MEMORY_TYPE_SHARED,
+            .usage = lv::BufferUsageFlags::UniformBuffer,
+            .memoryType = lv::MemoryType::Shared,
             .size = sizeof(UBOGBufferVP)
         });
 
         lightUniformBuffer = new lv::Buffer({
             .frameCount = 1,
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT | LV_BUFFER_USAGE_TRANSFER_DST_BIT,
+            .usage = lv::BufferUsageFlags::UniformBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(UBOLight)
         });
 
@@ -1426,18 +1424,18 @@ public:
 
         //Copy commands
         lv::CommandBuffer* copyCommandBuffer = new lv::CommandBuffer({
-            .flags = LV_COMMAND_BUFFER_CREATE_FENCE_TO_WAIT_UNTIL_COMPLETE_BIT
+            .flags = lv::CommandBufferCreateFlags::CreateFenceToWaitUntilComplete
         });
         copyCommandBuffer->beginRecording();
         copyCommandBuffer->beginBlitCommands();
 
         //Transition attachments to the correct layout
-        copyCommandBuffer->cmdTransitionImageLayout(mainRenderPass.depthImage, 0, LV_IMAGE_LAYOUT_UNDEFINED, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+        copyCommandBuffer->cmdTransitionImageLayout(mainRenderPass.depthImage, 0, lv::ImageLayout::Undefined, lv::ImageLayout::DepthStencilReadOnlyOptimal);
 
         //Transition images that are used in composite render pass for temporal accumulation
         for (uint8_t i = 1; i < swapChain->maxFramesInFlight(); i++) { //Skip the first one, since it will be used as an attachment in the first frame
-            copyCommandBuffer->cmdTransitionImageLayout(ssrRenderPass.colorImage, i, LV_IMAGE_LAYOUT_UNDEFINED, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-            copyCommandBuffer->cmdTransitionImageLayout(compositeRenderPass.ssaoImage, i, LV_IMAGE_LAYOUT_UNDEFINED, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            copyCommandBuffer->cmdTransitionImageLayout(ssrRenderPass.colorImage, i, lv::ImageLayout::Undefined, lv::ImageLayout::ShaderReadOnlyOptimal);
+            copyCommandBuffer->cmdTransitionImageLayout(compositeRenderPass.ssaoImage, i, lv::ImageLayout::Undefined, lv::ImageLayout::ShaderReadOnlyOptimal);
         }
 
         //Copy to data
@@ -1445,14 +1443,14 @@ public:
 
         skyboxVertexBuffer = new lv::Buffer({
             .frameCount = 1,
-            .usage = LV_BUFFER_USAGE_VERTEX_BUFFER_BIT | LV_BUFFER_USAGE_TRANSFER_DST_BIT,
+            .usage = lv::BufferUsageFlags::VertexBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(skyboxVertices)
         });
         copyCommandBuffer->cmdStagingCopyDataToBuffer(skyboxVertexBuffer, skyboxVertices);
 
         skyboxIndexBuffer = new lv::Buffer({
             .frameCount = 1,
-            .usage = LV_BUFFER_USAGE_INDEX_BUFFER_BIT | LV_BUFFER_USAGE_TRANSFER_DST_BIT,
+            .usage = lv::BufferUsageFlags::IndexBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(skyboxIndices)
         });
         copyCommandBuffer->cmdStagingCopyDataToBuffer(skyboxIndexBuffer, skyboxIndices);
@@ -1488,16 +1486,16 @@ public:
             .format = (AO_TYPE == AO_TYPE_SSAO ? lv::Format::RG8Snorm : lv::Format::R8Unorm),
             .width = AO_NOISE_TEX_SIZE,
             .height = AO_NOISE_TEX_SIZE,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::TransferDestination
         });
         if (AO_TYPE == AO_TYPE_SSAO)
             copyCommandBuffer->cmdStagingCopyDataToImage(aoNoiseImage, ssaoNoise.data(), 2);
         else
             copyCommandBuffer->cmdStagingCopyDataToImage(aoNoiseImage, hbaoNoise.data(), 1);
-        copyCommandBuffer->cmdTransitionImageLayout(aoNoiseImage, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        copyCommandBuffer->cmdTransitionImageLayout(aoNoiseImage, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
         
         brdfLUTImage = new lv::Image({"../examples/assets/textures/brdf_lut.png"}, copyCommandBuffer);
-        copyCommandBuffer->cmdTransitionImageLayout(brdfLUTImage, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        copyCommandBuffer->cmdTransitionImageLayout(brdfLUTImage, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
 
         //Descriptor sets
         shadowDescriptorSet = new lv::DescriptorSet({
@@ -1520,12 +1518,12 @@ public:
                 lightUniformBuffer->descriptorInfo(4)
             },
             .imageBindings = {
-                mainRenderPass.albedoMetallicImage->descriptorInfo(0, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
-                mainRenderPass.normalRoughnessImage->descriptorInfo(1, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
+                mainRenderPass.albedoMetallicImage->descriptorInfo(0, lv::DescriptorType::InputAttachment),
+                mainRenderPass.normalRoughnessImage->descriptorInfo(1, lv::DescriptorType::InputAttachment),
 #ifdef LV_BACKEND_VULKAN
-                mainRenderPass.depthImage->descriptorInfo(2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL),
+                mainRenderPass.depthImage->descriptorInfo(2, lv::DescriptorType::InputAttachment, lv::ImageLayout::DepthStencilReadOnlyOptimal),
 #elif defined(LV_BACKEND_METAL)
-                mainRenderPass.depthAsColorImage->descriptorInfo(2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT),
+                mainRenderPass.depthAsColorImage->descriptorInfo(2, lv::DescriptorType::InputAttachment),
 #endif
                 shadowRenderPass.depthSampler->descriptorInfo(shadowRenderPass.depthImage, 3)
             }
@@ -1541,7 +1539,7 @@ public:
         ssrDescriptorSet = new lv::DescriptorSet({
             .pipelineLayout = ssrPipelineLayout,
             .imageBindings = {
-                basicSampler->descriptorInfo(mainRenderPass.halfDepthImage, 0, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL),
+                basicSampler->descriptorInfo(mainRenderPass.halfDepthImage, 0, lv::ImageLayout::DepthStencilReadOnlyOptimal),
                 mainRenderPass.normalRoughnessImage->descriptorInfo(1)
             }
         });
@@ -1549,7 +1547,7 @@ public:
         lightShaftDescriptorSet = new lv::DescriptorSet({
             .pipelineLayout = lightShaftPipelineLayout,
             .imageBindings = {
-                mainRenderPass.halfDepthImage->descriptorInfo(0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL),
+                mainRenderPass.halfDepthImage->descriptorInfo(0, lv::DescriptorType::SampledImage, lv::ImageLayout::DepthStencilReadOnlyOptimal),
                 shadowRenderPass.depthSampler->descriptorInfo(shadowRenderPass.depthImage, 1)
             }
         });
@@ -1564,7 +1562,7 @@ public:
         ssaoDescriptorSet = new lv::DescriptorSet({
             .pipelineLayout = ssaoPipelineLayout,
             .imageBindings = {
-                basicSampler->descriptorInfo(mainRenderPass.depthImage, 0, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL),
+                basicSampler->descriptorInfo(mainRenderPass.depthImage, 0, lv::ImageLayout::DepthStencilReadOnlyOptimal),
                 mainRenderPass.normalRoughnessImage->descriptorInfo(1),
                 repeatSampler->descriptorInfo(aoNoiseImage, 2)
             }
@@ -1574,9 +1572,9 @@ public:
             .pipelineLayout = temporalResolvePipelineLayout,
             .imageBindings = {
                 basicSampler->descriptorInfo(mainRenderPass.colorImage, 0),
-                basicSampler->descriptorInfo(compositeRenderPass.resolvedSsrImage, 1, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, -1),
-                basicSampler->descriptorInfo(compositeRenderPass.resolvedSsaoImage, 2, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, -1),
-                basicSampler->descriptorInfo(compositeRenderPass.resolvedColorImage, 3, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, -1),
+                basicSampler->descriptorInfo(compositeRenderPass.resolvedSsrImage, 1, lv::ImageLayout::ShaderReadOnlyOptimal, -1),
+                basicSampler->descriptorInfo(compositeRenderPass.resolvedSsaoImage, 2, lv::ImageLayout::ShaderReadOnlyOptimal, -1),
+                basicSampler->descriptorInfo(compositeRenderPass.resolvedColorImage, 3, lv::ImageLayout::ShaderReadOnlyOptimal, -1),
                 basicSampler->descriptorInfo(brdfLUTImage, 4)
             }
         });
@@ -1585,7 +1583,7 @@ public:
             .pipelineLayout = temporalResolvePipelineLayout,
             .layoutIndex = 1,
             .imageBindings = {
-                mainRenderPass.depthImage->descriptorInfo(0, LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL),
+                mainRenderPass.depthImage->descriptorInfo(0, lv::DescriptorType::SampledImage, lv::ImageLayout::DepthStencilReadOnlyOptimal),
                 mainRenderPass.normalRoughnessImage->descriptorInfo(1),
                 mainRenderPass.motionImage->descriptorInfo(2),
                 mainRenderPass.f0Image->descriptorInfo(3)
@@ -1598,7 +1596,7 @@ public:
             .imageBindings = {
                 ssrRenderPass.colorImage->descriptorInfo(0),
                 blurRenderPass.lightShaftBlurImage->descriptorInfo(1),
-                compositeRenderPass.ssaoImage->descriptorInfo(2, LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
+                compositeRenderPass.ssaoImage->descriptorInfo(2, lv::DescriptorType::InputAttachment)
             }
         });
 
@@ -1829,15 +1827,15 @@ public:
         mainRenderPass.commandBuffer->cmdBindDescriptorSet(skyboxDescriptorSet);
 
         mainRenderPass.commandBuffer->cmdBindVertexBuffer(skyboxVertexBuffer);
-        mainRenderPass.commandBuffer->cmdDrawIndexed(skyboxIndexBuffer, LV_INDEX_TYPE_UINT16, skyboxIndexBuffer->size() / sizeof(uint16_t));
+        mainRenderPass.commandBuffer->cmdDrawIndexed(skyboxIndexBuffer, lv::IndexType::Uint16, skyboxIndexBuffer->size() / sizeof(uint16_t));
 
         mainRenderPass.commandBuffer->beginComputeCommands();
 
         //mainRenderPass.colorImage.generateMipmaps(1);
         //mainRenderPass.depthImage.generateMipmaps(1);
-        mainRenderPass.commandBuffer->cmdTransitionImageLayout(mainRenderPass.depthImage, swapChain->crntFrame(), LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, LV_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        mainRenderPass.commandBuffer->cmdTransitionImageLayout(mainRenderPass.depthImage, swapChain->crntFrame(), lv::ImageLayout::DepthStencilReadOnlyOptimal, lv::ImageLayout::TransferSourceOptimal);
         mainRenderPass.commandBuffer->cmdBlitToImageFromImage(mainRenderPass.depthImage, mainRenderPass.halfDepthImage); //TODO: probably rename this function, it may seem a bit weird that we begin 'compute' commands instead of 'blit' commands when blitting to an image
-        mainRenderPass.commandBuffer->cmdTransitionImageLayout(mainRenderPass.halfDepthImage, swapChain->crntFrame(), LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+        mainRenderPass.commandBuffer->cmdTransitionImageLayout(mainRenderPass.halfDepthImage, swapChain->crntFrame(), lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::DepthStencilReadOnlyOptimal);
 
         mainRenderPass.commandBuffer->endRecording();
         mainRenderPass.commandBuffer->submit();
@@ -1998,16 +1996,16 @@ public:
     void precomputeSkylight() {
         skylightImage = new lv::Image({
             .frameCount = 1,
-            .format = lv::Format::B10GR11Float,
+            .format = lv::Format::B10GR11UFloat,
             .width = SKYLIGHT_IMAGE_SIZE,
             .height = SKYLIGHT_IMAGE_SIZE,
             .imageType = lv::ImageType::Cube,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
         lv::Subpass* subpass = new lv::Subpass({
             .colorAttachments = {
-                {0, LV_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+                {0, lv::ImageLayout::ColorAttachmentOptimal}
             }
         });
 
@@ -2017,8 +2015,8 @@ public:
                 {
                     .index = 0,
                     .format = skylightImage->format(),
-                    .storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-                    .finalLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                    .storeOp = lv::AttachmentStoreOperation::Store,
+                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
             }
         });
@@ -2039,26 +2037,26 @@ public:
         lv::PipelineLayout* pipelineLayout = new lv::PipelineLayout({
             .pushConstantRanges = {
                 {
-                    .stageFlags = LV_SHADER_STAGE_VERTEX_BIT,
+                    .stageFlags = lv::ShaderStageFlags::Vertex,
                     .offset = 0,
                     .size = sizeof(PCSkylightVP)
                 }
             },
             .descriptorSetLayouts = {
                 {{
-                    {0, LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LV_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Fragment}
                 }}
             }
         });
 
         //Graphics pipeline
         lv::ShaderModule* vertShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_VERTEX_BIT,
+            .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/skylight.json").c_str())
         });
 
         lv::ShaderModule* fragShaderModule = new lv::ShaderModule({
-            .shaderStage = LV_SHADER_STAGE_FRAGMENT_BIT,
+            .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/skylight.json").c_str())
         });
 
@@ -2080,7 +2078,7 @@ public:
 
         lv::Buffer* uniformBuffer = new lv::Buffer({
             .frameCount = 1,
-            .usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT | LV_BUFFER_USAGE_TRANSFER_DST_BIT,
+            .usage = lv::BufferUsageFlags::UniformBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(glm::vec3)
         });
 

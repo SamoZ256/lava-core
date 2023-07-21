@@ -5,7 +5,11 @@
 
 #include "lvcore/core/common.hpp"
 
+//TODO: remove the use of 'metal' namespace from macros
+
 namespace lv {
+
+namespace metal {
 
 //---------------- Pixel format ----------------
 constexpr MTLPixelFormat pixelFormatLUT[] = {
@@ -28,7 +32,7 @@ constexpr MTLPixelFormat pixelFormatLUT[] = {
     MTLPixelFormatR16Sint,
     MTLPixelFormatR16Unorm,
     MTLPixelFormatR16Snorm,
-    MTLPixelFormatInvalid, //Invalid
+    MTLPixelFormatR16Float,
 
     //RG
     MTLPixelFormatRG8Uint,
@@ -70,7 +74,7 @@ constexpr MTLPixelFormat pixelFormatLUT[] = {
     MTLPixelFormatRG16Sint,
     MTLPixelFormatRG16Unorm,
     MTLPixelFormatRG16Snorm,
-    MTLPixelFormatInvalid, //Invalid
+    MTLPixelFormatRG16Float,
 
     //RGBA
     MTLPixelFormatRGBA8Uint,
@@ -81,14 +85,6 @@ constexpr MTLPixelFormat pixelFormatLUT[] = {
 
     //BGRA
     MTLPixelFormatBGRA8Unorm_sRGB,
-    
-    //ABGR
-    MTLPixelFormatBGR10A2Unorm,
-
-    //ARGB
-    MTLPixelFormatRGB10A2Unorm,
-    MTLPixelFormatInvalid, //Invalid
-    MTLPixelFormatRGB10A2Uint,
 
     //D
     MTLPixelFormatDepth32Float,
@@ -98,6 +94,14 @@ constexpr MTLPixelFormat pixelFormatLUT[] = {
 
     //BGR - packed
     MTLPixelFormatRG11B10Float,
+    
+    //ABGR - packed
+    MTLPixelFormatBGR10A2Unorm,
+
+    //ARGB - packed
+    MTLPixelFormatRGB10A2Unorm,
+    MTLPixelFormatInvalid, //Invalid
+    MTLPixelFormatRGB10A2Uint,
 
     //ERGB - packed
     MTLPixelFormatRGB9E5Float,
@@ -121,7 +125,7 @@ constexpr MTLPixelFormat pixelFormatLUT[] = {
     //RG
     MTLPixelFormatRG32Uint,
     MTLPixelFormatRG32Sint,
-    MTLPixelFormatInvalid, //Invalid
+    MTLPixelFormatRG32Float,
 
     //RGBA
     MTLPixelFormatRGBA16Uint,
@@ -152,7 +156,7 @@ constexpr MTLPixelFormat pixelFormatLUT[] = {
 
 #define GET_MTL_PIXEL_FORMAT(format, retval) \
 LV_CHECK_ARGUMENT(Format, format); \
-retval = pixelFormatLUT[(int)format];
+retval = metal::pixelFormatLUT[(int)format];
 
 //---------------- Vertex format ----------------
 constexpr MTLVertexFormat vertexFormatLUT[] = {
@@ -228,14 +232,6 @@ constexpr MTLVertexFormat vertexFormatLUT[] = {
 
     //BGRA
     MTLVertexFormatInvalid, //Invalid
-    
-    //ABGR
-    MTLVertexFormatInvalid, //Invalid
-
-    //ARGB
-    MTLVertexFormatUInt1010102Normalized,
-    MTLVertexFormatInt1010102Normalized,
-    MTLVertexFormatInvalid, //Invalid
 
     //D
     MTLVertexFormatInvalid, //Invalid
@@ -245,6 +241,14 @@ constexpr MTLVertexFormat vertexFormatLUT[] = {
 
     //BGR - packed
     MTLVertexFormatInvalid, //Beta (MTLVertexFormatFloatRG11B10)
+    
+    //ABGR - packed
+    MTLVertexFormatInvalid, //Invalid
+
+    //ARGB - packed
+    MTLVertexFormatUInt1010102Normalized,
+    MTLVertexFormatInt1010102Normalized,
+    MTLVertexFormatInvalid, //Invalid
 
     //ERGB - packed
     MTLVertexFormatInvalid, //Beta (MTLVertexFormatFloatRGB9E5)
@@ -299,7 +303,7 @@ constexpr MTLVertexFormat vertexFormatLUT[] = {
 
 #define GET_MTL_VERTEX_FORMAT(format, retval) \
 LV_CHECK_ARGUMENT(Format, format); \
-retval = vertexFormatLUT[(int)format];
+retval = metal::vertexFormatLUT[(int)format];
 
 //---------------- Cull mode ----------------
 constexpr MTLCullMode cullModeLUT[] = {
@@ -310,7 +314,7 @@ constexpr MTLCullMode cullModeLUT[] = {
 
 #define GET_MTL_CULL_MODE(cullMode, retval) \
 LV_CHECK_ARGUMENT(CullMode, cullMode); \
-retval = cullModeLUT[(int)cullMode];
+retval = metal::cullModeLUT[(int)cullMode];
 
 //---------------- Winding ----------------
 constexpr MTLWinding windingLUT[] = {
@@ -320,7 +324,7 @@ constexpr MTLWinding windingLUT[] = {
 
 #define GET_MTL_WINDING(frontFace, retval) \
 LV_CHECK_ARGUMENT(FrontFace, frontFace); \
-retval = windingLUT[(int)frontFace];
+retval = metal::windingLUT[(int)frontFace];
 
 //---------------- Min mag filter ----------------
 constexpr MTLSamplerMinMagFilter samplerMinMagFilterLUT[] = {
@@ -330,7 +334,7 @@ constexpr MTLSamplerMinMagFilter samplerMinMagFilterLUT[] = {
 
 #define GET_MTL_SAMPLER_MIN_MAG_FILTER(filter, retval) \
 LV_CHECK_ARGUMENT(Filter, filter); \
-retval = samplerMinMagFilterLUT[(int)filter];
+retval = metal::samplerMinMagFilterLUT[(int)filter];
 
 //---------------- Texture type ----------------
 constexpr MTLTextureType textureTypeLUT[] = {
@@ -345,11 +349,12 @@ constexpr MTLTextureType textureTypeLUT[] = {
 
 #define GET_MTL_TEXTURE_TYPE(imageType, retval) \
 LV_CHECK_ARGUMENT(ImageType, imageType); \
-retval = textureTypeLUT[(int)imageType];
+retval = metal::textureTypeLUT[(int)imageType];
 
 //---------------- Sampler address mode ----------------
 constexpr MTLSamplerAddressMode samplerAddressModeLUT[] = {
     MTLSamplerAddressModeRepeat,
+    MTLSamplerAddressModeMirrorRepeat,
     MTLSamplerAddressModeClampToEdge,
     MTLSamplerAddressModeClampToBorderColor,
     MTLSamplerAddressModeMirrorClampToEdge
@@ -357,7 +362,7 @@ constexpr MTLSamplerAddressMode samplerAddressModeLUT[] = {
 
 #define GET_MTL_SAMPLER_ADDRESS_MODE(samplerAddressMode, retval) \
 LV_CHECK_ARGUMENT(SamplerAddressMode, samplerAddressMode); \
-retval = samplerAddressModeLUT[(int)samplerAddressMode];
+retval = metal::samplerAddressModeLUT[(int)samplerAddressMode];
 
 //---------------- Index type ----------------
 constexpr MTLIndexType indexTypeLUT[] = {
@@ -367,7 +372,7 @@ constexpr MTLIndexType indexTypeLUT[] = {
 
 #define GET_MTL_INDEX_TYPE(indexType, retval) \
 LV_CHECK_ARGUMENT(IndexType, indexType); \
-retval = indexTypeLUT[(int)indexType];
+retval = metal::indexTypeLUT[(int)indexType];
 
 //---------------- Load action ----------------
 constexpr MTLLoadAction loadActionLUT[] = {
@@ -378,7 +383,7 @@ constexpr MTLLoadAction loadActionLUT[] = {
 
 #define GET_MTL_LOAD_ACTION(attachmentLoadOperation, retval) \
 LV_CHECK_ARGUMENT(AttachmentLoadOperation, attachmentLoadOperation); \
-retval = loadActionLUT[(int)attachmentLoadOperation];
+retval = metal::loadActionLUT[(int)attachmentLoadOperation];
 
 //---------------- Store action ----------------
 constexpr MTLStoreAction storeActionLUT[] = {
@@ -388,7 +393,7 @@ constexpr MTLStoreAction storeActionLUT[] = {
 
 #define GET_MTL_STORE_ACTION(attachmentStoreOperation, retval) \
 LV_CHECK_ARGUMENT(AttachmentStoreOperation, attachmentStoreOperation); \
-retval = storeActionLUT[(int)attachmentStoreOperation];
+retval = metal::storeActionLUT[(int)attachmentStoreOperation];
 
 //---------------- Compare function ----------------
 constexpr MTLCompareFunction compareFunctionLUT[] = {
@@ -404,7 +409,7 @@ constexpr MTLCompareFunction compareFunctionLUT[] = {
 
 #define GET_MTL_COMPARE_FUNCTION(compareOperation, retval) \
 LV_CHECK_ARGUMENT(CompareOperation, compareOperation); \
-retval = compareFunctionLUT[(int)compareOperation];
+retval = metal::compareFunctionLUT[(int)compareOperation];
 
 //---------------- Storage mode ----------------
 constexpr MTLStorageMode storageModeLUT[] = {
@@ -415,7 +420,7 @@ constexpr MTLStorageMode storageModeLUT[] = {
 
 #define GET_MTL_STORAGE_MODE(memoryType, retval) \
 LV_CHECK_ARGUMENT(MemoryType, memoryType); \
-retval = storageModeLUT[(int)memoryType];
+retval = metal::storageModeLUT[(int)memoryType];
 
 //---------------- Resource options ----------------
 constexpr MTLResourceOptions resourceOptionsLUT[] = {
@@ -426,7 +431,7 @@ constexpr MTLResourceOptions resourceOptionsLUT[] = {
 
 #define GET_MTL_RESOURCE_OPTIONS(memoryType, retval) \
 LV_CHECK_ARGUMENT(MemoryType, memoryType); \
-retval = resourceOptionsLUT[(int)memoryType];
+retval = metal::resourceOptionsLUT[(int)memoryType];
 
 //---------------- Blend operation ----------------
 constexpr MTLBlendOperation blendOperationLUT[] = {
@@ -439,7 +444,7 @@ constexpr MTLBlendOperation blendOperationLUT[] = {
 
 #define GET_MTL_BLEND_OPERATION(blendOperation, retval) \
 LV_CHECK_ARGUMENT(BlendOperation, blendOperation); \
-retval = blendOperationLUT[(int)blendOperation];
+retval = metal::blendOperationLUT[(int)blendOperation];
 
 //---------------- Blend factor ----------------
 constexpr MTLBlendFactor blendFactorLUT[] = {
@@ -462,7 +467,7 @@ constexpr MTLBlendFactor blendFactorLUT[] = {
 
 #define GET_MTL_BLEND_FACTOR(blendFactor, retval) \
 LV_CHECK_ARGUMENT(BlendFactor, blendFactor); \
-retval = blendFactorLUT[(int)blendFactor];
+retval = metal::blendFactorLUT[(int)blendFactor];
 
 //---------------- Tessellation partition mode ----------------
 constexpr MTLTessellationPartitionMode tessellationPartitionModeLUT[] = {
@@ -474,7 +479,7 @@ constexpr MTLTessellationPartitionMode tessellationPartitionModeLUT[] = {
 
 #define GET_MTL_TESSELLATION_PARTITION_MODE(tessellationSpacing, retval) \
 LV_CHECK_ARGUMENT(TessellationSpacing, tessellationSpacing); \
-retval = tessellationPartitionModeLUT[(int)tessellationSpacing];
+retval = metal::tessellationPartitionModeLUT[(int)tessellationSpacing];
 
 //---------------- Vertex step function ----------------
 constexpr MTLVertexStepFunction vertexStepFunctionLUT[] = {
@@ -487,10 +492,12 @@ constexpr MTLVertexStepFunction vertexStepFunctionLUT[] = {
 
 #define GET_MTL_VERTEX_STEP_FUNCTION(vertexInputRate, retval) \
 LV_CHECK_ARGUMENT(VertexInputRate, vertexInputRate); \
-retval = vertexStepFunctionLUT[(int)vertexInputRate];
+retval = metal::vertexStepFunctionLUT[(int)vertexInputRate];
 
 //---------------- Flags ----------------
 MTLTextureUsage getMTLTextureUsage(ImageUsageFlags imageUsageFlags);
+
+} //namespace metal
 
 } //namespace lv
 

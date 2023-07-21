@@ -23,7 +23,7 @@ struct Metal_GraphicsPipelineCreateInfo {
     Bool depthTestEnable = False;
     Bool depthWriteEnable = True;
     CompareOperation depthOp = CompareOperation::Less;
-    LvWindingOrder windingOrder = LV_WINDING_ORDER_CLOCKWISE;
+    FrontFace frontFace = FrontFace::Clockwise; //TODO: use this without tessellation as well
     TessellationSpacing tessellationSpacing = TessellationSpacing::Equal;
     uint32_t maxTessellationFactor = 16;
 };

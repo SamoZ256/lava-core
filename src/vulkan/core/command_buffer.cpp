@@ -1,5 +1,7 @@
 #include "vulkan/lvcore/core/command_buffer.hpp"
 
+#include "vulkan/lvcore/core/core.hpp"
+
 #include "vulkan/lvcore/core/swap_chain.hpp"
 
 namespace lv {
@@ -248,7 +250,10 @@ void Vulkan_CommandBuffer::cmdStagingCopyDataToImage(Vulkan_Image* image, void* 
 }
 
 void Vulkan_CommandBuffer::cmdTransitionImageLayout(Vulkan_Image* image, uint8_t imageIndex, LvImageLayout srcLayout, LvImageLayout dstLayout) {
-    Vulkan_ImageHelper::transitionImageLayout(_getActiveCommandBuffer(), image->image(imageIndex), image->format(), srcLayout, dstLayout, image->aspectMask(), image->layerCount(), image->mipCount());
+    VkFormat vkFormat;
+    GET_VK_FORMAT(image->format(), vkFormat);
+
+    Vulkan_ImageHelper::transitionImageLayout(_getActiveCommandBuffer(), image->image(imageIndex), vkFormat, srcLayout, dstLayout, image->aspectMask(), image->layerCount(), image->mipCount());
 }
 
 void Vulkan_CommandBuffer::cmdGenerateMipmapsForImage(Vulkan_Image* image, uint8_t aFrameCount) {

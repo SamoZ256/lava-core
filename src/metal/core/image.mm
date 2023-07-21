@@ -35,7 +35,7 @@ Metal_Image::Metal_Image(Metal_ImageCreateInfo createInfo) {
     GET_MTL_TEXTURE_TYPE(createInfo.imageType, mtlTextureType);
     MTLStorageMode mtlStorageMode;
     GET_MTL_STORAGE_MODE(createInfo.memoryType, mtlStorageMode);
-    MTLTextureUsage mtlTextureUsage = getMTLTextureUsage(createInfo.usage);
+    MTLTextureUsage mtlTextureUsage = metal::getMTLTextureUsage(createInfo.usage); //TODO: remove the metal namespace
     
     if (createInfo.imageType == ImageType::Cube || createInfo.imageType == ImageType::CubeArray)
         _layersPerLayer = 6;

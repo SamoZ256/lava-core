@@ -49,7 +49,7 @@ void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInf
         for (uint8_t i = 0; i < createInfo.renderPass->attachments.size(); i++) {
             MTLPixelFormat format;
             GET_MTL_PIXEL_FORMAT(createInfo.renderPass->attachments[i].format, format);
-            if (format >= LV_FORMAT_D16_UNORM && format <= MTLPixelFormatX24_Stencil8)
+            if (format >= MTLPixelFormatDepth16Unorm && format <= MTLPixelFormatX24_Stencil8)
                 descriptor.depthAttachmentPixelFormat = format;
         }
     }
@@ -88,12 +88,14 @@ void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInf
 
     MTLTessellationPartitionMode mtlTessellationPartitionMode;
     GET_MTL_TESSELLATION_PARTITION_MODE(createInfo.tessellationSpacing, mtlTessellationPartitionMode);
+    MTLWinding mtlWinding;
+    GET_MTL_WINDING(createInfo.frontFace, mtlWinding);
 
     descriptor.tessellationFactorScaleEnabled = NO;
     descriptor.tessellationFactorFormat = MTLTessellationFactorFormatHalf;
     descriptor.tessellationControlPointIndexType = MTLTessellationControlPointIndexTypeNone;
     descriptor.tessellationFactorStepFunction = MTLTessellationFactorStepFunctionPerPatch;
-    descriptor.tessellationOutputWindingOrder = (MTLWinding)createInfo.windingOrder;
+    descriptor.tessellationOutputWindingOrder = mtlWinding;
     descriptor.tessellationPartitionMode = mtlTessellationPartitionMode;
     descriptor.maxTessellationFactor = createInfo.maxTessellationFactor;
 

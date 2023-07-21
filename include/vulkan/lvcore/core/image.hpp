@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "lvcore/core/core.hpp"
+
 #include "common.hpp"
 
 #include "enums.hpp"
@@ -26,7 +28,7 @@ struct Vulkan_ImageDescriptorInfo {
 
 struct Vulkan_ImageCreateInfo {
     uint8_t frameCount = 0;
-    LvFormat format;
+    Format format;
     uint16_t width;
     uint16_t height;
     uint16_t layerCount = 1;
@@ -61,7 +63,7 @@ private:
     std::vector<VmaAllocation> allocations;
     std::vector<VkImageView> imageViews;
 
-    LvFormat _format;
+    Format _format;
 
     uint16_t _width, _height;
 
@@ -102,7 +104,7 @@ public:
 
     inline uint16_t height() { return _height; }
 
-    inline LvFormat format() { return _format; }
+    inline lv::Format format() { return _format; }
 
     inline uint16_t baseLayer() { return _baseLayer; }
 
@@ -127,7 +129,7 @@ public:
 
     inline void _setImage(VkImage image, uint8_t index) { images[index] = image; }
 
-    inline void _setFormat(LvFormat format) { _format = format; }
+    inline void _setFormat(lv::Format format) { _format = format; }
 
     inline void _setWidth(uint16_t width) { _width = width; }
 

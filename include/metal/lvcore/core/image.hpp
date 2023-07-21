@@ -7,8 +7,6 @@
 
 #include "common.hpp"
 
-#include "enums.hpp"
-
 #include "compute_pipeline.hpp"
 
 namespace lv {

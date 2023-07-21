@@ -7,8 +7,6 @@
 
 #include "common.hpp"
 
-#include "enums.hpp"
-
 namespace lv {
 
 struct Metal_BufferDescriptorInfo {

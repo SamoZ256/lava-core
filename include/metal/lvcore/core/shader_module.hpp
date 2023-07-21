@@ -8,15 +8,13 @@
 
 #include "common.hpp"
 
-#include "enums.hpp"
-
 namespace lv {
 
 struct Metal_SpecializationMapEntry {
     uint32_t constantID;
     uint32_t offset;
     size_t size;
-    LvDataType dataType;
+    int dataType; //TODO: create an enum for this
 };
 
 struct Metal_ShaderModuleCreateInfo {

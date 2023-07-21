@@ -5,8 +5,6 @@
 
 #include "common.hpp"
 
-#include "enums.hpp"
-
 #include "semaphore.hpp"
 #include "framebuffer.hpp"
 #include "viewport.hpp"
@@ -18,7 +16,7 @@ namespace lv {
 struct Metal_CommandBufferCreateInfo {
     uint8_t frameCount = 0;
     uint8_t threadIndex = 0;
-    LvCommandBufferCreateFlags flags = 0;
+    CommandBufferCreateFlags flags = CommandBufferCreateFlags::None;
 };
 
 class Metal_CommandBuffer {
@@ -42,7 +40,7 @@ public:
 
     ~Metal_CommandBuffer() {}
 
-    void beginRecording(LvCommandBufferUsageFlags usage = 0);
+    void beginRecording(CommandBufferUsageFlags usage = CommandBufferUsageFlags::None);
 
     void endRecording();
 

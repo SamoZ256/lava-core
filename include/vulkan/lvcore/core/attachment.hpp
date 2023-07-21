@@ -3,6 +3,8 @@
 
 #include "lvcore/core/common.hpp"
 
+#include "vulkan/lvcore/core/core.hpp"
+
 #include "image.hpp"
 
 namespace lv {
@@ -20,15 +22,18 @@ struct Vulkan_ColorBlendAttachment {
 
 struct Vulkan_RenderPassAttachment {
     uint8_t index = 0;
-    LvFormat format;
+    Format format;
     LvAttachmentLoadOp loadOp = LV_ATTACHMENT_LOAD_OP_DONT_CARE;
     LvAttachmentStoreOp storeOp = LV_ATTACHMENT_STORE_OP_DONT_CARE;
     LvImageLayout initialLayout = LV_IMAGE_LAYOUT_UNDEFINED;
     LvImageLayout finalLayout = LV_IMAGE_LAYOUT_UNDEFINED;
 
     VkAttachmentDescription getAttachmentDescription(/*VkImageLayout finalLayout*/) {
+        VkFormat vkFormat;
+        GET_VK_FORMAT(format, vkFormat);
+
         VkAttachmentDescription description{};
-        description.format = format;
+        description.format = vkFormat;
         description.samples = VK_SAMPLE_COUNT_1_BIT;
         description.loadOp = loadOp;
         description.storeOp = storeOp;

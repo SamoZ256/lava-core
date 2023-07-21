@@ -2,6 +2,8 @@
 
 namespace lv {
 
+namespace metal {
+
 //---------------- Texture usage ----------------
 MTLTextureUsage getMTLTextureUsage(ImageUsageFlags imageUsageFlags) {
     MTLTextureUsage mtlTextureUsage = 0;
@@ -15,5 +17,7 @@ MTLTextureUsage getMTLTextureUsage(ImageUsageFlags imageUsageFlags) {
     
     return mtlTextureUsage;
 }
+
+} //namespace metal
 
 } //namespace lv

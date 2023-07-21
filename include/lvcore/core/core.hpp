@@ -106,14 +106,6 @@ enum class Format {
     //BGRA
     BGRA8Unorm_sRGB,
 
-    //ABGR
-    A2BGR10Unorm,
-
-    //ARGB
-    A2RGB10Unorm,
-    A2RGB10Snorm,
-    A2RGB10Uint,
-
     //D
     D32Float,
 
@@ -121,10 +113,18 @@ enum class Format {
     D24Unorm_S8Uint,
 
     //BGR - packed
-    B10GR11Float,
+    B10GR11UFloat,
+
+    //ABGR - packed
+    A2BGR10Unorm,
+
+    //ARGB - packed
+    A2RGB10Unorm,
+    A2RGB10Snorm,
+    A2RGB10Uint,
 
     //ERGB - packed
-    E5RGB9Float,
+    E5RGB9UFloat,
 
     //---------------- 40 ----------------
 
@@ -212,6 +212,7 @@ enum class ImageType {
 
 enum class SamplerAddressMode {
     Repeat,
+    MirrorRepeat,
     ClampToEdge,
     ClampToBorder,
     MirrorClampToEdge,

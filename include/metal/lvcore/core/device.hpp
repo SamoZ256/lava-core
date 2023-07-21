@@ -9,8 +9,6 @@
 
 #include "common.hpp"
 
-#include "enums.hpp"
-
 #include "lvcore/threading/thread_pool.hpp"
 
 namespace lv {

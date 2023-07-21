@@ -1,8 +1,6 @@
 #ifndef LV_METAL_SAMPLER_H
 #define LV_METAL_SAMPLER_H
 
-#include "enums.hpp"
-
 #include "image.hpp"
 
 namespace lv {

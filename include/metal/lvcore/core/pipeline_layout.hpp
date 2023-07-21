@@ -5,8 +5,6 @@
 
 #include "lvcore/core/core.hpp"
 
-#include "enums.hpp"
-
 namespace lv {
 
 struct Metal_SortedDescriptorSetLayoutBinding {

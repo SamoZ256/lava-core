@@ -3,6 +3,8 @@
 #include "stb/stb_image.h"
 #include "gli/gli.hpp"
 
+#include "vulkan/lvcore/core/core.hpp"
+
 #include "vulkan/lvcore/core/device.hpp"
 #include "vulkan/lvcore/core/swap_chain.hpp"
 
@@ -20,11 +22,11 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* 
     void* data = (void*)stbi_load(strFilename.c_str(), &width, &height, &nbChannels, STBI_rgb_alpha);
 
     //TODO: query the format from the image properties instead
-    LvFormat format;
+    Format format;
     if (loadInfo.isSRGB)
-        format = LV_FORMAT_R8G8B8A8_UNORM_SRGB;
+        format = Format::RGBA8Unorm_sRGB;
     else
-        format = LV_FORMAT_R8G8B8A8_UNORM;
+        format = Format::RGBA8Unorm;
 
     if (!data && extension == ".dds") {
         gli::texture image = gli::load(loadInfo.filename);
@@ -115,22 +117,25 @@ void Vulkan_Image::create(Vulkan_ImageCreateInfo& createInfo) {
     _format = createInfo.format;
     _layerCount = createInfo.layerCount;
     _mipCount = createInfo.mipCount;
-
     _aspectMask = createInfo.aspectMask;
+
+    VkFormat vkFormat;
+    GET_VK_FORMAT(_format, vkFormat);
     
     if (createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE || createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
         _layerCount *= 6;
     
+    //TODO: create a local variable for memoryType
 #ifdef __APPLE__ //TODO: check for support instead
     if (createInfo.memoryType == LV_MEMORY_TYPE_MEMORYLESS)
         createInfo.memoryType = LV_MEMORY_TYPE_PRIVATE;
 #endif
 
     LvMemoryAllocationCreateFlags memoryAllocationFlags = createInfo.memoryAllocationFlags;
-    if (createInfo.usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT || createInfo.usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+    if (createInfo.usage & LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT || createInfo.usage & LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
         memoryAllocationFlags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
     VkImageCreateFlags flags = 0;
-    if (createInfo.imageType == VK_IMAGE_VIEW_TYPE_CUBE || createInfo.imageType == VK_IMAGE_VIEW_TYPE_CUBE_ARRAY)
+    if (createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE || createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
         flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     
     images.resize(_frameCount);
@@ -138,14 +143,17 @@ void Vulkan_Image::create(Vulkan_ImageCreateInfo& createInfo) {
     imageViews.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
         //Creating image
-        allocations[i] = Vulkan_ImageHelper::createImage((uint16_t)_width, (uint16_t)_height, _format, VK_IMAGE_TILING_OPTIMAL, createInfo.usage, images[i], nullptr, createInfo.memoryType, _layerCount, _mipCount, memoryAllocationFlags, flags);
-        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], _format, _aspectMask, createInfo.imageType, 0, _layerCount, 0, _mipCount);
+        allocations[i] = Vulkan_ImageHelper::createImage((uint16_t)_width, (uint16_t)_height, vkFormat, VK_IMAGE_TILING_OPTIMAL, createInfo.usage, images[i], nullptr, createInfo.memoryType, _layerCount, _mipCount, memoryAllocationFlags, flags);
+        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, _aspectMask, createInfo.imageType, 0, _layerCount, 0, _mipCount);
     }
 }
 
 void Vulkan_Image::_createImageView(LvImageViewType viewType, LvImageAspectFlags aspectMask) {
+    VkFormat vkFormat;
+    GET_VK_FORMAT(_format, vkFormat);
+
     for (uint8_t i = 0; i < _frameCount; i++) {
-        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], _format, aspectMask, viewType, _baseLayer, _layerCount, _baseMip, _mipCount);
+        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, aspectMask, viewType, _baseLayer, _layerCount, _baseMip, _mipCount);
     }
 }
 
