@@ -115,19 +115,19 @@ void Metal_CommandBuffer::cmdBindDescriptorSet(Metal_DescriptorSet* descriptorSe
         id<MTLBuffer> buffer = descriptorSet->buffers[i][g_metal_swapChain->crntFrame() % descriptorSet->buffers[i].size()];
         ShaderStageFlags shaderStage = descriptorSet->pipelineLayout()->descriptorSetLayouts[descriptorSet->layoutIndex()].bindings[descriptorSet->bufferBindingIndices[i]].shaderStage;
 
-        if (toUnderlying(shaderStage & ShaderStageFlags::Vertex)) {
+        if (shaderStage & ShaderStageFlags::Vertex) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_VERTEX_INDEX, bufferBindings, bufferBindingIndices);
             [encoder setVertexBuffer:buffer
                                                              offset:0
                                                             atIndex:binding];
         }
-        if (toUnderlying(shaderStage & ShaderStageFlags::Fragment)) {
+        if (shaderStage & ShaderStageFlags::Fragment) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_FRAGMENT_INDEX, bufferBindings, bufferBindingIndices);
             [encoder setFragmentBuffer:buffer
                                                                offset:0
                                                               atIndex:binding];
         }
-        if (toUnderlying(shaderStage & ShaderStageFlags::Compute)) {
+        if (shaderStage & ShaderStageFlags::Compute) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_COMPUTE_INDEX, bufferBindings, bufferBindingIndices);
             [encoder setBuffer:buffer
                                                         offset:0
@@ -139,17 +139,17 @@ void Metal_CommandBuffer::cmdBindDescriptorSet(Metal_DescriptorSet* descriptorSe
         id<MTLTexture> texture = descriptorSet->textures[i][g_metal_swapChain->crntFrame() % descriptorSet->textures[i].size()];
         ShaderStageFlags shaderStage = descriptorSet->pipelineLayout()->descriptorSetLayouts[descriptorSet->layoutIndex()].bindings[descriptorSet->textureBindingIndices[i]].shaderStage;
 
-        if (toUnderlying(shaderStage & ShaderStageFlags::Vertex)) {
+        if (shaderStage & ShaderStageFlags::Vertex) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_VERTEX_INDEX, textureBindings, textureBindingIndices);
             [encoder setVertexTexture:texture
                                                              atIndex:binding];
         }
-        if (toUnderlying(shaderStage & ShaderStageFlags::Fragment)) {
+        if (shaderStage & ShaderStageFlags::Fragment) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_FRAGMENT_INDEX, textureBindings, textureBindingIndices);
             [encoder setFragmentTexture:texture
                                                                atIndex:binding];
         }
-        if (toUnderlying(shaderStage & ShaderStageFlags::Compute)) {
+        if (shaderStage & ShaderStageFlags::Compute) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_COMPUTE_INDEX, textureBindings, textureBindingIndices);
             [encoder setTexture:texture
                                                         atIndex:binding];
@@ -159,17 +159,17 @@ void Metal_CommandBuffer::cmdBindDescriptorSet(Metal_DescriptorSet* descriptorSe
     for (uint32_t i = 0; i < descriptorSet->samplers.size(); i++) {
         ShaderStageFlags shaderStage = descriptorSet->pipelineLayout()->descriptorSetLayouts[descriptorSet->layoutIndex()].bindings[descriptorSet->samplerBindingIndices[i]].shaderStage;
 
-        if (toUnderlying(shaderStage & ShaderStageFlags::Vertex)) {
+        if (shaderStage & ShaderStageFlags::Vertex) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_VERTEX_INDEX, samplerBindings, samplerBindingIndices);
             [encoder setVertexSamplerState:descriptorSet->samplers[i]
                                                                   atIndex:binding];
         }
-        if (toUnderlying(shaderStage & ShaderStageFlags::Fragment)) {
+        if (shaderStage & ShaderStageFlags::Fragment) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_FRAGMENT_INDEX, samplerBindings, samplerBindingIndices);
             [encoder setFragmentSamplerState:descriptorSet->samplers[i]
                                                                     atIndex:binding];
         }
-        if (toUnderlying(shaderStage & ShaderStageFlags::Compute)) {
+        if (shaderStage & ShaderStageFlags::Compute) {
             uint32_t binding = GET_BINDING_BY_SHADER_STAGE_INDEX(LV_SHADER_STAGE_COMPUTE_INDEX, samplerBindings, samplerBindingIndices);
             [encoder setSamplerState:descriptorSet->samplers[i]
                                                              atIndex:binding];
@@ -194,19 +194,19 @@ void Metal_CommandBuffer::cmdPushConstants(void* data, uint16_t index) {
     size_t size = activePipelineLayout->pushConstantRanges[index].size;
     ShaderStageFlags shaderStage = activePipelineLayout->pushConstantRanges[index].stageFlags;
 
-    if (toUnderlying(shaderStage & ShaderStageFlags::Vertex)) {
+    if (shaderStage & ShaderStageFlags::Vertex) {
         uint32_t bufferIndex = activeShaderModules[LV_SHADER_STAGE_VERTEX_INDEX]->pushConstantBinding;
         [encoder setVertexBytes:data
                                                         length:roundToMultipleOf16(size)
                                                        atIndex:bufferIndex];
     }
-    if (toUnderlying(shaderStage & ShaderStageFlags::Fragment)) {
+    if (shaderStage & ShaderStageFlags::Fragment) {
         uint32_t bufferIndex = activeShaderModules[LV_SHADER_STAGE_FRAGMENT_INDEX]->pushConstantBinding;
         [encoder setFragmentBytes:data
                                                           length:roundToMultipleOf16(size)
                                                          atIndex:bufferIndex];
     }
-    if (toUnderlying(shaderStage & ShaderStageFlags::Compute)) {
+    if (shaderStage & ShaderStageFlags::Compute) {
         uint32_t bufferIndex = activeShaderModules[LV_SHADER_STAGE_COMPUTE_INDEX]->pushConstantBinding;
         [encoder setBytes:data
                                                           length:roundToMultipleOf16(size)

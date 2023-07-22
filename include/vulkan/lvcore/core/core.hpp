@@ -1,8 +1,7 @@
 #ifndef LV_VULKAN_CORE_H
 #define LV_VULKAN_CORE_H
 
-#include <vulkan/vulkan.h>
-#include <vma/vk_mem_alloc.h>
+#include <vk_mem_alloc.h>
 
 #include "lvcore/core/common.hpp"
 
@@ -266,14 +265,14 @@ retval = vulkan::attachmentStoreOpLUT[(int)attachmentStoreOperation];
 
 //---------------- Compare op ----------------
 constexpr VkCompareOp compareOpLUT[] = {
-    VK_COMAPRE_OP_NEVER,
-    VK_COMAPRE_OP_LESS,
-    VK_COMAPRE_OP_EQUAL,
-    VK_COMAPRE_OP_LESS_OR_EQUAL,
-    VK_COMAPRE_OP_GREATER,
-    VK_COMAPRE_OP_NOT_EQUAL,
-    VK_COMAPRE_OP_GREATER_OR_EQUAL,
-    VK_COMAPRE_OP_ALWAYS
+    VK_COMPARE_OP_NEVER,
+    VK_COMPARE_OP_LESS,
+    VK_COMPARE_OP_EQUAL,
+    VK_COMPARE_OP_LESS_OR_EQUAL,
+    VK_COMPARE_OP_GREATER,
+    VK_COMPARE_OP_NOT_EQUAL,
+    VK_COMPARE_OP_GREATER_OR_EQUAL,
+    VK_COMPARE_OP_ALWAYS
 };
 
 #define GET_VK_COMPARE_OP(compareOperation, retval) \

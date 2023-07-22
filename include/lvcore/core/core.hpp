@@ -15,7 +15,7 @@ constexpr std::underlying_type_t<T> toUnderlying(T e) {
 
 template<class T>
 constexpr std::underlying_type_t<T> operator& (T l, T r) {
-    std::underlying_type_t<T> ut;
+    typedef std::underlying_type_t<T> ut;
     return static_cast<ut>(l) & static_cast<ut>(r);
 }
 
