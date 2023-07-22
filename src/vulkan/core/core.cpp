@@ -18,6 +18,19 @@ VkShaderStageFlags getVKShaderStageFlags(ShaderStageFlags shaderStageFlags) {
     return vkShaderStage;
 }
 
+VkShaderStageFlagBits getVKShaderStageFlagBits(ShaderStageFlags shaderStageFlags) {
+    if (shaderStageFlags & ShaderStageFlags::Vertex)
+        return VK_SHADER_STAGE_VERTEX_BIT;
+    if (shaderStageFlags & ShaderStageFlags::Fragment)
+        return VK_SHADER_STAGE_FRAGMENT_BIT;
+    if (shaderStageFlags & ShaderStageFlags::Compute)
+        return VK_SHADER_STAGE_COMPUTE_BIT;
+    
+    LV_INVALID_ARGUMENT("shaderStageFlags");
+    
+    return VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
+}
+
 //---------------- Image usage ----------------
 VkImageUsageFlags getVKImageUsageFlags(ImageUsageFlags imageUsageFlags) {
     VkImageUsageFlags vkImageUsage = 0;

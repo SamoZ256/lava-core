@@ -52,7 +52,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* 
             .width = uint16_t(width),
             .height = uint16_t(height),
             .mipCount = mipCount,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT, //TODO: let the user set this
+            .usage = ImageUsageFlags::Sampled | ImageUsageFlags::TransferDestination, //TODO: let the user set this
         };
         create(createInfo);
 
@@ -70,7 +70,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* 
             .format = format,
             .width = 1,
             .height = 1,
-            .usage = LV_IMAGE_USAGE_SAMPLED_BIT
+            .usage = ImageUsageFlags::Sampled
         };
         create(createInfo);
 
@@ -90,7 +90,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageViewCreateInfo viewCreateInfo) {
     _baseMip = viewCreateInfo.baseMip;
     _mipCount = viewCreateInfo.mipCount;
 
-    if (viewCreateInfo.viewType == LV_IMAGE_VIEW_TYPE_CUBE || viewCreateInfo.viewType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
+    if (viewCreateInfo.viewType == ImageType::Cube || viewCreateInfo.viewType == ImageType::CubeArray)
         _layerCount *= 6;
 
     images.resize(_frameCount);
@@ -98,7 +98,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageViewCreateInfo viewCreateInfo) {
     for (uint8_t i = 0; i < _frameCount; i++) {
         images[i] = viewCreateInfo.image->image(i);
     }
-    _createImageView(viewCreateInfo.viewType, viewCreateInfo.image->aspectMask());
+    _createImageView(viewCreateInfo.viewType, viewCreateInfo.image->aspect());
 }
 
 Vulkan_Image::~Vulkan_Image() {
@@ -117,54 +117,68 @@ void Vulkan_Image::create(Vulkan_ImageCreateInfo& createInfo) {
     _format = createInfo.format;
     _layerCount = createInfo.layerCount;
     _mipCount = createInfo.mipCount;
-    _aspectMask = createInfo.aspectMask;
+    _aspect = createInfo.aspect;
 
     VkFormat vkFormat;
     GET_VK_FORMAT(_format, vkFormat);
+    VkImageType vkImageType;
+    GET_VK_IMAGE_TYPE(createInfo.imageType, vkImageType);
+    VkImageViewType vkImageViewType;
+    GET_VK_IMAGE_VIEW_TYPE(createInfo.imageType, vkImageViewType);
     
-    if (createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE || createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
+    VkImageCreateFlags flags = 0;
+    if (createInfo.imageType == ImageType::Cube || createInfo.imageType == ImageType::CubeArray) {
         _layerCount *= 6;
+        flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+    }
     
     //TODO: create a local variable for memoryType
 #ifdef __APPLE__ //TODO: check for support instead
-    if (createInfo.memoryType == LV_MEMORY_TYPE_MEMORYLESS)
-        createInfo.memoryType = LV_MEMORY_TYPE_PRIVATE;
+    if (createInfo.memoryType == MemoryType::Memoryless) {
+        createInfo.memoryType = MemoryType::Private;
+        LV_WARN_UNSUPPORTED("MemoryType::Memoryless");
+    }
 #endif
 
-    LvMemoryAllocationCreateFlags memoryAllocationFlags = createInfo.memoryAllocationFlags;
-    if (createInfo.usage & LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT || createInfo.usage & LV_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-        memoryAllocationFlags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-    VkImageCreateFlags flags = 0;
-    if (createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE || createInfo.imageType == LV_IMAGE_VIEW_TYPE_CUBE_ARRAY)
-        flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+    VkMemoryPropertyFlags vkMemoryPropertyFlags;
+    GET_VK_MEMORY_PROPERTIES(createInfo.memoryType, vkMemoryPropertyFlags);
+
+    MemoryAllocationCreateFlags memoryAllocationFlags = createInfo.memoryAllocationFlags;
+    if (createInfo.usage & ImageUsageFlags::ColorAttachment || createInfo.usage & ImageUsageFlags::DepthStencilAttachment)
+        memoryAllocationFlags |= MemoryAllocationCreateFlags::Dedicated;
     
     images.resize(_frameCount);
     allocations.resize(_frameCount);
     imageViews.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
         //Creating image
-        allocations[i] = Vulkan_ImageHelper::createImage((uint16_t)_width, (uint16_t)_height, vkFormat, VK_IMAGE_TILING_OPTIMAL, createInfo.usage, images[i], nullptr, createInfo.memoryType, _layerCount, _mipCount, memoryAllocationFlags, flags);
-        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, _aspectMask, createInfo.imageType, 0, _layerCount, 0, _mipCount);
+        allocations[i] = Vulkan_ImageHelper::createImage((uint16_t)_width, (uint16_t)_height, vkFormat, VK_IMAGE_TILING_OPTIMAL, vulkan::getVKImageUsageFlags(createInfo.usage), vkImageType, images[i], nullptr, vkMemoryPropertyFlags, _layerCount, _mipCount, vulkan::getVKAllocationCreateFlags(memoryAllocationFlags), flags);
+        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, vulkan::getVKImageAspectFlags(_aspect), vkImageViewType, 0, _layerCount, 0, _mipCount);
     }
 }
 
-void Vulkan_Image::_createImageView(LvImageViewType viewType, LvImageAspectFlags aspectMask) {
+void Vulkan_Image::_createImageView(ImageType viewType, ImageAspectFlags aspect) {
     VkFormat vkFormat;
     GET_VK_FORMAT(_format, vkFormat);
+    VkImageViewType vkImageViewType;
+    GET_VK_IMAGE_VIEW_TYPE(viewType, vkImageViewType);
 
     for (uint8_t i = 0; i < _frameCount; i++) {
-        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, aspectMask, viewType, _baseLayer, _layerCount, _baseMip, _mipCount);
+        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, vulkan::getVKImageAspectFlags(aspect), vkImageViewType, _baseLayer, _layerCount, _baseMip, _mipCount);
     }
 }
 
-Vulkan_ImageDescriptorInfo Vulkan_Image::descriptorInfo(uint32_t binding, VkDescriptorType descriptorType, VkImageLayout imageLayout, int8_t frameOffset) {
+Vulkan_ImageDescriptorInfo Vulkan_Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
+    VkImageLayout vkImageLayout;
+    GET_VK_IMAGE_LAYOUT(imageLayout, vkImageLayout);
+
     Vulkan_ImageDescriptorInfo info;
     info.infos.resize(imageViews.size());
     for (uint8_t i = 0; i < info.infos.size(); i++) {
         int8_t index = i + frameOffset;
         if (index < 0) index += _frameCount;
         else if (index >= _frameCount) index -= _frameCount;
-        info.infos[i].imageLayout = imageLayout;
+        info.infos[i].imageLayout = vkImageLayout;
         info.infos[i].imageView = imageViews[index];
         info.infos[i].sampler = VK_NULL_HANDLE;
     }
@@ -174,7 +188,7 @@ Vulkan_ImageDescriptorInfo Vulkan_Image::descriptorInfo(uint32_t binding, VkDesc
     return info;
 }
     
-Vulkan_Image* Vulkan_Image::newImageView(LvImageViewType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
+Vulkan_Image* Vulkan_Image::newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
     Vulkan_Image* newImage = new Vulkan_Image({
         .image = this,
         .viewType = viewType,

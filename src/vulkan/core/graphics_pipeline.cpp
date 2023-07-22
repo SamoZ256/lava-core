@@ -22,6 +22,11 @@ Vulkan_GraphicsPipeline::~Vulkan_GraphicsPipeline() {
 }
 
 void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createInfo) {
+    VkCullModeFlags vkCullMode;
+    GET_VK_CULL_MODE(createInfo.cullMode, vkCullMode);
+    VkCompareOp vkCompareOp;
+    GET_VK_COMPARE_OP(createInfo.depthOp, vkCompareOp);
+
     Vulkan_PipelineConfigInfo configInfo;
 
     //Input assembly
@@ -42,7 +47,7 @@ void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createI
     configInfo.rasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
     configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL;
     configInfo.rasterizationInfo.lineWidth = 1.0f;
-    configInfo.rasterizationInfo.cullMode = createInfo.cullMode;
+    configInfo.rasterizationInfo.cullMode = vkCullMode;
     configInfo.rasterizationInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     configInfo.rasterizationInfo.depthBiasEnable = VK_FALSE;
     configInfo.rasterizationInfo.depthBiasConstantFactor = 0.0f;  // Optional
@@ -61,15 +66,29 @@ void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createI
     //Color blending (attachment)
     configInfo.colorBlendAttachments.resize(createInfo.colorBlendAttachments.size());
     for (uint8_t i = 0; i < createInfo.colorBlendAttachments.size(); i++) {
+        VkBlendFactor sourceRGBVKBlendFactor;
+        GET_VK_BLEND_FACTOR(createInfo.colorBlendAttachments[i].srcRgbBlendFactor, sourceRGBVKBlendFactor);
+        VkBlendFactor destinationRGBVKBlendFactor;
+        GET_VK_BLEND_FACTOR(createInfo.colorBlendAttachments[i].dstRgbBlendFactor, destinationRGBVKBlendFactor);
+        VkBlendOp rgbVKBlendOperation;
+        GET_VK_BLEND_OPERATION(createInfo.colorBlendAttachments[i].rgbBlendOp, rgbVKBlendOperation);
+
+        VkBlendFactor sourceAlphaVKBlendFactor;
+        GET_VK_BLEND_FACTOR(createInfo.colorBlendAttachments[i].srcAlphaBlendFactor, sourceAlphaVKBlendFactor);
+        VkBlendFactor destinationAlphaVKBlendFactor;
+        GET_VK_BLEND_FACTOR(createInfo.colorBlendAttachments[i].dstAlphaBlendFactor, destinationAlphaVKBlendFactor);
+        VkBlendOp alphaVKBlendOperation;
+        GET_VK_BLEND_OPERATION(createInfo.colorBlendAttachments[i].alphaBlendOp, alphaVKBlendOperation);
+        
         //uint8_t index = i;//colorBlendAttachments[i].index;
         configInfo.colorBlendAttachments[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         configInfo.colorBlendAttachments[i].blendEnable = (VkBool32)createInfo.colorBlendAttachments[i].blendEnable;
-        configInfo.colorBlendAttachments[i].srcColorBlendFactor = createInfo.colorBlendAttachments[i].srcRgbBlendFactor;
-        configInfo.colorBlendAttachments[i].dstColorBlendFactor = createInfo.colorBlendAttachments[i].dstRgbBlendFactor;
-        configInfo.colorBlendAttachments[i].colorBlendOp = createInfo.colorBlendAttachments[i].rgbBlendOp;
-        configInfo.colorBlendAttachments[i].srcAlphaBlendFactor = createInfo.colorBlendAttachments[i].srcAlphaBlendFactor;
-        configInfo.colorBlendAttachments[i].dstAlphaBlendFactor = createInfo.colorBlendAttachments[i].dstAlphaBlendFactor;
-        configInfo.colorBlendAttachments[i].alphaBlendOp = createInfo.colorBlendAttachments[i].alphaBlendOp;
+        configInfo.colorBlendAttachments[i].srcColorBlendFactor = sourceRGBVKBlendFactor;
+        configInfo.colorBlendAttachments[i].dstColorBlendFactor = destinationRGBVKBlendFactor;
+        configInfo.colorBlendAttachments[i].colorBlendOp = rgbVKBlendOperation;
+        configInfo.colorBlendAttachments[i].srcAlphaBlendFactor = sourceAlphaVKBlendFactor;
+        configInfo.colorBlendAttachments[i].dstAlphaBlendFactor = destinationAlphaVKBlendFactor;
+        configInfo.colorBlendAttachments[i].alphaBlendOp = alphaVKBlendOperation;
     }
 
     //Color blending (info)
@@ -87,7 +106,7 @@ void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createI
     configInfo.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     configInfo.depthStencilInfo.depthTestEnable = (VkBool32)createInfo.depthTestEnable;
     configInfo.depthStencilInfo.depthWriteEnable = (createInfo.depthTestEnable ? (VkBool32)createInfo.depthWriteEnable : VK_FALSE);
-    configInfo.depthStencilInfo.depthCompareOp = createInfo.depthOp;
+    configInfo.depthStencilInfo.depthCompareOp = vkCompareOp;
     configInfo.depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
     configInfo.depthStencilInfo.minDepthBounds = 0.0f;  // Optional
     configInfo.depthStencilInfo.maxDepthBounds = 1.0f;  // Optional

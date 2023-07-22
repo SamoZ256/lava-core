@@ -54,7 +54,7 @@ public:
 
     ~Vulkan_DescriptorSet();
 
-    static bool registerDescriptor(VkDescriptorType descriptorType);
+    static bool registerDescriptor(DescriptorType descriptorType);
 
     void registerDescriptorSet();
 

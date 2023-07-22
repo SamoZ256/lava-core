@@ -3,16 +3,23 @@
 
 #include <vector>
 
-#include "enums.hpp"
+#include "core.hpp"
 
 namespace lv {
 
-struct Vulkan_DescriptorSetLayoutBinding {
-    uint32_t binding;
-    LvDescriptorType descriptorType;
-    LvShaderStageFlags shaderStage;
+struct Vulkan_PushConstantRange {
+    ShaderStageFlags stageFlags;
+    uint32_t offset;
+    uint32_t size;
 };
 
+struct Vulkan_DescriptorSetLayoutBinding {
+    uint32_t binding;
+    DescriptorType descriptorType;
+    ShaderStageFlags shaderStage;
+};
+
+//TODO: use contructors and destructors
 class Vulkan_DescriptorSetLayout {
 public:
     VkDescriptorSetLayout descriptorSetLayout;
@@ -25,7 +32,7 @@ public:
 
 struct Vulkan_PipelineLayoutCreateInfo {
     std::vector<Vulkan_DescriptorSetLayout> descriptorSetLayouts;
-    std::vector<VkPushConstantRange> pushConstantRanges;
+    std::vector<Vulkan_PushConstantRange> pushConstantRanges;
 };
 
 class Vulkan_PipelineLayout {

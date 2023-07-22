@@ -26,7 +26,7 @@ Vulkan_CommandBuffer::Vulkan_CommandBuffer(Vulkan_CommandBufferCreateInfo create
     commandBuffers.resize(frameCount);
 	VK_CHECK_RESULT(vkAllocateCommandBuffers(g_vulkan_device->device(), &allocInfo, commandBuffers.data()));
 
-    if (createInfo.flags & LV_COMMAND_BUFFER_CREATE_FENCE_TO_WAIT_UNTIL_COMPLETE_BIT) {
+    if (createInfo.flags & CommandBufferCreateFlags::CreateFenceToWaitUntilComplete) {
         VkFenceCreateInfo fenceInfo = {};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
@@ -145,8 +145,11 @@ void Vulkan_CommandBuffer::cmdDraw(uint32_t vertexCount, uint32_t instanceCount)
     vkCmdDraw(_getActiveCommandBuffer(), vertexCount, instanceCount, 0, 0);
 }
 
-void Vulkan_CommandBuffer::cmdDrawIndexed(Vulkan_Buffer* indexBuffer, LvIndexType indexType, uint32_t indexCount, uint32_t instanceCount) {
-    vkCmdBindIndexBuffer(_getActiveCommandBuffer(), indexBuffer->buffer(g_vulkan_swapChain->crntFrame() % indexBuffer->frameCount()), 0, indexType);
+void Vulkan_CommandBuffer::cmdDrawIndexed(Vulkan_Buffer* indexBuffer, IndexType indexType, uint32_t indexCount, uint32_t instanceCount) {
+    VkIndexType vkIndexType;
+    GET_VK_INDEX_TYPE(indexType, vkIndexType);
+    
+    vkCmdBindIndexBuffer(_getActiveCommandBuffer(), indexBuffer->buffer(g_vulkan_swapChain->crntFrame() % indexBuffer->frameCount()), 0, vkIndexType);
 
     vkCmdDrawIndexed(_getActiveCommandBuffer(), indexCount, instanceCount, 0, 0, 0);
 }
@@ -241,7 +244,7 @@ void Vulkan_CommandBuffer::cmdStagingCopyDataToImage(Vulkan_Image* image, void* 
     vmaUnmapMemory(g_vulkan_device->allocator(), stagingAllocation);
 
     for (uint8_t i = 0; i < image->frameCount(); i++) {
-        cmdTransitionImageLayout(image, i, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        cmdTransitionImageLayout(image, i, ImageLayout::Undefined, ImageLayout::TransferDestinationOptimal);
         Vulkan_BufferHelper::copyBufferToImage(_getActiveCommandBuffer(), stagingBuffer, image->image(i), image->width(), image->height());
     }
 
@@ -249,11 +252,14 @@ void Vulkan_CommandBuffer::cmdStagingCopyDataToImage(Vulkan_Image* image, void* 
     stagingBufferAllocationsToDestroy.emplace_back(Vulkan_BufferAllocation{stagingBuffer, stagingAllocation});
 }
 
-void Vulkan_CommandBuffer::cmdTransitionImageLayout(Vulkan_Image* image, uint8_t imageIndex, LvImageLayout srcLayout, LvImageLayout dstLayout) {
+void Vulkan_CommandBuffer::cmdTransitionImageLayout(Vulkan_Image* image, uint8_t imageIndex, ImageLayout srcLayout, ImageLayout dstLayout) {
     VkFormat vkFormat;
     GET_VK_FORMAT(image->format(), vkFormat);
+    VkImageLayout vkSourceImageLayout, vkDestinationImageLayout;
+    GET_VK_IMAGE_LAYOUT(srcLayout, vkSourceImageLayout);
+    GET_VK_IMAGE_LAYOUT(dstLayout, vkDestinationImageLayout);
 
-    Vulkan_ImageHelper::transitionImageLayout(_getActiveCommandBuffer(), image->image(imageIndex), vkFormat, srcLayout, dstLayout, image->aspectMask(), image->layerCount(), image->mipCount());
+    Vulkan_ImageHelper::transitionImageLayout(_getActiveCommandBuffer(), image->image(imageIndex), vkFormat, vkSourceImageLayout, vkDestinationImageLayout, vulkan::getVKImageAspectFlags(image->aspect()), image->layerCount(), image->mipCount());
 }
 
 void Vulkan_CommandBuffer::cmdGenerateMipmapsForImage(Vulkan_Image* image, uint8_t aFrameCount) {
@@ -338,7 +344,7 @@ void Vulkan_CommandBuffer::cmdBlitToImageFromImage(Vulkan_Image* source, Vulkan_
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.subresourceRange.aspectMask = destination->aspectMask();
+    barrier.subresourceRange.aspectMask = vulkan::getVKImageAspectFlags(destination->aspect());
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
     barrier.subresourceRange.baseMipLevel = 0;
@@ -369,14 +375,14 @@ void Vulkan_CommandBuffer::cmdBlitToImageFromImage(Vulkan_Image* source, Vulkan_
     VkImageBlit blit{};
     blit.srcOffsets[0] = {0, 0, 0};
     blit.srcOffsets[1] = {source->width(), source->height(), 1};
-    blit.srcSubresource.aspectMask = source->aspectMask();
+    blit.srcSubresource.aspectMask = vulkan::getVKImageAspectFlags(source->aspect());
     blit.srcSubresource.mipLevel = 0;
     blit.srcSubresource.baseArrayLayer = 0;
     blit.srcSubresource.layerCount = 1;
 
     blit.dstOffsets[0] = {0, 0, 0};
     blit.dstOffsets[1] = {destination->width(), destination->height(), 1 };
-    blit.dstSubresource.aspectMask = destination->aspectMask();
+    blit.dstSubresource.aspectMask = vulkan::getVKImageAspectFlags(destination->aspect());
     blit.dstSubresource.mipLevel = 0;
     blit.dstSubresource.baseArrayLayer = 0;
     blit.dstSubresource.layerCount = 1;

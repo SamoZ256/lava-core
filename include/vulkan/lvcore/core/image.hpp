@@ -10,8 +10,6 @@
 
 #include "common.hpp"
 
-#include "enums.hpp"
-
 #include "buffer_helper.hpp"
 #include "image_helper.hpp"
 
@@ -23,7 +21,7 @@ class Vulkan_Image;
 struct Vulkan_ImageDescriptorInfo {
     std::vector<VkDescriptorImageInfo> infos;
     uint32_t binding;
-    VkDescriptorType descriptorType;
+    DescriptorType descriptorType;
 };
 
 struct Vulkan_ImageCreateInfo {
@@ -33,11 +31,11 @@ struct Vulkan_ImageCreateInfo {
     uint16_t height;
     uint16_t layerCount = 1;
     uint16_t mipCount = 1;
-    LvImageViewType imageType = LV_IMAGE_VIEW_TYPE_2D;
-    LvImageUsageFlags usage = 0;
-    LvImageAspectFlags aspectMask = LV_IMAGE_ASPECT_COLOR_BIT;
-    LvMemoryType memoryType = LV_MEMORY_TYPE_PRIVATE;
-    LvMemoryAllocationCreateFlags memoryAllocationFlags = 0;
+    ImageType imageType = ImageType::_2D;
+    ImageUsageFlags usage = ImageUsageFlags::None;
+    ImageAspectFlags aspect = ImageAspectFlags::Color;
+    MemoryType memoryType = MemoryType::Private;
+    MemoryAllocationCreateFlags memoryAllocationFlags = MemoryAllocationCreateFlags::None;
 };
 
 struct Vulkan_ImageLoadInfo {
@@ -48,7 +46,7 @@ struct Vulkan_ImageLoadInfo {
 
 struct Vulkan_ImageViewCreateInfo {
     Vulkan_Image* image;
-    LvImageViewType viewType;
+    ImageType viewType;
     uint16_t baseLayer;
     uint16_t layerCount;
     uint16_t baseMip;
@@ -72,7 +70,7 @@ private:
     uint16_t _baseMip = 0;
     uint16_t _mipCount = 1;
 
-    LvImageAspectFlags _aspectMask;
+    ImageAspectFlags _aspect;
 
     bool _isOriginal = true;
 
@@ -87,11 +85,11 @@ public:
 
     void create(Vulkan_ImageCreateInfo& createInfo);
 
-    void _createImageView(LvImageViewType viewType, LvImageAspectFlags aspectMask);
+    void _createImageView(ImageType viewType, ImageAspectFlags aspect);
 
-    Vulkan_ImageDescriptorInfo descriptorInfo(uint32_t binding, VkDescriptorType descriptorType = LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VkImageLayout imageLayout = LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, int8_t frameOffset = 0);
+    Vulkan_ImageDescriptorInfo descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::SampledImage, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0);
     
-    Vulkan_Image* newImageView(LvImageViewType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount);
+    Vulkan_Image* newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount);
 
     //Getters
     inline uint8_t frameCount() { return _frameCount; }
@@ -114,7 +112,7 @@ public:
 
     inline uint16_t mipCount() { return _mipCount; }
 
-    inline LvImageAspectFlags aspectMask() { return _aspectMask; }
+    inline ImageAspectFlags aspect() { return _aspect; }
 
     inline bool isOriginal() { return _isOriginal; }
 
@@ -129,7 +127,7 @@ public:
 
     inline void _setImage(VkImage image, uint8_t index) { images[index] = image; }
 
-    inline void _setFormat(lv::Format format) { _format = format; }
+    inline void _setFormat(Format format) { _format = format; }
 
     inline void _setWidth(uint16_t width) { _width = width; }
 
@@ -143,7 +141,7 @@ public:
 
     inline void _setMipCount(uint16_t mipCount) { _mipCount = mipCount; }
 
-    inline void _setAspectMask(LvImageAspectFlags aspectMask) { _aspectMask = aspectMask; }
+    inline void _setAspect(ImageAspectFlags aspect) { _aspect = aspect; }
 };
 
 } //namespace lv

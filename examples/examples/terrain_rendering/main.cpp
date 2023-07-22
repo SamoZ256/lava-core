@@ -859,7 +859,7 @@ public:
             .layerCount = SHADOW_CASCADE_COUNT,
             .imageType = lv::ImageType::_2DArray,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
-            .aspectMask = lv::ImageAspectFlags::Depth
+            .aspect = lv::ImageAspectFlags::Depth
         });
         shadowRenderPass.depthSampler = new lv::Sampler({
             .filter = lv::Filter::Linear,
@@ -920,7 +920,7 @@ public:
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
-            .aspectMask = lv::ImageAspectFlags::Depth
+            .aspect = lv::ImageAspectFlags::Depth
         });
 
 #ifdef LV_BACKEND_METAL

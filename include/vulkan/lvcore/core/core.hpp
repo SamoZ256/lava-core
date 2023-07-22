@@ -285,6 +285,7 @@ constexpr VkImageLayout imageLayoutLUT[] = {
     VK_IMAGE_LAYOUT_GENERAL,
     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -295,7 +296,8 @@ constexpr VkImageLayout imageLayoutLUT[] = {
     VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL,
     VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL,
     VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
-    VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
+    VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 };
 
 #define GET_VK_IMAGE_LAYOUT(imageLayout, retval) \
@@ -322,7 +324,7 @@ constexpr VkBlendOp blendOpLUT[] = {
     VK_BLEND_OP_MAX
 };
 
-#define GET_MTL_BLEND_OPERATION(blendOperation, retval) \
+#define GET_VK_BLEND_OPERATION(blendOperation, retval) \
 LV_CHECK_ARGUMENT(BlendOperation, blendOperation); \
 retval = vulkan::blendOpLUT[(int)blendOperation];
 
@@ -372,12 +374,13 @@ constexpr VkVertexInputRate vertexInputRateLUT[] = {
     VK_VERTEX_INPUT_RATE_MAX_ENUM
 };
 
-#define GET_MTL_VERTEX_INPUT_RATE(vertexInputRate, retval) \
+#define GET_VK_VERTEX_INPUT_RATE(vertexInputRate, retval) \
 LV_CHECK_ARGUMENT(VertexInputRate, vertexInputRate); \
 retval = vulkan::vertexInputRateLUT[(int)vertexInputRate];
 
 //---------------- Flags ----------------
 VkShaderStageFlags getVKShaderStageFlags(ShaderStageFlags shaderStageFlags);
+VkShaderStageFlagBits getVKShaderStageFlagBits(ShaderStageFlags shaderStageFlags);
 VkImageUsageFlags getVKImageUsageFlags(ImageUsageFlags imageUsageFlags);
 VkImageAspectFlags getVKImageAspectFlags(ImageAspectFlags imageAspectFlags);
 VkCommandBufferUsageFlags getVKCommandBufferUsageFlags(CommandBufferUsageFlags commandBufferUsageFlags);

@@ -12,7 +12,7 @@
 #define LVND_BACKEND_VULKAN
 #include "lvnd/lvnd.h"
 
-#include "enums.hpp"
+#include "core.hpp"
 
 #include "instance.hpp"
 
@@ -20,6 +20,7 @@
 
 namespace lv {
 
+//TODO: use contructors and destructors
 class Vulkan_DescriptorPool {
 public:
     VkDescriptorPool descriptorPool;
@@ -28,12 +29,12 @@ public:
 
     std::vector<VkDescriptorPoolSize> poolSizesVec{};
     uint32_t maxSets = 1024;
-    VkDescriptorPoolCreateFlags poolFlags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    VkDescriptorPoolCreateFlags poolFlags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; //TODO: use these flags?
 
-    std::map<LvDescriptorType, uint32_t> poolSizesBegin;
-    std::map<LvDescriptorType, uint32_t> poolSizes;
+    std::map<DescriptorType, uint32_t> poolSizesBegin;
+    std::map<DescriptorType, uint32_t> poolSizes;
 
-    void init(uint32_t maxSets, std::map<LvDescriptorType, uint32_t>& poolSizes);
+    void init(uint32_t maxSets, std::map<DescriptorType, uint32_t>& poolSizes);
 
     void create();
 
@@ -70,13 +71,13 @@ struct Vulkan_DeviceCreateInfo {
     LvndWindow* window;
     ThreadPool* threadPool;
     uint32_t maxDescriptorSets = 1024;
-	std::map<VkDescriptorType, uint32_t> descriptorPoolSizes = {
-		{LV_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 128},
-    	{LV_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 512},
-        {LV_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 64},
-        {LV_DESCRIPTOR_TYPE_STORAGE_IMAGE, 16},
-        {LV_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 16},
-        {LV_DESCRIPTOR_TYPE_STORAGE_BUFFER, 16}
+	std::map<DescriptorType, uint32_t> descriptorPoolSizes = {
+		{DescriptorType::UniformBuffer, 128},
+    	{DescriptorType::CombinedImageSampler, 512},
+        {DescriptorType::SampledImage, 64},
+        {DescriptorType::StorageImage, 16},
+        {DescriptorType::InputAttachment, 16},
+        {DescriptorType::StorageBuffer, 16}
 	};
 };
 

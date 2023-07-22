@@ -47,7 +47,7 @@ private:
 	Vulkan_CommandBuffer* _commandBuffer;
 	Vulkan_Image* image;
 
-	LvAttachmentLoadOp loadOp = LV_ATTACHMENT_LOAD_OP_DONT_CARE;
+	AttachmentLoadOperation loadOp = AttachmentLoadOperation::DontCare;
 
 	VkExtent2D windowExtent;
 

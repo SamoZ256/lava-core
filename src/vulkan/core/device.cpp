@@ -11,13 +11,16 @@ Vulkan_DescriptorPool* g_vulkan_descriptorPool = nullptr;
 
 // *************** Descriptor Pool *********************
 
-void Vulkan_DescriptorPool::init(uint32_t aMaxSets, std::map<VkDescriptorType, uint32_t>& aPoolSizes) {
+void Vulkan_DescriptorPool::init(uint32_t aMaxSets, std::map<DescriptorType, uint32_t>& aPoolSizes) {
 	maxSets = aMaxSets;
 	poolSizesBegin = aPoolSizes;
 	poolSizes = aPoolSizes;
 
 	for (const auto& [key, value] : poolSizes) {
-		poolSizesVec.push_back({key, value/* * g_vulkan_swapChain->maxFramesInFlight()*/});
+		VkDescriptorType vkDescriptorType;
+		GET_VK_DESCRIPTOR_TYPE(key, vkDescriptorType);
+
+		poolSizesVec.push_back({vkDescriptorType, value/* * g_vulkan_swapChain->maxFramesInFlight()*/});
 	}
 
 	g_vulkan_descriptorPool = this;

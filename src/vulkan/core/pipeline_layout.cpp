@@ -11,10 +11,13 @@ namespace lv {
 Vulkan_DescriptorSetLayout::Vulkan_DescriptorSetLayout(std::vector<Vulkan_DescriptorSetLayoutBinding> aBindings) {
 	bindings.resize(aBindings.size());
 	for (uint32_t i = 0; i < bindings.size(); i++) {
+		VkDescriptorType vkDescriptorType;
+		GET_VK_DESCRIPTOR_TYPE(aBindings[i].descriptorType, vkDescriptorType);
+
 		bindings[i].binding = aBindings[i].binding;
-		bindings[i].descriptorType = aBindings[i].descriptorType;
+		bindings[i].descriptorType = vkDescriptorType;
 		bindings[i].descriptorCount = 1;
-		bindings[i].stageFlags = aBindings[i].shaderStage;
+		bindings[i].stageFlags = vulkan::getVKShaderStageFlags(aBindings[i].shaderStage);
 	}
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
@@ -32,7 +35,13 @@ void Vulkan_DescriptorSetLayout::destroy() {
 
 // *************** Pipeline Layout *********************
 
-Vulkan_PipelineLayout::Vulkan_PipelineLayout(Vulkan_PipelineLayoutCreateInfo createInfo) : descriptorSetLayouts(createInfo.descriptorSetLayouts), pushConstantRanges(createInfo.pushConstantRanges) {
+Vulkan_PipelineLayout::Vulkan_PipelineLayout(Vulkan_PipelineLayoutCreateInfo createInfo) : descriptorSetLayouts(createInfo.descriptorSetLayouts), pushConstantRanges(createInfo.pushConstantRanges.size()) {
+	for (uint32_t i = 0; i < pushConstantRanges.size(); i++) {
+		pushConstantRanges[i].stageFlags = vulkan::getVKShaderStageFlags(createInfo.pushConstantRanges[i].stageFlags);
+		pushConstantRanges[i].offset = createInfo.pushConstantRanges[i].offset;
+		pushConstantRanges[i].size = createInfo.pushConstantRanges[i].size;
+	}
+
 	std::vector<VkDescriptorSetLayout> descLayouts;
 	for (uint8_t i = 0; i < descriptorSetLayouts.size(); i++) {
 		descLayouts.push_back(descriptorSetLayouts[i].descriptorSetLayout);

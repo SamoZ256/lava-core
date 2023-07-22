@@ -21,7 +21,7 @@ struct Vulkan_BufferAllocation {
 struct Vulkan_CommandBufferCreateInfo {
     uint8_t frameCount = 0;
     uint8_t threadIndex = 0;
-    LvCommandBufferCreateFlags flags = 0;
+    CommandBufferCreateFlags flags = CommandBufferCreateFlags::None;
 };
 
 class Vulkan_CommandBuffer {
@@ -70,7 +70,7 @@ public:
 
     void cmdDraw(uint32_t vertexCount, uint32_t instanceCount = 1);
 
-    void cmdDrawIndexed(Vulkan_Buffer* indexBuffer, LvIndexType indexType, uint32_t indexCount, uint32_t instanceCount = 1);
+    void cmdDrawIndexed(Vulkan_Buffer* indexBuffer, IndexType indexType, uint32_t indexCount, uint32_t instanceCount = 1);
 
     void cmdBindDescriptorSet(Vulkan_DescriptorSet* descriptorSet);
 
@@ -93,7 +93,7 @@ public:
 
     void cmdStagingCopyDataToImage(Vulkan_Image* image, void* data, uint8_t bytesPerPixel = 4);
 
-    void cmdTransitionImageLayout(Vulkan_Image* image, uint8_t imageIndex, LvImageLayout srcLayout, LvImageLayout dstLayout);
+    void cmdTransitionImageLayout(Vulkan_Image* image, uint8_t imageIndex, ImageLayout srcLayout, ImageLayout dstLayout);
 
     void cmdGenerateMipmapsForImage(Vulkan_Image* image, uint8_t aFrameCount = 0);
 

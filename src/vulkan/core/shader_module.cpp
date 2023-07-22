@@ -1,5 +1,7 @@
 #include "vulkan/lvcore/core/shader_module.hpp"
 
+#include "vulkan/lvcore/core/core.hpp"
+
 #include "vulkan/lvcore/core/device.hpp"
 
 namespace lv {
@@ -31,7 +33,7 @@ void Vulkan_ShaderModule::compile(Vulkan_ShaderModuleCreateInfo& createInfo) {
     //std::cout << "Size: " << constants.size() << " : " << (constants.size() == 0 ? "none" : std::to_string((int)constants[0].constantID) + ", " + std::to_string(*(float*)constantsData) + ", " + std::to_string(constants[0].size)) << std::endl;
 
     _stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    _stageInfo.stage = createInfo.shaderStage;
+    _stageInfo.stage = vulkan::getVKShaderStageFlagBits(createInfo.shaderStage);
     _stageInfo.module = shaderModule;
     _stageInfo.pName = "main";
     _stageInfo.flags = 0;

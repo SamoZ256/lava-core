@@ -3,10 +3,12 @@
 
 #include "common.hpp"
 
+#include "lvcore/core/core.hpp"
+
 namespace lv {
 
 struct Vulkan_ShaderModuleCreateInfo {
-    VkShaderStageFlagBits shaderStage;
+    ShaderStageFlags shaderStage;
     std::string source;
     std::vector<VkSpecializationMapEntry> specializationConstants;
     void* constantsData = nullptr;

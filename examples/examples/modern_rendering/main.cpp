@@ -362,7 +362,7 @@ public:
             .layerCount = SHADOW_CASCADE_COUNT,
             .imageType = lv::ImageType::_2DArray,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
-            .aspectMask = lv::ImageAspectFlags::Depth
+            .aspect = lv::ImageAspectFlags::Depth
         });
         shadowRenderPass.depthSampler = new lv::Sampler({
             .filter = lv::Filter::Linear,
@@ -429,7 +429,7 @@ public:
 
         mainRenderPass.f0Image = new lv::Image({
 #ifdef LV_BACKEND_VULKAN //TODO: query whether the device supports this format instead
-            .format = lv::Format::B10G11R11Ufloat,
+            .format = lv::Format::B10GR11UFloat,
 #elif defined(LV_BACKEND_METAL)
             .format = lv::Format::B5G6R5Unorm,
 #endif
@@ -443,7 +443,7 @@ public:
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment | lv::ImageUsageFlags::InputAttachment | lv::ImageUsageFlags::TransferSource,
-            .aspectMask = lv::ImageAspectFlags::Depth
+            .aspect = lv::ImageAspectFlags::Depth
         });
 
         mainRenderPass.halfDepthImage = new lv::Image({
@@ -451,7 +451,7 @@ public:
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment | lv::ImageUsageFlags::TransferDestination,
-            .aspectMask = lv::ImageAspectFlags::Depth
+            .aspect = lv::ImageAspectFlags::Depth
         });
 
 #ifdef LV_BACKEND_METAL

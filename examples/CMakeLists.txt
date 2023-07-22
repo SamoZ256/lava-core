@@ -2,11 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(lava_core_examples)
 
-if (APPLE)
-    set(BACKEND_METAL ON)
-else()
-    set(BACKEND_VULKAN ON)
-endif()
+option(BACKEND_METAL OFF)
+option(BACKEND_VULKAN OFF)
 
 set(BACKEND)
 

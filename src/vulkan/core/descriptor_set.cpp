@@ -105,7 +105,7 @@ Vulkan_DescriptorSet::~Vulkan_DescriptorSet() {
 	vkFreeDescriptorSets(g_vulkan_device->device(), *pool, descriptorSets.size(), descriptorSets.data());
 }
 
-bool Vulkan_DescriptorSet::registerDescriptor(VkDescriptorType descriptorType) {
+bool Vulkan_DescriptorSet::registerDescriptor(DescriptorType descriptorType) {
 	uint32_t& count = g_vulkan_descriptorPool->poolSizes[descriptorType];
 	if (count == 0) {
 		g_vulkan_descriptorPool->recreate();

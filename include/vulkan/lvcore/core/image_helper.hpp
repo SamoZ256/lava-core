@@ -8,7 +8,7 @@ namespace lv {
 
 class Vulkan_ImageHelper {
 public:
-    static VmaAllocation createImage(uint16_t width, uint16_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage/*, VmaMemoryUsage memoryUsage*/, VkImage& image, VmaAllocationInfo* allocInfo = nullptr, VkMemoryPropertyFlags properties = 0, uint8_t layerCount = 1, uint8_t mipCount = 1, VmaAllocationCreateFlags allocationFlags = 0, VkImageCreateFlags flags = 0);
+    static VmaAllocation createImage(uint16_t width, uint16_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage/*, VmaMemoryUsage memoryUsage*/, VkImageType type, VkImage& image, VmaAllocationInfo* allocInfo = nullptr, VkMemoryPropertyFlags properties = 0, uint8_t layerCount = 1, uint8_t mipCount = 1, VmaAllocationCreateFlags allocationFlags = 0, VkImageCreateFlags flags = 0);
 
     static void transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, uint8_t layerCount = 1, uint8_t mipCount = 1);
 

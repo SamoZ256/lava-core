@@ -12,35 +12,42 @@ namespace lv {
 struct Vulkan_ColorBlendAttachment {
     uint8_t index = 0;
     Bool blendEnable = False;
-    LvBlendFactor srcRgbBlendFactor = LV_BLEND_FACTOR_SRC_ALPHA;
-    LvBlendFactor dstRgbBlendFactor = LV_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    LvBlendOp rgbBlendOp = LV_BLEND_OP_ADD;
-    LvBlendFactor srcAlphaBlendFactor = LV_BLEND_FACTOR_ONE;
-    LvBlendFactor dstAlphaBlendFactor = LV_BLEND_FACTOR_ONE;
-    LvBlendOp alphaBlendOp = LV_BLEND_OP_MAX;
+    BlendFactor srcRgbBlendFactor = BlendFactor::SourceAlpha;
+    BlendFactor dstRgbBlendFactor = BlendFactor::OneMinusSourceAlpha;
+    BlendOperation rgbBlendOp = BlendOperation::Add;
+    BlendFactor srcAlphaBlendFactor = BlendFactor::One;
+    BlendFactor dstAlphaBlendFactor = BlendFactor::One;
+    BlendOperation alphaBlendOp = BlendOperation::Max;
 };
 
 struct Vulkan_RenderPassAttachment {
     uint8_t index = 0;
     Format format;
-    LvAttachmentLoadOp loadOp = LV_ATTACHMENT_LOAD_OP_DONT_CARE;
-    LvAttachmentStoreOp storeOp = LV_ATTACHMENT_STORE_OP_DONT_CARE;
-    LvImageLayout initialLayout = LV_IMAGE_LAYOUT_UNDEFINED;
-    LvImageLayout finalLayout = LV_IMAGE_LAYOUT_UNDEFINED;
+    AttachmentLoadOperation loadOp = AttachmentLoadOperation::DontCare;
+    AttachmentStoreOperation storeOp = AttachmentStoreOperation::DontCare;
+    ImageLayout initialLayout = ImageLayout::Undefined;
+    ImageLayout finalLayout = ImageLayout::Undefined;
 
     VkAttachmentDescription getAttachmentDescription(/*VkImageLayout finalLayout*/) {
         VkFormat vkFormat;
         GET_VK_FORMAT(format, vkFormat);
+        VkAttachmentLoadOp vkAttachmentLoadOp;
+        GET_VK_ATTACHMENT_LOAD_OP(loadOp, vkAttachmentLoadOp);
+        VkAttachmentStoreOp vkAttachmentStoreOp;
+        GET_VK_ATTACHMENT_STORE_OP(storeOp, vkAttachmentStoreOp);
+        VkImageLayout vkInitialImageLayout, vkFinalImageLayout;
+        GET_VK_IMAGE_LAYOUT(initialLayout, vkInitialImageLayout);
+        GET_VK_IMAGE_LAYOUT(finalLayout, vkFinalImageLayout);
 
         VkAttachmentDescription description{};
         description.format = vkFormat;
         description.samples = VK_SAMPLE_COUNT_1_BIT;
-        description.loadOp = loadOp;
-        description.storeOp = storeOp;
+        description.loadOp = vkAttachmentLoadOp;
+        description.storeOp = vkAttachmentStoreOp;
         description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        description.initialLayout = initialLayout;
-        description.finalLayout = finalLayout;
+        description.initialLayout = vkInitialImageLayout;
+        description.finalLayout = vkFinalImageLayout;
 
         return description;
     }
@@ -48,12 +55,15 @@ struct Vulkan_RenderPassAttachment {
 
 struct Vulkan_SubpassAttachment {
     int8_t index = -1;
-    LvImageLayout layout = LV_IMAGE_LAYOUT_UNDEFINED;
+    ImageLayout layout = ImageLayout::Undefined;
 
     VkAttachmentReference getAttachmentReference() {
+        VkImageLayout vkImageLayout;
+        GET_VK_IMAGE_LAYOUT(layout, vkImageLayout);
+
         VkAttachmentReference reference{};
         reference.attachment = index;
-        reference.layout = layout;
+        reference.layout = vkImageLayout;
 
         return reference;
     }
@@ -62,10 +72,7 @@ struct Vulkan_SubpassAttachment {
 struct Vulkan_FramebufferAttachment {
     int8_t index = -1;
     Vulkan_Image* image = nullptr;
-    LvClearValue clearValue = {
-        .color = {0.0f, 0.0f, 0.0f, 1.0f},
-        .depthStencil = {1.0f, 0}
-    };
+    ClearValue clearValue{};
 };
 
 } //namespace lv

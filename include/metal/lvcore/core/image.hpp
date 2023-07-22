@@ -30,7 +30,7 @@ struct Metal_ImageCreateInfo {
     uint16_t mipCount = 1;
     ImageType imageType = ImageType::_2D;
     ImageUsageFlags usage = ImageUsageFlags::None;
-    ImageAspectFlags aspectMask = ImageAspectFlags::Color;
+    ImageAspectFlags aspect = ImageAspectFlags::Color;
     MemoryType memoryType = MemoryType::Private;
     MemoryAllocationCreateFlags memoryAllocationFlags = MemoryAllocationCreateFlags::None;
 };

@@ -7,10 +7,10 @@
 
 namespace lv {
 
-VmaAllocation Vulkan_ImageHelper::createImage(uint16_t width, uint16_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage/*, VmaMemoryUsage memoryUsage*/, VkImage& image, VmaAllocationInfo* allocInfo, VkMemoryPropertyFlags properties, uint8_t layerCount, uint8_t mipCount, VmaAllocationCreateFlags allocationFlags, VkImageCreateFlags flags) {
+VmaAllocation Vulkan_ImageHelper::createImage(uint16_t width, uint16_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage/*, VmaMemoryUsage memoryUsage*/, VkImageType type, VkImage& image, VmaAllocationInfo* allocInfo, VkMemoryPropertyFlags properties, uint8_t layerCount, uint8_t mipCount, VmaAllocationCreateFlags allocationFlags, VkImageCreateFlags flags) {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.imageType = type;
     imageInfo.extent.width = static_cast<uint32_t>(width);
     imageInfo.extent.height = static_cast<uint32_t>(height);
     imageInfo.extent.depth = 1;

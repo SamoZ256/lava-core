@@ -93,7 +93,7 @@ void Metal_SwapChain::create() {
             .width = width,
             .height = height,
             .usage = ImageUsageFlags::DepthStencilAttachment,
-            .aspectMask = ImageAspectFlags::Depth
+            .aspect = ImageAspectFlags::Depth
         });
     }
 }

@@ -25,6 +25,12 @@ constexpr T operator| (T l, T r) {
     return static_cast<T>(static_cast<ut>(l) | static_cast<ut>(r));
 }
 
+template<class T>
+constexpr T operator|= (T l, T r) {
+    typedef std::underlying_type_t<T> ut;
+    return static_cast<T>(static_cast<ut>(l) | static_cast<ut>(r));
+}
+
 namespace lv {
 
 enum Bool {
@@ -272,6 +278,7 @@ enum class ImageLayout {
     StencilReadOnlyOptimal,
     ReadOnlyOptimal,
     AttachmentOptimal,
+    PresentSource_KHR,
 
     MaxEnum
 };

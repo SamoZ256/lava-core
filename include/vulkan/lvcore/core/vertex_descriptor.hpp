@@ -3,13 +3,13 @@
 
 #include <vector>
 
-#include "enums.hpp"
+#include "core.hpp"
 
 namespace lv {
 
 struct Vulkan_VertexDescriptorBinding {
     uint16_t location;
-    LvVertexFormat format;
+    Format format;
     uint32_t offset;
 };
 

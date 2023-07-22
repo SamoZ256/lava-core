@@ -13,13 +13,13 @@ Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
 	_window = createInfo.window;
 	//image.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	if (createInfo.clearAttachment)
-		loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		loadOp = AttachmentLoadOperation::Clear;
 
 	subpass = new Vulkan_Subpass({
 		.colorAttachments = {
 			{
 				.index = 0,
-				.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+				.layout = ImageLayout::ColorAttachmentOptimal
 			}
 		}
 	});
@@ -54,8 +54,8 @@ Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
 				.format = Format::BGRA8Unorm_sRGB,
 				.index = 0,
 				.loadOp = loadOp,
-				.storeOp = LV_ATTACHMENT_STORE_OP_STORE,
-				.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+				.storeOp = AttachmentStoreOperation::Store,
+				.finalLayout = ImageLayout::PresentSource_KHR
 			}
 		},
 		.dependencies = {dependencies[0], dependencies[1]}
@@ -91,7 +91,7 @@ void Vulkan_SwapChain::create() {
 	windowExtent = {width, height};
 	//findDepthFormat();
 	createSwapChain();
-	image->_createImageView(LV_IMAGE_VIEW_TYPE_2D, LV_IMAGE_ASPECT_COLOR_BIT);
+	image->_createImageView(ImageType::_2D, ImageAspectFlags::Color);
 
 	//createDepthResources();
 
@@ -256,7 +256,7 @@ void Vulkan_SwapChain::createSwapChain() {
 	image->_setMipCount(1);
 	vkGetSwapchainImagesKHR(g_vulkan_device->device(), swapChain, &imageCount, image->_imagesData());
 	image->_setFormat(Format::BGRA8Unorm_sRGB); //TODO: set this to the surface format
-	image->_setAspectMask(LV_IMAGE_ASPECT_COLOR_BIT);
+	image->_setAspect(ImageAspectFlags::Color);
 
 	if (oldSwapChain != VK_NULL_HANDLE)
 		vkDestroySwapchainKHR(g_vulkan_device->device(), oldSwapChain, nullptr);

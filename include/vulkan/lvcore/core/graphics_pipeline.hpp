@@ -34,10 +34,10 @@ struct Vulkan_GraphicsPipelineCreateInfo {
     Vulkan_VertexDescriptor* vertexDescriptor = nullptr;
     std::vector<Vulkan_ColorBlendAttachment> colorBlendAttachments;
 
-    LvCullModeFlags cullMode = LV_CULL_MODE_NONE;
+    CullMode cullMode = CullMode::None;
     Bool depthTestEnable = False;
     Bool depthWriteEnable = True;
-    LvCompareOp depthOp = LV_COMPARE_OP_LESS;
+    CompareOperation depthOp = CompareOperation::Less;
 };
 
 class Vulkan_GraphicsPipeline {

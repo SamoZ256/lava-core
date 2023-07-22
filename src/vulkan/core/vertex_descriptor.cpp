@@ -10,9 +10,12 @@ Vulkan_VertexDescriptor::Vulkan_VertexDescriptor(Vulkan_VertexDescriptorCreateIn
     
     attributeDescriptions.resize(createInfo.bindings.size());
     for (uint16_t i = 0; i < attributeDescriptions.size(); i++) {
+        VkFormat vkFormat;
+        GET_VK_FORMAT(createInfo.bindings[i].format, vkFormat);
+
         attributeDescriptions[i].binding = 0;
         attributeDescriptions[i].location = createInfo.bindings[i].location;
-        attributeDescriptions[i].format = createInfo.bindings[i].format;
+        attributeDescriptions[i].format = vkFormat;
         attributeDescriptions[i].offset = createInfo.bindings[i].offset;
     }
 }
