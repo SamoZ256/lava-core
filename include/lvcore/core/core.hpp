@@ -14,9 +14,9 @@ constexpr std::underlying_type_t<T> toUnderlying(T e) {
 }
 
 template<class T>
-constexpr T operator& (T l, T r) {
-    typedef std::underlying_type_t<T> ut;
-    return static_cast<T>(static_cast<ut>(l) & static_cast<ut>(r));
+constexpr std::underlying_type_t<T> operator& (T l, T r) {
+    std::underlying_type_t<T> ut;
+    return static_cast<ut>(l) & static_cast<ut>(r);
 }
 
 template<class T>
@@ -334,8 +334,9 @@ enum class TessellationSpacing {
     MaxEnum
 };
 
+//TODO: only support per vertex and per instance, the others will only be used internaly in Metal backend for tessellation
 enum class VertexInputRate {
-    Constant, //TODO: Not supported yet
+    Constant, //TODO: Not supported yet (probably won't ever be)
     PerVertex,
     PerInstance,
     PerPatch,

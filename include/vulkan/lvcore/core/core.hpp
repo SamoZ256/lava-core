@@ -2,6 +2,7 @@
 #define LV_VULKAN_CORE_H
 
 #include <vulkan/vulkan.h>
+#include <vma/vk_mem_alloc.h>
 
 #include "lvcore/core/common.hpp"
 
@@ -253,7 +254,7 @@ constexpr VkAttachmentLoadOp attachmentLoadOpLUT[] = {
 LV_CHECK_ARGUMENT(AttachmentLoadOperation, attachmentLoadOperation); \
 retval = vulkan::attachmentLoadOpLUT[(int)attachmentLoadOperation];
 
-//---------------- Attachment load op ----------------
+//---------------- Attachment store op ----------------
 constexpr VkAttachmentStoreOp attachmentStoreOpLUT[] = {
     VK_ATTACHMENT_STORE_OP_DONT_CARE,
     VK_ATTACHMENT_STORE_OP_STORE
@@ -262,6 +263,127 @@ constexpr VkAttachmentStoreOp attachmentStoreOpLUT[] = {
 #define GET_VK_ATTACHMENT_STORE_OP(attachmentStoreOperation, retval) \
 LV_CHECK_ARGUMENT(AttachmentStoreOperation, attachmentStoreOperation); \
 retval = vulkan::attachmentStoreOpLUT[(int)attachmentStoreOperation];
+
+//---------------- Compare op ----------------
+constexpr VkCompareOp compareOpLUT[] = {
+    VK_COMAPRE_OP_NEVER,
+    VK_COMAPRE_OP_LESS,
+    VK_COMAPRE_OP_EQUAL,
+    VK_COMAPRE_OP_LESS_OR_EQUAL,
+    VK_COMAPRE_OP_GREATER,
+    VK_COMAPRE_OP_NOT_EQUAL,
+    VK_COMAPRE_OP_GREATER_OR_EQUAL,
+    VK_COMAPRE_OP_ALWAYS
+};
+
+#define GET_VK_COMPARE_OP(compareOperation, retval) \
+LV_CHECK_ARGUMENT(CompareOperation, compareOperation); \
+retval = vulkan::compareOpLUT[(int)compareOperation];
+
+//---------------- Image layout ----------------
+constexpr VkImageLayout imageLayoutLUT[] = {
+    VK_IMAGE_LAYOUT_UNDEFINED,
+    VK_IMAGE_LAYOUT_GENERAL,
+    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
+    VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
+};
+
+#define GET_VK_IMAGE_LAYOUT(imageLayout, retval) \
+LV_CHECK_ARGUMENT(ImageLayout, imageLayout); \
+retval = vulkan::imageLayoutLUT[(int)imageLayout];
+
+//---------------- Memory properties ----------------
+constexpr VkMemoryPropertyFlags memoryPropertiesLUT[] = {
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+};
+
+#define GET_VK_MEMORY_PROPERTIES(memoryType, retval) \
+LV_CHECK_ARGUMENT(MemoryType, memoryType); \
+retval = vulkan::memoryPropertiesLUT[(int)memoryType];
+
+//---------------- Blend op ----------------
+constexpr VkBlendOp blendOpLUT[] = {
+    VK_BLEND_OP_ADD,
+    VK_BLEND_OP_SUBTRACT,
+    VK_BLEND_OP_REVERSE_SUBTRACT,
+    VK_BLEND_OP_MIN,
+    VK_BLEND_OP_MAX
+};
+
+#define GET_MTL_BLEND_OPERATION(blendOperation, retval) \
+LV_CHECK_ARGUMENT(BlendOperation, blendOperation); \
+retval = vulkan::blendOpLUT[(int)blendOperation];
+
+//---------------- Blend factor ----------------
+constexpr VkBlendFactor blendFactorLUT[] = {
+    VK_BLEND_FACTOR_ZERO,
+    VK_BLEND_FACTOR_ONE,
+    VK_BLEND_FACTOR_SRC_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+    VK_BLEND_FACTOR_DST_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+    VK_BLEND_FACTOR_SRC_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+    VK_BLEND_FACTOR_DST_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+    VK_BLEND_FACTOR_CONSTANT_COLOR,
+    VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR,
+    VK_BLEND_FACTOR_CONSTANT_ALPHA,
+    VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA
+};
+
+#define GET_VK_BLEND_FACTOR(blendFactor, retval) \
+LV_CHECK_ARGUMENT(BlendFactor, blendFactor); \
+retval = vulkan::blendFactorLUT[(int)blendFactor];
+
+//---------------- Descriptor type ----------------
+constexpr VkDescriptorType descriptorTypeLUT[] = {
+    VK_DESCRIPTOR_TYPE_SAMPLER,
+    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+    VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
+};
+
+#define GET_VK_DESCRIPTOR_TYPE(descriptorType, retval) \
+LV_CHECK_ARGUMENT(DescriptorType, descriptorType); \
+retval = vulkan::descriptorTypeLUT[(int)descriptorType];
+
+//---------------- Vertex input rate ----------------
+constexpr VkVertexInputRate vertexInputRateLUT[] = {
+    VK_VERTEX_INPUT_RATE_MAX_ENUM,
+    VK_VERTEX_INPUT_RATE_VERTEX,
+    VK_VERTEX_INPUT_RATE_INSTANCE,
+    VK_VERTEX_INPUT_RATE_MAX_ENUM,
+    VK_VERTEX_INPUT_RATE_MAX_ENUM
+};
+
+#define GET_MTL_VERTEX_INPUT_RATE(vertexInputRate, retval) \
+LV_CHECK_ARGUMENT(VertexInputRate, vertexInputRate); \
+retval = vulkan::vertexInputRateLUT[(int)vertexInputRate];
+
+//---------------- Flags ----------------
+VkShaderStageFlags getVKShaderStageFlags(ShaderStageFlags shaderStageFlags);
+VkImageUsageFlags getVKImageUsageFlags(ImageUsageFlags imageUsageFlags);
+VkImageAspectFlags getVKImageAspectFlags(ImageAspectFlags imageAspectFlags);
+VkCommandBufferUsageFlags getVKCommandBufferUsageFlags(CommandBufferUsageFlags commandBufferUsageFlags);
+VkBufferUsageFlags getVKBufferUsageFlags(BufferUsageFlags bufferUsageFlags);
+VmaAllocationCreateFlags getVKAllocationCreateFlags(MemoryAllocationCreateFlags memoryAllocationCreateFlags);
 
 } //namespace vulkan
 

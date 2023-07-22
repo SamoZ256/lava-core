@@ -495,7 +495,7 @@ LV_CHECK_ARGUMENT(VertexInputRate, vertexInputRate); \
 retval = metal::vertexStepFunctionLUT[(int)vertexInputRate];
 
 //---------------- Flags ----------------
-MTLTextureUsage getMTLTextureUsage(ImageUsageFlags imageUsageFlags);
+MTLTextureUsage getMTLTextureUsageFlags(ImageUsageFlags imageUsageFlags);
 
 } //namespace metal
 
