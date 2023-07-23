@@ -3,7 +3,7 @@
 
 #import <Metal/Metal.h>
 
-#include "lvcore/core/common.hpp"
+#include "lvcore/internal/common.hpp"
 
 //TODO: remove the use of 'metal' namespace from macros
 

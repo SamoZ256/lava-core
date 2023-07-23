@@ -3,7 +3,7 @@
 
 #include <vk_mem_alloc.h>
 
-#include "lvcore/core/common.hpp"
+#include "lvcore/internal/common.hpp"
 
 //TODO: remove the use of 'vulkan' namespace from macros
 

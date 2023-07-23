@@ -292,7 +292,7 @@ void Metal_CommandBuffer::cmdCopyToImageFromImage(Metal_Image* source, Metal_Ima
 
 void Metal_CommandBuffer::cmdBlitToImageFromImage(Metal_Image* source, Metal_Image* destination) {
     if (!Metal_Image::blitComputePipelineState) {
-        std::string source = readFile("/Users/samuliak/Documents/lava_core/src/metal/core/blit.metallib"); //TODO: load this file independently of path
+        std::string source = readFile("/Users/samuliak/Documents/lava_core/src/metal/blit.metallib"); //TODO: load this file independently of path
 
         dispatch_data_t sourceData = dispatch_data_create((void*)source.c_str(), source.size() * sizeof(char), nullptr, nullptr);
 

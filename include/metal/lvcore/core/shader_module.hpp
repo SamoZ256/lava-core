@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "lvcore/core/core.hpp"
+#include "lvcore/internal/core.hpp"
 
 #include "common.hpp"
 

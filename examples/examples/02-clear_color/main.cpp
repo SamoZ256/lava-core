@@ -1,8 +1,8 @@
 #include "lvcore/threading/thread_pool.hpp"
 
-#include "lvcore/core/instance.hpp"
-#include "lvcore/core/device.hpp"
-#include "lvcore/core/swap_chain.hpp"
+#include "lvcore/internal/instance.hpp"
+#include "lvcore/internal/device.hpp"
+#include "lvcore/internal/swap_chain.hpp"
 
 #include "application.hpp"
 

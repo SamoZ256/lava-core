@@ -5,7 +5,7 @@
 
 #include "lvnd/lvnd.h"
 
-#include "lvcore/core/core.hpp"
+#include "lvcore/internal/core.hpp"
 
 #include "common.hpp"
 

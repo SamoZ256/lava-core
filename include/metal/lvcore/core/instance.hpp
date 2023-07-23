@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "lvcore/core/common.hpp"
+#include "lvcore/internal/common.hpp"
 
 #define LV_MAKE_VERSION(variant, major, minor, patch) 0
 

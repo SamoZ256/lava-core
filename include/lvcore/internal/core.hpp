@@ -38,6 +38,13 @@ enum Bool {
     True
 };
 
+enum class RenderAPI {
+    Vulkan,
+    Metal,
+
+    MaxEnum
+};
+
 enum class Format {
     //---------------- 8 ----------------
 

@@ -3,7 +3,7 @@
 
 #include "common.hpp"
 
-#include "lvcore/core/core.hpp"
+#include "lvcore/internal/core.hpp"
 
 namespace lv {
 

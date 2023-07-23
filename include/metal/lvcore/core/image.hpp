@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "lvcore/core/common.hpp"
+#include "lvcore/internal/common.hpp"
 
 #include "common.hpp"
 

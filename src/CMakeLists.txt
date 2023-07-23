@@ -1,6 +1,5 @@
 file(GLOB src
-    vulkan/core/*.cpp
-    vulkan/libraries/*.cpp
+    vulkan/*.cpp
     filesystem/*.cpp
     threading/*.cpp
     libraries/*.cpp
@@ -22,7 +21,7 @@ target_link_libraries(LAVA_CORE_LIB PUBLIC
 
 if (APPLE)
     file(GLOB metalSrc
-        metal/core/*.mm
+        metal/*.mm
     )
 
     target_sources(LAVA_CORE_LIB PRIVATE

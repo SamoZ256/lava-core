@@ -1,7 +1,7 @@
 #ifndef LV_VULKAN_ATTACHMENT_H
 #define LV_VULKAN_ATTACHMENT_H
 
-#include "lvcore/core/common.hpp"
+#include "lvcore/internal/common.hpp"
 
 #include "vulkan/lvcore/core/core.hpp"
 

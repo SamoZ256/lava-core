@@ -9,13 +9,13 @@
 
 #include "glm.hpp"
 
-#include "lvcore/core/buffer.hpp"
-#include "lvcore/core/image.hpp"
-#include "lvcore/core/sampler.hpp"
-#include "lvcore/core/descriptor_set.hpp"
-#include "lvcore/core/pipeline_layout.hpp"
-#include "lvcore/core/graphics_pipeline.hpp"
-#include "lvcore/core/command_buffer.hpp"
+#include "lvcore/buffer.hpp"
+#include "lvcore/image.hpp"
+#include "lvcore/sampler.hpp"
+#include "lvcore/descriptor_set.hpp"
+#include "lvcore/pipeline_layout.hpp"
+#include "lvcore/graphics_pipeline.hpp"
+#include "lvcore/command_buffer.hpp"
 
 struct Texture {
     std::string filename;

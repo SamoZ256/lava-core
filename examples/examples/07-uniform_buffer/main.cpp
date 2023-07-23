@@ -2,15 +2,15 @@
 
 #include "lvcore/filesystem/filesystem.hpp"
 
-#include "lvcore/core/instance.hpp"
-#include "lvcore/core/device.hpp"
-#include "lvcore/core/swap_chain.hpp"
-#include "lvcore/core/pipeline_layout.hpp"
-#include "lvcore/core/shader_module.hpp"
-#include "lvcore/core/graphics_pipeline.hpp"
-#include "lvcore/core/vertex_descriptor.hpp"
-#include "lvcore/core/buffer.hpp"
-#include "lvcore/core/descriptor_set.hpp"
+#include "lvcore/internal/instance.hpp"
+#include "lvcore/internal/device.hpp"
+#include "lvcore/internal/swap_chain.hpp"
+#include "lvcore/internal/pipeline_layout.hpp"
+#include "lvcore/internal/shader_module.hpp"
+#include "lvcore/internal/graphics_pipeline.hpp"
+#include "lvcore/internal/vertex_descriptor.hpp"
+#include "lvcore/internal/buffer.hpp"
+#include "lvcore/internal/descriptor_set.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

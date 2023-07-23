@@ -1,7 +1,7 @@
 #ifndef LV_METAL_ATTACHMENT_H
 #define LV_METAL_ATTACHMENT_H
 
-#include "lvcore/core/common.hpp"
+#include "lvcore/internal/common.hpp"
 
 #include "image.hpp"
 
