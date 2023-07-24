@@ -1,4 +1,4 @@
-#include "vulkan/lvcore/core/common.hpp"
+#include "vulkan/lvcore/common.hpp"
 
 std::string errorString(VkResult errorCode) {
     switch (errorCode) {

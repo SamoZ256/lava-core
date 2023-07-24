@@ -3,12 +3,12 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/denoiser.hpp"
+#include "vulkan/lvcore/denoiser.hpp"
 
 namespace lv {
 
-typedef Vulkan_DenoiserCreateInfo DenoiserCreateInfo;
-typedef Vulkan_Denoiser Denoiser;
+typedef vulkan::DenoiserCreateInfo DenoiserCreateInfo;
+typedef vulkan::Denoiser Denoiser;
 
 } //namespace lv
 
@@ -16,12 +16,12 @@ typedef Vulkan_Denoiser Denoiser;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/denoiser.hpp"
+#include "metal/lvcore/denoiser.hpp"
 
 namespace lv {
 
-typedef Metal_DenoiserCreateInfo DenoiserCreateInfo;
-typedef Metal_Denoiser Denoiser;
+typedef metal::DenoiserCreateInfo DenoiserCreateInfo;
+typedef metal::Denoiser Denoiser;
 
 } //namespace lv
 

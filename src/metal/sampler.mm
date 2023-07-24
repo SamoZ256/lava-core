@@ -1,15 +1,17 @@
-#include "metal/lvcore/core/sampler.hpp"
+#include "metal/lvcore/sampler.hpp"
 
 #include <string>
 
-#include "metal/lvcore/core/core.hpp"
+#include "metal/lvcore/core.hpp"
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-Metal_Sampler::Metal_Sampler(Metal_SamplerCreateInfo createInfo) {
+namespace metal {
+
+Sampler::Sampler(internal::SamplerCreateInfo createInfo) {
     MTLSamplerMinMagFilter mtlSamplerMinMagFilter;
     GET_MTL_SAMPLER_MIN_MAG_FILTER(createInfo.filter, mtlSamplerMinMagFilter);
     MTLSamplerAddressMode mtlSamplerAddressMode;
@@ -35,24 +37,28 @@ Metal_Sampler::Metal_Sampler(Metal_SamplerCreateInfo createInfo) {
     _sampler = [g_metal_device->device() newSamplerStateWithDescriptor:descriptor];
 }
 
-Metal_Sampler::~Metal_Sampler() {
+Sampler::~Sampler() {
     [_sampler release];
 }
 
-Metal_ImageDescriptorInfo Metal_Sampler::descriptorInfo(Metal_Image* image, uint32_t binding, ImageLayout imageLayout, int8_t frameOffset) {
-    Metal_ImageDescriptorInfo info;
-    info.images.resize(image->frameCount());
-    for (uint8_t i = 0; i < image->frameCount(); i++) {
+internal::ImageDescriptorInfo* Sampler::descriptorInfo(internal::Image* image, uint32_t binding, ImageLayout imageLayout, int8_t frameOffset) {
+    CAST_FROM_INTERNAL(image, Image);
+
+    ImageDescriptorInfo* info = new ImageDescriptorInfo;
+    info->images.resize(image_->frameCount());
+    for (uint8_t i = 0; i < image_->frameCount(); i++) {
         int8_t index = i + frameOffset;
-        if (index < 0) index += image->frameCount();
-        else if (index >= image->frameCount()) index -= image->frameCount();
-        info.images[i] = image->image(index);
+        if (index < 0) index += image_->frameCount();
+        else if (index >= image_->frameCount()) index -= image_->frameCount();
+        info->images[i] = image_->image(index);
     }
-    info.sampler = _sampler;
-    info.binding = binding;
-    info.descriptorType = DescriptorType::CombinedImageSampler;
+    info->sampler = _sampler;
+    info->binding = binding;
+    info->descriptorType = DescriptorType::CombinedImageSampler;
 
     return info;
 }
+
+} //namespace metal
 
 } //namespace lv

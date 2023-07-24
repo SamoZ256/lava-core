@@ -877,9 +877,9 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
-                }}
+                }
             }
         });
 
@@ -893,30 +893,14 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
-                    {
-                        .binding = 0,
-                        .descriptorType = lv::DescriptorType::UniformBuffer,
-                        .shaderStage = lv::ShaderStageFlags::Vertex
-                    }
-                }},
-                {{
-                    {
-                        .binding = 0,
-                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                    {
-                        .binding = 1,
-                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                    {
-                        .binding = 2,
-                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                }}
+                {
+                    {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
+                },
+                {
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                }
             }
         });
 
@@ -930,33 +914,13 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
-                    {
-                        .binding = 0,
-                        .descriptorType = lv::DescriptorType::InputAttachment,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                    {
-                        .binding = 1,
-                        .descriptorType = lv::DescriptorType::InputAttachment,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                    {
-                        .binding = 2,
-                        .descriptorType = lv::DescriptorType::InputAttachment,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                    {
-                        .binding = 3,
-                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    },
-                    {
-                        .binding = 4,
-                        .descriptorType = lv::DescriptorType::UniformBuffer,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    }
-                }}
+                {
+                    {0, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
+                    {1, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
+                    {2, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
+                    {3, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
+                    {4, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Fragment}
+                }
             }
         });
 
@@ -970,13 +934,9 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
-                    {
-                        .binding = 0,
-                        .descriptorType = lv::DescriptorType::CombinedImageSampler,
-                        .shaderStage = lv::ShaderStageFlags::Fragment
-                    }
-                }}
+                {
+                    {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
+                }
             }
         });
 
@@ -990,10 +950,10 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1007,19 +967,19 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
         //Blur
         blurPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1033,11 +993,11 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1051,24 +1011,24 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {3, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {4, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {2, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {3, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment},
                     {2, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1082,19 +1042,19 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
         //HDR
         hdrPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 

@@ -1,14 +1,16 @@
-#include "metal/lvcore/core/graphics_pipeline.hpp"
+#include "metal/lvcore/graphics_pipeline.hpp"
 
 #include <string>
 #include <iostream>
 
-#include "metal/lvcore/core/core.hpp"
+#include "metal/lvcore/core.hpp"
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 namespace lv {
+
+namespace metal {
 
 #define _LV_CREATE_GRAPHICS_PIPELINE \
 NSError* error; \
@@ -18,21 +20,25 @@ if (!_graphicsPipeline) { \
     throw std::runtime_error("Failed to create graphics pipeline: " + std::string([[error localizedDescription] UTF8String])); \
 }
 
-Metal_GraphicsPipeline::Metal_GraphicsPipeline(Metal_GraphicsPipelineCreateInfo createInfo) {
-    _vertexShaderModule = createInfo.vertexShaderModule;
-    _fragmentShaderModule = createInfo.fragmentShaderModule;
-    _pipelineLayout = createInfo.pipelineLayout;
+GraphicsPipeline::GraphicsPipeline(internal::GraphicsPipelineCreateInfo createInfo) {
+    _vertexShaderModule = (ShaderModule*)createInfo.vertexShaderModule;
+    _fragmentShaderModule = (ShaderModule*)createInfo.fragmentShaderModule;
+    _pipelineLayout = (PipelineLayout*)createInfo.pipelineLayout;
     _cullMode = createInfo.cullMode;
 
     compile(createInfo);
 }
 
-Metal_GraphicsPipeline::~Metal_GraphicsPipeline() {
+GraphicsPipeline::~GraphicsPipeline() {
     [descriptor release];
     [_graphicsPipeline release];
 }
 
-void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInfo) {
+void GraphicsPipeline::compile(internal::GraphicsPipelineCreateInfo& createInfo) {
+    CAST_FROM_INTERNAL_NAMED(createInfo.renderPass, RenderPass, renderPass);
+    CAST_FROM_INTERNAL_NAMED(createInfo.vertexDescriptor, VertexDescriptor, vertexDescriptor);
+    CAST_FROM_INTERNAL_NAMED(renderPass->subpasses[createInfo.subpassIndex], Subpass, subpass);
+
     MTLCompareFunction mtlCompareFunction;
     GET_MTL_COMPARE_FUNCTION(createInfo.depthOp, mtlCompareFunction);
 
@@ -40,15 +46,14 @@ void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInf
     descriptor.vertexFunction = _vertexShaderModule->function();
     descriptor.fragmentFunction = _fragmentShaderModule->function();
     if (createInfo.vertexDescriptor)
-        descriptor.vertexDescriptor = (MTLVertexDescriptor*)createInfo.vertexDescriptor->descriptor();
+        descriptor.vertexDescriptor = (MTLVertexDescriptor*)vertexDescriptor->descriptor();
     
     descriptor.inputPrimitiveTopology = MTLPrimitiveTopologyClassTriangle;
 
-    Metal_Subpass* subpass = createInfo.renderPass->subpasses[createInfo.subpassIndex];
     if (subpass->depthAttachment.index != -1) {
-        for (uint8_t i = 0; i < createInfo.renderPass->attachments.size(); i++) {
+        for (uint8_t i = 0; i < renderPass->attachments.size(); i++) {
             MTLPixelFormat format;
-            GET_MTL_PIXEL_FORMAT(createInfo.renderPass->attachments[i].format, format);
+            GET_MTL_PIXEL_FORMAT(renderPass->attachments[i].format, format);
             if (format >= MTLPixelFormatDepth16Unorm && format <= MTLPixelFormatX24_Stencil8)
                 descriptor.depthAttachmentPixelFormat = format;
         }
@@ -56,7 +61,7 @@ void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInf
 
     //Setting blend states
     for (uint8_t i = 0; i < createInfo.colorBlendAttachments.size(); i++) {
-        Metal_RenderPassAttachment* renderPassAttachment = &createInfo.renderPass->attachments[createInfo.colorBlendAttachments[i].index];
+        internal::RenderPassAttachment* renderPassAttachment = &renderPass->attachments[createInfo.colorBlendAttachments[i].index];
         MTLRenderPipelineColorAttachmentDescriptor* attachment = descriptor.colorAttachments[i];
         MTLPixelFormat format;
         GET_MTL_PIXEL_FORMAT(renderPassAttachment->format, format);
@@ -110,10 +115,12 @@ void Metal_GraphicsPipeline::compile(Metal_GraphicsPipelineCreateInfo& createInf
     _depthStencilState = [g_metal_device->device() newDepthStencilStateWithDescriptor:depthStencilDesc];
 }
 
-void Metal_GraphicsPipeline::recompile() {
+void GraphicsPipeline::recompile() {
     [_graphicsPipeline release];
 
     _LV_CREATE_GRAPHICS_PIPELINE;
 }
+
+} //namespace metal
 
 } //namespace lv

@@ -45,6 +45,12 @@ enum class RenderAPI {
     MaxEnum
 };
 
+#ifdef __APPLE__
+constexpr RenderAPI defaultRenderAPI = RenderAPI::Metal;
+#else
+constexpr RenderAPI defaultRenderAPI = RenderAPI::Vulkan;
+#endif
+
 enum class Format {
     //---------------- 8 ----------------
 

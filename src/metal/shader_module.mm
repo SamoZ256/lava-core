@@ -1,13 +1,15 @@
-#include "metal/lvcore/core/shader_module.hpp"
+#include "metal/lvcore/shader_module.hpp"
 
 #include <json/json.h>
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 #include <iostream>
 
 namespace lv {
+
+namespace metal {
 
 #define _LV_CREATE_FUNCTION \
 NSError* error; \
@@ -17,9 +19,7 @@ if (!_function) { \
     throw std::runtime_error("Failed to create shader module: " + std::string([[error localizedDescription] UTF8String])); \
 }
 
-Metal_ShaderModule::Metal_ShaderModule(Metal_ShaderModuleCreateInfo createInfo) {
-    //
-
+ShaderModule::ShaderModule(internal::ShaderModuleCreateInfo createInfo) {
     std::string source = createInfo.source;
     source.erase(0, createInfo.source.find("section.metallib") + 16 /*"section.metallib".size()*/);
 
@@ -87,7 +87,7 @@ Metal_ShaderModule::Metal_ShaderModule(Metal_ShaderModuleCreateInfo createInfo) 
     }
 }
 
-Metal_ShaderModule::~Metal_ShaderModule() {
+ShaderModule::~ShaderModule() {
     [library release];
     [_function release];
 
@@ -104,7 +104,7 @@ Metal_ShaderModule::~Metal_ShaderModule() {
     }
 }
 
-void Metal_ShaderModule::compile(Metal_ShaderModuleCreateInfo& createInfo) {
+void ShaderModule::compile(internal::ShaderModuleCreateInfo& createInfo) {
     if (createInfo.specializationConstants.size() == 0) {
         _function = [library newFunctionWithName:@"main0"];
     } else {
@@ -128,10 +128,12 @@ void Metal_ShaderModule::compile(Metal_ShaderModuleCreateInfo& createInfo) {
     }
 }
 
-void Metal_ShaderModule::recompile() {
+void ShaderModule::recompile() {
     [_function release];
     throw std::runtime_error("Not implemented yet");
     //_LV_CREATE_FUNCTION;
 }
+
+} //namespace metal
 
 } //namespace lv

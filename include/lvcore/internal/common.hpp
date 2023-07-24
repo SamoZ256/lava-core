@@ -2,9 +2,17 @@
 #define LV_COMMON_H
 
 #include <stdio.h>
+#include <vector>
+#include <string>
+#include <iostream>
 
 #include "core.hpp"
 
+#define CAST_FROM_INTERNAL(name, type) type* name##_ = (type*)name;
+
+#define CAST_FROM_INTERNAL_NAMED(name, type, newName) type* newName = (type*)name;
+
+//Errors and warnings
 #define _LV_MSG(type, msg) fprintf(stderr, "[LV:" type "]::%s: %s\n", __FUNCTION__, msg)
 
 #define LV_ERROR(msg) _LV_MSG("error", msg)

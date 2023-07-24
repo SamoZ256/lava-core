@@ -3,12 +3,10 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/descriptor_set.hpp"
+#include "vulkan/lvcore/descriptor_set.hpp"
 
 namespace lv {
-
-typedef Vulkan_DescriptorSetCreateInfo DescriptorSetCeateInfo;
-typedef Vulkan_DescriptorSet DescriptorSet;
+typedef vulkan::DescriptorSet DescriptorSet;
 
 } //namespace lv
 
@@ -16,15 +14,19 @@ typedef Vulkan_DescriptorSet DescriptorSet;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/descriptor_set.hpp"
+#include "metal/lvcore/descriptor_set.hpp"
 
 namespace lv {
-
-typedef Metal_DescriptorSetCreateInfo DescriptorSetCeateInfo;
-typedef Metal_DescriptorSet DescriptorSet;
+typedef metal::DescriptorSet DescriptorSet;
 
 } //namespace lv
 
 #endif
+
+namespace lv {
+
+typedef internal::DescriptorSetCreateInfo DescriptorSetCeateInfo;
+
+} //namespace lv
 
 #endif

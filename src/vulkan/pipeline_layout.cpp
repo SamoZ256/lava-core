@@ -1,14 +1,16 @@
-#include "vulkan/lvcore/core/pipeline_layout.hpp"
+#include "vulkan/lvcore/pipeline_layout.hpp"
 
-#include "vulkan/lvcore/core/common.hpp"
+#include "vulkan/lvcore/common.hpp"
 
-#include "vulkan/lvcore/core/device.hpp"
+#include "vulkan/lvcore/device.hpp"
 
 namespace lv {
 
+namespace vulkan {
+
 // *************** Descriptor Set Layout *********************
 
-Vulkan_DescriptorSetLayout::Vulkan_DescriptorSetLayout(std::vector<Vulkan_DescriptorSetLayoutBinding> aBindings) {
+DescriptorSetLayout::DescriptorSetLayout(std::vector<DescriptorSetLayoutBinding> aBindings) {
 	bindings.resize(aBindings.size());
 	for (uint32_t i = 0; i < bindings.size(); i++) {
 		VkDescriptorType vkDescriptorType;
@@ -17,7 +19,7 @@ Vulkan_DescriptorSetLayout::Vulkan_DescriptorSetLayout(std::vector<Vulkan_Descri
 		bindings[i].binding = aBindings[i].binding;
 		bindings[i].descriptorType = vkDescriptorType;
 		bindings[i].descriptorCount = 1;
-		bindings[i].stageFlags = vulkan::getVKShaderStageFlags(aBindings[i].shaderStage);
+		bindings[i].stageFlags = getVKShaderStageFlags(aBindings[i].shaderStage);
 	}
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
@@ -28,16 +30,16 @@ Vulkan_DescriptorSetLayout::Vulkan_DescriptorSetLayout(std::vector<Vulkan_Descri
 	VK_CHECK_RESULT(vkCreateDescriptorSetLayout(g_vulkan_device->device(), &descriptorSetLayoutInfo, nullptr, &descriptorSetLayout));
 }
 
-void Vulkan_DescriptorSetLayout::destroy() {
+void DescriptorSetLayout::destroy() {
 	vkDestroyDescriptorSetLayout(g_vulkan_device->device(), descriptorSetLayout, nullptr);
 	//descriptorSetLayout = VK_NULL_HANDLE;
 }
 
 // *************** Pipeline Layout *********************
 
-Vulkan_PipelineLayout::Vulkan_PipelineLayout(Vulkan_PipelineLayoutCreateInfo createInfo) : descriptorSetLayouts(createInfo.descriptorSetLayouts), pushConstantRanges(createInfo.pushConstantRanges.size()) {
+PipelineLayout::PipelineLayout(PipelineLayoutCreateInfo createInfo) : descriptorSetLayouts(createInfo.descriptorSetLayouts), pushConstantRanges(createInfo.pushConstantRanges.size()) {
 	for (uint32_t i = 0; i < pushConstantRanges.size(); i++) {
-		pushConstantRanges[i].stageFlags = vulkan::getVKShaderStageFlags(createInfo.pushConstantRanges[i].stageFlags);
+		pushConstantRanges[i].stageFlags = getVKShaderStageFlags(createInfo.pushConstantRanges[i].stageFlags);
 		pushConstantRanges[i].offset = createInfo.pushConstantRanges[i].offset;
 		pushConstantRanges[i].size = createInfo.pushConstantRanges[i].size;
 	}
@@ -57,10 +59,12 @@ Vulkan_PipelineLayout::Vulkan_PipelineLayout(Vulkan_PipelineLayoutCreateInfo cre
 	VK_CHECK_RESULT(vkCreatePipelineLayout(g_vulkan_device->device(), &pipelineLayoutInfo, nullptr, &_pipelineLayout));
 }
 
-Vulkan_PipelineLayout::~Vulkan_PipelineLayout() {
+PipelineLayout::~PipelineLayout() {
 	for (auto& descriptorSetLayout : descriptorSetLayouts)
 		descriptorSetLayout.destroy();
 	vkDestroyPipelineLayout(g_vulkan_device->device(), _pipelineLayout, nullptr);
 }
+
+} //namespace vulkan
 
 } //namespace lv

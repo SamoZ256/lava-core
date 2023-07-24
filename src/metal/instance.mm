@@ -1,14 +1,18 @@
-#include "metal/lvcore/core/instance.hpp"
+#include "metal/lvcore/instance.hpp"
 
 namespace lv {
 
-//Implementation
-Metal_Instance* g_metal_instance = nullptr;
+namespace metal {
 
-Metal_Instance::Metal_Instance(Metal_InstanceCreateInfo createInfo) {
+//Implementation
+Instance* g_metal_instance = nullptr;
+
+Instance::Instance(internal::InstanceCreateInfo createInfo) {
     validationEnable = createInfo.validationEnable;
 
     g_metal_instance = this;
 }
+
+} //namespace metal
 
 } //namespace lv

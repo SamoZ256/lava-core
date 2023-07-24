@@ -1,11 +1,13 @@
-#include "vulkan/lvcore/core/buffer.hpp"
+#include "vulkan/lvcore/buffer.hpp"
 
-#include "vulkan/lvcore/core/buffer_helper.hpp"
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/buffer_helper.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-Vulkan_Buffer::Vulkan_Buffer(Vulkan_BufferCreateInfo createInfo) : _size(createInfo.size) {
+namespace vulkan {
+
+Buffer::Buffer(BufferCreateInfo createInfo) : _size(createInfo.size) {
     _frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
     VkMemoryPropertyFlags vkMemoryPropertyFlags;
@@ -14,15 +16,15 @@ Vulkan_Buffer::Vulkan_Buffer(Vulkan_BufferCreateInfo createInfo) : _size(createI
     buffers.resize(_frameCount);
     allocations.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++)
-        allocations[i] = Vulkan_BufferHelper::createBuffer(_size, vulkan::getVKBufferUsageFlags(createInfo.usage), buffers[i], nullptr, vkMemoryPropertyFlags, vulkan::getVKAllocationCreateFlags(createInfo.memoryAllocationFlags));
+        allocations[i] = BufferHelper::createBuffer(_size, getVKBufferUsageFlags(createInfo.usage), buffers[i], nullptr, vkMemoryPropertyFlags, getVKAllocationCreateFlags(createInfo.memoryAllocationFlags));
 }
 
-Vulkan_Buffer::~Vulkan_Buffer() {
+Buffer::~Buffer() {
     for (uint8_t i = 0; i < _frameCount; i++)
         vmaDestroyBuffer(g_vulkan_device->allocator(), buffers[i], allocations[i]);
 }
 
-void Vulkan_Buffer::copyDataTo(void* data, size_t aSize) {
+void Buffer::copyDataTo(void* data, size_t aSize) {
     if (aSize == 0)
         aSize = _size;
     uint8_t index = g_vulkan_swapChain->crntFrame() % _frameCount;
@@ -33,8 +35,8 @@ void Vulkan_Buffer::copyDataTo(void* data, size_t aSize) {
     vmaUnmapMemory(g_vulkan_device->allocator(), allocations[index]);
 }
 
-Vulkan_BufferDescriptorInfo Vulkan_Buffer::descriptorInfo(uint32_t binding, DescriptorType descriptorType/*VkDeviceSize size, VkDeviceSize offset*/) {
-	Vulkan_BufferDescriptorInfo info;
+BufferDescriptorInfo Buffer::descriptorInfo(uint32_t binding, DescriptorType descriptorType/*VkDeviceSize size, VkDeviceSize offset*/) {
+	BufferDescriptorInfo info;
 	info.infos.resize(_frameCount);
 	for (uint8_t i = 0; i < _frameCount; i++) {
 		info.infos[i].buffer = buffers[i];
@@ -46,5 +48,7 @@ Vulkan_BufferDescriptorInfo Vulkan_Buffer::descriptorInfo(uint32_t binding, Desc
 
 	return info;
 }
+
+} //namespace vulkan
 
 } //namespace lv

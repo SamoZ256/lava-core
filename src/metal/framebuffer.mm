@@ -1,16 +1,20 @@
-#include "metal/lvcore/core/framebuffer.hpp"
+#include "metal/lvcore/framebuffer.hpp"
 
-#include "metal/lvcore/core/core.hpp"
+#include "metal/lvcore/core.hpp"
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 #include <iostream>
 
 namespace lv {
 
-Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
+namespace metal {
+
+Framebuffer::Framebuffer(internal::FramebufferCreateInfo createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_metal_swapChain->maxFramesInFlight() : createInfo.frameCount);
+
+    CAST_FROM_INTERNAL_NAMED(createInfo.renderPass, RenderPass, renderPass);
 
     //sortedAttachments.resize(colorAttachments.size() + 1);
     //for (uint8_t i = 0; i < colorAttachments.size(); i++)
@@ -24,12 +28,14 @@ Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
         renderPasses[i] = [[MTLRenderPassDescriptor alloc] init];
         uint16_t maxArrayLength = 1;
         for (uint8_t j = 0; j < createInfo.colorAttachments.size(); j++) {
-            //Metal_SubpassAttachment& subpassAttachment = subpass->colorAttachments[j];
-            Metal_FramebufferAttachment& framebufferAttachment = createInfo.colorAttachments[j];
-            Metal_RenderPassAttachment* renderPassAttachment = createInfo.renderPass->sortedAttachments[framebufferAttachment.index];
+            //SubpassAttachment& subpassAttachment = subpass->colorAttachments[j];
+            internal::FramebufferAttachment& framebufferAttachment = createInfo.colorAttachments[j];
+            internal::RenderPassAttachment* renderPassAttachment = renderPass->sortedAttachments[framebufferAttachment.index];
             MTLRenderPassColorAttachmentDescriptor* attachment = ((MTLRenderPassDescriptor*)renderPasses[i]).colorAttachments[j];
             //if (colorAttachments[i].clearValue.color.float32[0] != 0.0f)
             //    std::cout << "CLEAR COLOR X: " << colorAttachments[i].clearValue.color.float32[0] << std::endl;
+
+            CAST_FROM_INTERNAL_NAMED(framebufferAttachment.image, Image, image);
 
             MTLLoadAction mtlLoadAction;
             GET_MTL_LOAD_ACTION(renderPassAttachment->loadOp, mtlLoadAction);
@@ -39,15 +45,17 @@ Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
             attachment.clearColor = MTLClearColorMake(createInfo.colorAttachments[j].clearValue.color.float32[0], createInfo.colorAttachments[j].clearValue.color.float32[1], createInfo.colorAttachments[j].clearValue.color.float32[2], createInfo.colorAttachments[j].clearValue.color.float32[3]);
             attachment.loadAction = mtlLoadAction;
             attachment.storeAction = mtlStoreAction;
-            attachment.texture = framebufferAttachment.image->image(i % framebufferAttachment.image->frameCount());
+            attachment.texture = image->image(i % framebufferAttachment.image->frameCount());
             maxArrayLength = std::max(maxArrayLength, uint16_t(framebufferAttachment.image->layerCount() * framebufferAttachment.image->layersPerLayer()));
             //std::cout << "Index: " << (int)subpassAttachment.index << std::endl;
             //std::cout << "Color attachment " << (int)j << ": " << framebufferAttachment.image->format << std::endl;
         }
 
         if (createInfo.depthAttachment.index != -1) {
-            //Metal_SubpassAttachment& subpassAttachment = subpass->depthAttachment;
-            Metal_RenderPassAttachment* renderPassAttachment = createInfo.renderPass->sortedAttachments[createInfo.depthAttachment.index];
+            //SubpassAttachment& subpassAttachment = subpass->depthAttachment;
+            internal::RenderPassAttachment* renderPassAttachment = renderPass->sortedAttachments[createInfo.depthAttachment.index];
+
+            CAST_FROM_INTERNAL_NAMED(createInfo.depthAttachment.image, Image, image);
 
             MTLLoadAction mtlLoadAction;
             GET_MTL_LOAD_ACTION(renderPassAttachment->loadOp, mtlLoadAction);
@@ -58,7 +66,7 @@ Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
             attachment.clearDepth = createInfo.depthAttachment.clearValue.depthStencil.depth;
             attachment.loadAction = mtlLoadAction;
             attachment.storeAction = mtlStoreAction;
-            attachment.texture = createInfo.depthAttachment.image->image(i % createInfo.depthAttachment.image->frameCount());
+            attachment.texture = image->image(i % createInfo.depthAttachment.image->frameCount());
             maxArrayLength = std::max(maxArrayLength, uint16_t(createInfo.depthAttachment.image->layerCount() * createInfo.depthAttachment.image->layersPerLayer()));
         }
 
@@ -68,7 +76,7 @@ Metal_Framebuffer::Metal_Framebuffer(Metal_FramebufferCreateInfo createInfo) {
     //}
 }
 
-Metal_Framebuffer::~Metal_Framebuffer() {
+Framebuffer::~Framebuffer() {
     //for (auto& subpass : subpasses) {
     for (uint8_t i = 0; i < _frameCount; i++) {
         [(MTLRenderPassDescriptor*)renderPasses[i] release];
@@ -77,19 +85,21 @@ Metal_Framebuffer::~Metal_Framebuffer() {
 }
 
 /*
-void Metal_Framebuffer::nextSubpass() {
+void Framebuffer::nextSubpass() {
     _endSubpass();
     crntSubpass++;
     _beginSubpass();
 }
 
-void Metal_Framebuffer::_beginSubpass() {
+void Framebuffer::_beginSubpass() {
     
 }
 
-void Metal_Framebuffer::_endSubpass() {
+void Framebuffer::_endSubpass() {
     
 }
 */
+
+} //namespace metal
 
 } //namespace lv

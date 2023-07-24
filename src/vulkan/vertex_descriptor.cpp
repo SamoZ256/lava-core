@@ -1,8 +1,10 @@
-#include "vulkan/lvcore/core/vertex_descriptor.hpp"
+#include "vulkan/lvcore/vertex_descriptor.hpp"
 
 namespace lv {
 
-Vulkan_VertexDescriptor::Vulkan_VertexDescriptor(Vulkan_VertexDescriptorCreateInfo createInfo) {
+namespace vulkan {
+
+VertexDescriptor::VertexDescriptor(VertexDescriptorCreateInfo createInfo) {
     bindingDescriptions.resize(1);
     bindingDescriptions[0].binding = 0;
     bindingDescriptions[0].stride = createInfo.size;
@@ -19,5 +21,7 @@ Vulkan_VertexDescriptor::Vulkan_VertexDescriptor(Vulkan_VertexDescriptorCreateIn
         attributeDescriptions[i].offset = createInfo.bindings[i].offset;
     }
 }
+
+} //namespace vulkan
 
 } //namespace lv

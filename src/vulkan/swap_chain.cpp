@@ -1,11 +1,13 @@
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-//Implementation
-Vulkan_SwapChain* g_vulkan_swapChain = nullptr;
+namespace vulkan {
 
-Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
+//Implementation
+SwapChain* g_vulkan_swapChain = nullptr;
+
+SwapChain::SwapChain(SwapChainCreateInfo createInfo) {
 	g_vulkan_swapChain = this;
 
 	vsyncEnable = createInfo.vsyncEnable;
@@ -15,7 +17,7 @@ Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
 	if (createInfo.clearAttachment)
 		loadOp = AttachmentLoadOperation::Clear;
 
-	subpass = new Vulkan_Subpass({
+	subpass = new Subpass({
 		.colorAttachments = {
 			{
 				.index = 0,
@@ -47,7 +49,7 @@ Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
 	dependencies[1].srcAccessMask = 0;  // or VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 	dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-	_renderPass = new Vulkan_RenderPass({
+	_renderPass = new RenderPass({
 		.subpasses = {subpass},
 		.attachments = {
 			{
@@ -65,7 +67,7 @@ Vulkan_SwapChain::Vulkan_SwapChain(Vulkan_SwapChainCreateInfo createInfo) {
 	createSyncObjects();
 }
 
-Vulkan_SwapChain::~Vulkan_SwapChain() {
+SwapChain::~SwapChain() {
 	destroyToResize();
 
 	delete renderFinishedSemaphore;
@@ -77,7 +79,7 @@ Vulkan_SwapChain::~Vulkan_SwapChain() {
 	vkDestroySwapchainKHR(g_vulkan_device->device(), swapChain, nullptr);
 }
 
-void Vulkan_SwapChain::destroyToResize() {
+void SwapChain::destroyToResize() {
 	oldSwapChain = swapChain;
 
 	delete _framebuffer;
@@ -85,7 +87,7 @@ void Vulkan_SwapChain::destroyToResize() {
 	delete _renderPass;
 }
 
-void Vulkan_SwapChain::create() {
+void SwapChain::create() {
 	uint16_t width, height;
 	lvndGetWindowSize(_window, &width, &height);
 	windowExtent = {width, height};
@@ -95,7 +97,7 @@ void Vulkan_SwapChain::create() {
 
 	//createDepthResources();
 
-	_framebuffer = new Vulkan_Framebuffer({
+	_framebuffer = new Framebuffer({
 		.frameCount = uint8_t(imageCount()),
 		.renderPass = _renderPass,
 		.colorAttachments = {
@@ -103,7 +105,7 @@ void Vulkan_SwapChain::create() {
 		}
 	});
 
-	_commandBuffer = new Vulkan_CommandBuffer({
+	_commandBuffer = new CommandBuffer({
 		.frameCount = uint8_t(imageCount())
 	});
 
@@ -111,7 +113,7 @@ void Vulkan_SwapChain::create() {
 	//window.height = height();
 }
 
-void Vulkan_SwapChain::resize() {
+void SwapChain::resize() {
 	/*
 	float xscale, yscale;
     lvndWindowGetFramebufferScale(window, &xscale, &yscale);
@@ -128,19 +130,19 @@ void Vulkan_SwapChain::resize() {
 	create();
 }
 
-void Vulkan_SwapChain::renderAndPresent() {
+void SwapChain::renderAndPresent() {
 	VkCommandBuffer cmdBuffer = _commandBuffer->commandBuffer(_imageIndex);
 	VK_CHECK_RESULT(submitCommandBuffers(&cmdBuffer));
 	//_commandBuffer->submit();
 }
 
-void Vulkan_SwapChain::acquireNextImage(/*uint32_t *imageIndex*/) {
+void SwapChain::acquireNextImage(/*uint32_t *imageIndex*/) {
 	vkWaitForFences(g_vulkan_device->device(), 1, &inFlightFences[_crntFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
 	VK_CHECK_RESULT(vkAcquireNextImageKHR(g_vulkan_device->device(), swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore->semaphore(_crntFrame), VK_NULL_HANDLE, &_imageIndex));
 }
 
-VkResult Vulkan_SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers/*, uint32_t *imageIndex*/) {
+VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers/*, uint32_t *imageIndex*/) {
 	if (imagesInFlight[_imageIndex] != VK_NULL_HANDLE) {
 		vkWaitForFences(g_vulkan_device->device(), 1, &imagesInFlight[_imageIndex], VK_TRUE, UINT64_MAX);
 	}
@@ -187,7 +189,7 @@ VkResult Vulkan_SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers/*
 	return result;
 }
 
-void Vulkan_SwapChain::createSwapChain() {
+void SwapChain::createSwapChain() {
 	SwapChainSupportDetails swapChainSupport = g_vulkan_device->getSwapChainSupport();
 
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -246,7 +248,7 @@ void Vulkan_SwapChain::createSwapChain() {
 	vkGetSwapchainImagesKHR(g_vulkan_device->device(), swapChain, &imageCount, nullptr);
 	_maxFramesInFlight = std::min(_maxFramesInFlight, (uint8_t)imageCount);
 	//std::cout << "Max frames in flight: " << (int)maxFramesInFlight << std::endl;
-	image = (Vulkan_Image*)malloc(sizeof(Vulkan_Image));
+	image = (Image*)malloc(sizeof(Image));
 	image->_setFrameCount(imageCount);
 	image->_setWidth(swapChainExtent.width);
 	image->_setHeight(swapChainExtent.height);
@@ -329,7 +331,7 @@ void SwapChain::createDepthResources() {
 }
 */
 
-void Vulkan_SwapChain::createSyncObjects() {
+void SwapChain::createSyncObjects() {
 	inFlightFences.resize(_maxFramesInFlight);
 	imagesInFlight.resize(imageCount(), VK_NULL_HANDLE);
 
@@ -337,14 +339,14 @@ void Vulkan_SwapChain::createSyncObjects() {
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-	imageAvailableSemaphore = new Vulkan_Semaphore();
-	renderFinishedSemaphore = new Vulkan_Semaphore();
+	imageAvailableSemaphore = new Semaphore();
+	renderFinishedSemaphore = new Semaphore();
 	for (size_t i = 0; i < _maxFramesInFlight; i++) {
 		VK_CHECK_RESULT(vkCreateFence(g_vulkan_device->device(), &fenceInfo, nullptr, &inFlightFences[i]));
 	}
 }
 
-VkSurfaceFormatKHR Vulkan_SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats) {
+VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats) {
 	for (const auto &availableFormat : availableFormats) {
 		if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
 			availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
@@ -355,7 +357,7 @@ VkSurfaceFormatKHR Vulkan_SwapChain::chooseSwapSurfaceFormat(const std::vector<V
 	return availableFormats[0];
 }
 
-VkPresentModeKHR Vulkan_SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes) {
+VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes) {
 	/*
 	for (const auto &availablePresentMode : availablePresentModes) {
 		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
@@ -375,7 +377,7 @@ VkPresentModeKHR Vulkan_SwapChain::chooseSwapPresentMode(const std::vector<VkPre
 	return vsyncEnable ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR;
 }
 
-VkExtent2D Vulkan_SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
+VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 		return capabilities.currentExtent;
 	} else {
@@ -392,12 +394,14 @@ VkExtent2D Vulkan_SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &ca
 }
 
 /*
-VkFormat Vulkan_SwapChain::findDepthFormat() {
+VkFormat SwapChain::findDepthFormat() {
     return g_vulkan_device->findSupportedFormat(
       {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
       VK_IMAGE_TILING_OPTIMAL,
       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 */
+
+} //namespace vulkan
 
 } //namespace lv

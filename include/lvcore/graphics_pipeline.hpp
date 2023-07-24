@@ -3,12 +3,11 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/graphics_pipeline.hpp"
+#include "vulkan/lvcore/graphics_pipeline.hpp"
 
 namespace lv {
 
-typedef Vulkan_GraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-typedef Vulkan_GraphicsPipeline GraphicsPipeline;
+typedef vulkan::GraphicsPipeline GraphicsPipeline;
 
 } //namespace lv
 
@@ -16,15 +15,20 @@ typedef Vulkan_GraphicsPipeline GraphicsPipeline;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/graphics_pipeline.hpp"
+#include "metal/lvcore/graphics_pipeline.hpp"
 
 namespace lv {
 
-typedef Metal_GraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
-typedef Metal_GraphicsPipeline GraphicsPipeline;
+typedef metal::GraphicsPipeline GraphicsPipeline;
 
 } //namespace lv
 
 #endif
+
+namespace lv {
+
+typedef internal::GraphicsPipelineCreateInfo GraphicsPipelineCreateInfo;
+
+} //namespace lv
 
 #endif

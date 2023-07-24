@@ -3,12 +3,11 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/sampler.hpp"
+#include "vulkan/lvcore/sampler.hpp"
 
 namespace lv {
 
-typedef Vulkan_SamplerCreateInfo SamplerCreateInfo;
-typedef Vulkan_Sampler Sampler;
+typedef vulkan::Sampler Sampler;
 
 } //namespace lv
 
@@ -16,15 +15,20 @@ typedef Vulkan_Sampler Sampler;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/sampler.hpp"
+#include "metal/lvcore/sampler.hpp"
 
 namespace lv {
 
-typedef Metal_SamplerCreateInfo SamplerCreateInfo;
-typedef Metal_Sampler Sampler;
+typedef metal::Sampler Sampler;
 
 } //namespace lv
 
 #endif
+
+namespace lv {
+
+typedef internal::SamplerCreateInfo SamplerCreateInfo;
+
+} //namespace lv
 
 #endif

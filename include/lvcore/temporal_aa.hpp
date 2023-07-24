@@ -3,11 +3,11 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/temporal_aa.hpp"
+#include "vulkan/lvcore/temporal_aa.hpp"
 
 namespace lv {
 
-typedef Vulkan_TemporalAA TemporalAA;
+typedef vulkan::TemporalAA TemporalAA;
 
 } //namespace lv
 
@@ -15,11 +15,11 @@ typedef Vulkan_TemporalAA TemporalAA;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/temporal_aa.hpp"
+#include "metal/lvcore/temporal_aa.hpp"
 
 namespace lv {
 
-typedef Metal_TemporalAA TemporalAA;
+typedef metal::TemporalAA TemporalAA;
 
 } //namespace lv
 

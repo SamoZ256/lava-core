@@ -3,14 +3,13 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 #define g_swapChain g_vulkan_swapChain
 
 namespace lv {
 
-typedef Vulkan_SwapChainCreateInfo SwapChainCreateInfo;
-typedef Vulkan_SwapChain SwapChain;
+typedef vulkan::SwapChain SwapChain;
 
 } //namespace lv
 
@@ -18,32 +17,22 @@ typedef Vulkan_SwapChain SwapChain;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 #define g_swapChain g_metal_swapChain
 
 namespace lv {
 
-typedef Metal_SwapChainCreateInfo SwapChainCreateInfo;
-typedef Metal_SwapChain SwapChain;
+typedef metal::SwapChain SwapChain;
 
 } //namespace lv
 
 #endif
-
-#ifdef LV_BACKEND_OPENGL
-
-#include "opengl/lvcore/core/swap_chain.hpp"
-
-#define g_swapChain g_opengl_swapChain
 
 namespace lv {
 
-typedef OpenGL_SwapChainCreateInfo SwapChainCreateInfo;
-typedef OpenGL_SwapChain SwapChain;
+typedef internal::SwapChainCreateInfo SwapChainCreateInfo;
 
 } //namespace lv
-
-#endif
 
 #endif

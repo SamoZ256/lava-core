@@ -1,12 +1,14 @@
-#include "vulkan/lvcore/core/framebuffer.hpp"
+#include "vulkan/lvcore/framebuffer.hpp"
 
 #include <cmath>
 
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-Vulkan_Framebuffer::Vulkan_Framebuffer(Vulkan_FramebufferCreateInfo createInfo) {
+namespace vulkan {
+
+Framebuffer::Framebuffer(FramebufferCreateInfo createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
     _renderPass = createInfo.renderPass;
@@ -74,7 +76,7 @@ Vulkan_Framebuffer::Vulkan_Framebuffer(Vulkan_FramebufferCreateInfo createInfo) 
         clearValues[createInfo.depthAttachment.index].depthStencil = {createInfo.depthAttachment.clearValue.depthStencil.depth, createInfo.depthAttachment.clearValue.depthStencil.stencil};
 }
 
-Vulkan_Framebuffer::~Vulkan_Framebuffer() {
+Framebuffer::~Framebuffer() {
     for (auto& framebuffer : framebuffers) {
         vkDestroyFramebuffer(g_vulkan_device->device(), framebuffer, nullptr);
     }
@@ -100,5 +102,7 @@ void Framebuffer::resize(uint16_t aWidth, uint16_t aHeight) {
     init(renderPass, aWidth, aHeight);
 }
 */
+
+} //namespace vulkan
 
 } //namespace lv

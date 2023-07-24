@@ -3,12 +3,12 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/upscaler.hpp"
+#include "vulkan/lvcore/upscaler.hpp"
 
 namespace lv {
 
-typedef Vulkan_UpscalerCreateInfo UpscalerCreateInfo;
-typedef Vulkan_Upscaler Upscaler;
+typedef vulkan::UpscalerCreateInfo UpscalerCreateInfo;
+typedef vulkan::Upscaler Upscaler;
 
 } //namespace lv
 
@@ -16,12 +16,12 @@ typedef Vulkan_Upscaler Upscaler;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/upscaler.hpp"
+#include "metal/lvcore/upscaler.hpp"
 
 namespace lv {
 
-typedef Metal_UpscalerCreateInfo UpscalerCreateInfo;
-typedef Metal_Upscaler Upscaler;
+typedef metal::UpscalerCreateInfo UpscalerCreateInfo;
+typedef metal::Upscaler Upscaler;
 
 } //namespace lv
 

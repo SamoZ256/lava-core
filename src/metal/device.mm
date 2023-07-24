@@ -1,19 +1,23 @@
-#include "metal/lvcore/core/device.hpp"
+#include "metal/lvcore/device.hpp"
 
 namespace lv {
 
-Metal_Device* g_metal_device = nullptr;
+namespace metal {
 
-Metal_Device::Metal_Device(Metal_DeviceCreateInfo createInfo) {
+Device* g_metal_device = nullptr;
+
+Device::Device(internal::DeviceCreateInfo createInfo) {
     _device = MTLCreateSystemDefaultDevice();
     _commandQueue = [_device newCommandQueue];
 
     g_metal_device = this;
 }
 
-Metal_Device::~Metal_Device() {
+Device::~Device() {
     [_device release];
     [_commandQueue release];
 }
+
+} //namespace metal
 
 } //namespace lv

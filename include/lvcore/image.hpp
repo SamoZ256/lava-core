@@ -3,13 +3,11 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/image.hpp"
+#include "vulkan/lvcore/image.hpp"
 
 namespace lv {
 
-typedef Vulkan_ImageCreateInfo ImageCreateInfo;
-typedef Vulkan_ImageLoadInfo ImageLoadInfo;
-typedef Vulkan_Image Image;
+typedef vulkan::Image Image;
 
 } //namespace lv
 
@@ -17,16 +15,22 @@ typedef Vulkan_Image Image;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/image.hpp"
+#include "metal/lvcore/image.hpp"
 
 namespace lv {
 
-typedef Metal_ImageCreateInfo ImageCreateInfo;
-typedef Metal_ImageLoadInfo ImageLoadInfo;
-typedef Metal_Image Image;
+typedef metal::Image Image;
 
 } //namespace lv
 
 #endif
+
+namespace lv {
+
+typedef internal::ImageCreateInfo ImageCreateInfo;
+typedef internal::ImageLoadInfo ImageLoadInfo;
+typedef internal::ImageViewCreateInfo ImageViewCreateInfo;
+
+} //namespace lv
 
 #endif

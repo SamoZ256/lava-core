@@ -3,14 +3,13 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/instance.hpp"
+#include "vulkan/lvcore/instance.hpp"
 
 #define g_instance g_vulkan_instance
 
 namespace lv {
 
-typedef Vulkan_InstanceCreateInfo InstanceCreateInfo;
-typedef Vulkan_Instance Instance;
+typedef vulkan::Instance Instance;
 
 } //namespace lv
 
@@ -18,32 +17,22 @@ typedef Vulkan_Instance Instance;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/instance.hpp"
+#include "metal/lvcore/instance.hpp"
 
 #define g_instance g_metal_instance
 
 namespace lv {
 
-typedef Metal_InstanceCreateInfo InstanceCreateInfo;
-typedef Metal_Instance Instance;
+typedef metal::Instance Instance;
 
 } //namespace lv
 
 #endif
-
-#ifdef LV_BACKEND_OPENGL
-
-#include "opengl/lvcore/core/instance.hpp"
-
-#define g_instance g_opengl_instance
 
 namespace lv {
 
-typedef OpenGL_InstanceCreateInfo InstanceCreateInfo;
-typedef OpenGL_Instance Instance;
+typedef internal::InstanceCreateInfo InstanceCreateInfo;
 
 } //namespace lv
-
-#endif
 
 #endif

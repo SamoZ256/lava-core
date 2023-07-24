@@ -1,10 +1,12 @@
-#include "vulkan/lvcore/core/command_buffer.hpp"
+#include "vulkan/lvcore/command_buffer.hpp"
 
-#include "vulkan/lvcore/core/core.hpp"
+#include "vulkan/lvcore/core.hpp"
 
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
+
+namespace vulkan {
 
 #define _LV_CHECK_IF_ENCODING \
 if (renderPassBound) { \
@@ -12,7 +14,7 @@ if (renderPassBound) { \
     renderPassBound = false; \
 }
 
-Vulkan_CommandBuffer::Vulkan_CommandBuffer(Vulkan_CommandBufferCreateInfo createInfo) {
+CommandBuffer::CommandBuffer(CommandBufferCreateInfo createInfo) {
     frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
     threadIndex = createInfo.threadIndex;
@@ -37,11 +39,11 @@ Vulkan_CommandBuffer::Vulkan_CommandBuffer(Vulkan_CommandBufferCreateInfo create
     }
 }
 
-Vulkan_CommandBuffer::~Vulkan_CommandBuffer() {
+CommandBuffer::~CommandBuffer() {
     vkFreeCommandBuffers(g_vulkan_device->device(), g_vulkan_device->commandPool(threadIndex), commandBuffers.size(), commandBuffers.data());
 }
 
-void Vulkan_CommandBuffer::beginRecording(VkCommandBufferUsageFlags usage) {
+void CommandBuffer::beginRecording(VkCommandBufferUsageFlags usage) {
     uint8_t index = g_vulkan_swapChain->crntFrame() % frameCount;
     index = g_vulkan_swapChain->crntFrame();
 
@@ -52,7 +54,7 @@ void Vulkan_CommandBuffer::beginRecording(VkCommandBufferUsageFlags usage) {
     VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffers[index], &beginInfo));
 }
 
-void Vulkan_CommandBuffer::endRecording() {
+void CommandBuffer::endRecording() {
     _LV_CHECK_IF_ENCODING;
 
     uint8_t index = g_vulkan_swapChain->crntFrame() % frameCount;
@@ -60,7 +62,7 @@ void Vulkan_CommandBuffer::endRecording() {
     VK_CHECK_RESULT(vkEndCommandBuffer(commandBuffers[index]));
 }
 
-void Vulkan_CommandBuffer::submit(Vulkan_Semaphore* waitSemaphore, Vulkan_Semaphore* signalSemaphore) {
+void CommandBuffer::submit(Semaphore* waitSemaphore, Semaphore* signalSemaphore) {
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
@@ -93,7 +95,7 @@ void Vulkan_CommandBuffer::submit(Vulkan_Semaphore* waitSemaphore, Vulkan_Semaph
     */
 }
 
-void Vulkan_CommandBuffer::beginRenderCommands(Vulkan_Framebuffer* framebuffer) {
+void CommandBuffer::beginRenderCommands(Framebuffer* framebuffer) {
     _LV_CHECK_IF_ENCODING;
     
     VkRenderPassBeginInfo renderPassInfo{};
@@ -112,40 +114,40 @@ void Vulkan_CommandBuffer::beginRenderCommands(Vulkan_Framebuffer* framebuffer) 
     renderPassBound = true;
 }
 
-void Vulkan_CommandBuffer::beginComputeCommands() {
+void CommandBuffer::beginComputeCommands() {
     _LV_CHECK_IF_ENCODING;
 }
 
-void Vulkan_CommandBuffer::beginBlitCommands() {
+void CommandBuffer::beginBlitCommands() {
     _LV_CHECK_IF_ENCODING;
 }
 
-void Vulkan_CommandBuffer::endCommands() {
+void CommandBuffer::endCommands() {
     _LV_CHECK_IF_ENCODING;
 }
 
-void Vulkan_CommandBuffer::waitUntilCompleted() {
+void CommandBuffer::waitUntilCompleted() {
     vkWaitForFences(g_vulkan_device->device(), 1, &fences[g_vulkan_swapChain->crntFrame()], VK_TRUE, UINT64_MAX);
 }
 
-VkCommandBuffer Vulkan_CommandBuffer::_getActiveCommandBuffer() {
+VkCommandBuffer CommandBuffer::_getActiveCommandBuffer() {
     return commandBuffers[g_vulkan_swapChain->crntFrame() % frameCount];
 }
 
 //Commands
 
 //Render
-void Vulkan_CommandBuffer::cmdBindVertexBuffer(Vulkan_Buffer* buffer) {
+void CommandBuffer::cmdBindVertexBuffer(Buffer* buffer) {
     VkDeviceSize offsets[] = {0};
     VkBuffer buffers[] = {buffer->buffer(g_vulkan_swapChain->crntFrame() % buffer->frameCount())};
     vkCmdBindVertexBuffers(_getActiveCommandBuffer(), 0, 1, buffers, offsets);
 }
 
-void Vulkan_CommandBuffer::cmdDraw(uint32_t vertexCount, uint32_t instanceCount) {
+void CommandBuffer::cmdDraw(uint32_t vertexCount, uint32_t instanceCount) {
     vkCmdDraw(_getActiveCommandBuffer(), vertexCount, instanceCount, 0, 0);
 }
 
-void Vulkan_CommandBuffer::cmdDrawIndexed(Vulkan_Buffer* indexBuffer, IndexType indexType, uint32_t indexCount, uint32_t instanceCount) {
+void CommandBuffer::cmdDrawIndexed(Buffer* indexBuffer, IndexType indexType, uint32_t indexCount, uint32_t instanceCount) {
     VkIndexType vkIndexType;
     GET_VK_INDEX_TYPE(indexType, vkIndexType);
     
@@ -154,16 +156,16 @@ void Vulkan_CommandBuffer::cmdDrawIndexed(Vulkan_Buffer* indexBuffer, IndexType 
     vkCmdDrawIndexed(_getActiveCommandBuffer(), indexCount, instanceCount, 0, 0, 0);
 }
 
-void Vulkan_CommandBuffer::cmdBindDescriptorSet(Vulkan_DescriptorSet* descriptorSet) {
+void CommandBuffer::cmdBindDescriptorSet(DescriptorSet* descriptorSet) {
     VkDescriptorSet descriptorSets[] = {descriptorSet->descriptorSet(g_vulkan_swapChain->crntFrame() % descriptorSet->frameCount())};
     vkCmdBindDescriptorSets(_getActiveCommandBuffer(), pipelineBindPoint, descriptorSet->pipelineLayout()->pipelineLayout(), descriptorSet->layoutIndex(), 1, descriptorSets, 0, nullptr);
 }
 
-void Vulkan_CommandBuffer::cmdNextSubpass() {
+void CommandBuffer::cmdNextSubpass() {
     vkCmdNextSubpass(_getActiveCommandBuffer(), VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void Vulkan_CommandBuffer::cmdBindGraphicsPipeline(Vulkan_GraphicsPipeline* graphicsPipeline) {
+void CommandBuffer::cmdBindGraphicsPipeline(GraphicsPipeline* graphicsPipeline) {
     vkCmdBindPipeline(_getActiveCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->graphicsPipeline());
     pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     activePipelineLayout = graphicsPipeline->pipelineLayout();
@@ -187,7 +189,7 @@ void Vulkan_CommandBuffer::cmdBindGraphicsPipeline(Vulkan_GraphicsPipeline* grap
     vkCmdSetScissor(_getActiveCommandBuffer(), 0, 1, &scissor);
 }
 
-void Vulkan_CommandBuffer::cmdPushConstants(void* data, uint16_t index) {
+void CommandBuffer::cmdPushConstants(void* data, uint16_t index) {
     vkCmdPushConstants(_getActiveCommandBuffer(),
                        activePipelineLayout->pipelineLayout(),
                        activePipelineLayout->pushConstantRange(index).stageFlags,
@@ -195,48 +197,48 @@ void Vulkan_CommandBuffer::cmdPushConstants(void* data, uint16_t index) {
                        activePipelineLayout->pushConstantRange(index).size, data);
 }
 
-void Vulkan_CommandBuffer::cmdBindViewport(Vulkan_Viewport* viewport) {
+void CommandBuffer::cmdBindViewport(Viewport* viewport) {
     vkCmdSetViewport(_getActiveCommandBuffer(), 0, 1, &viewport->viewport);
 	vkCmdSetScissor(_getActiveCommandBuffer(), 0, 1, &viewport->scissor);
 }
 
 //Compute
-void Vulkan_CommandBuffer::cmdBindComputePipeline(Vulkan_ComputePipeline* computePipeline) {
+void CommandBuffer::cmdBindComputePipeline(ComputePipeline* computePipeline) {
     vkCmdBindPipeline(_getActiveCommandBuffer(), VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline->computePipeline());
     pipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 }
 
-void Vulkan_CommandBuffer::cmdDispatchThreadgroups(uint32_t threadgroupsX, uint32_t threadgroupsY, uint32_t threadgroupsZ, uint32_t threadsPerGroupX, uint32_t threadsPerGroupY, uint32_t threadsPerGroupZ) {
+void CommandBuffer::cmdDispatchThreadgroups(uint32_t threadgroupsX, uint32_t threadgroupsY, uint32_t threadgroupsZ, uint32_t threadsPerGroupX, uint32_t threadsPerGroupY, uint32_t threadsPerGroupZ) {
     vkCmdDispatch(_getActiveCommandBuffer(), threadgroupsX, threadgroupsY, threadgroupsZ);
 }
 
 //Blit
-void Vulkan_CommandBuffer::cmdStagingCopyDataToBuffer(Vulkan_Buffer* buffer, void* data, size_t aSize) {
+void CommandBuffer::cmdStagingCopyDataToBuffer(Buffer* buffer, void* data, size_t aSize) {
     if (aSize == 0)
         aSize = buffer->size();
     uint8_t index = g_vulkan_swapChain->crntFrame() % buffer->frameCount();
     
     VkBuffer stagingBuffer;
 
-    VmaAllocation stagingAllocation = Vulkan_BufferHelper::createBuffer(aSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, nullptr, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
+    VmaAllocation stagingAllocation = BufferHelper::createBuffer(aSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, nullptr, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
 
     void* mappedData;
     vmaMapMemory(g_vulkan_device->allocator(), stagingAllocation, &mappedData);
     memcpy(mappedData, data, aSize);
     vmaUnmapMemory(g_vulkan_device->allocator(), stagingAllocation);
 
-    Vulkan_BufferHelper::copyBuffer(_getActiveCommandBuffer(), stagingBuffer, buffer->buffer(index), aSize);
+    BufferHelper::copyBuffer(_getActiveCommandBuffer(), stagingBuffer, buffer->buffer(index), aSize);
 
     //vmaDestroyBuffer(g_vulkan_device->allocator(), stagingBuffer, stagingAllocation);
-    stagingBufferAllocationsToDestroy.emplace_back(Vulkan_BufferAllocation{stagingBuffer, stagingAllocation});
+    stagingBufferAllocationsToDestroy.emplace_back(BufferAllocation{stagingBuffer, stagingAllocation});
 }
 
-void Vulkan_CommandBuffer::cmdStagingCopyDataToImage(Vulkan_Image* image, void* data, uint8_t bytesPerPixel) {
+void CommandBuffer::cmdStagingCopyDataToImage(Image* image, void* data, uint8_t bytesPerPixel) {
     VkDeviceSize imageSize = image->width() * image->height() * bytesPerPixel;
 
     VkBuffer stagingBuffer;
 
-    VmaAllocation stagingAllocation = Vulkan_BufferHelper::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, nullptr, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    VmaAllocation stagingAllocation = BufferHelper::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, nullptr, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     void* mappedData;
     vmaMapMemory(g_vulkan_device->allocator(), stagingAllocation, &mappedData);
@@ -245,24 +247,24 @@ void Vulkan_CommandBuffer::cmdStagingCopyDataToImage(Vulkan_Image* image, void* 
 
     for (uint8_t i = 0; i < image->frameCount(); i++) {
         cmdTransitionImageLayout(image, i, ImageLayout::Undefined, ImageLayout::TransferDestinationOptimal);
-        Vulkan_BufferHelper::copyBufferToImage(_getActiveCommandBuffer(), stagingBuffer, image->image(i), image->width(), image->height());
+        BufferHelper::copyBufferToImage(_getActiveCommandBuffer(), stagingBuffer, image->image(i), image->width(), image->height());
     }
 
     //vmaDestroyBuffer(g_vulkan_device->allocator(), stagingBuffer, stagingAllocation);
-    stagingBufferAllocationsToDestroy.emplace_back(Vulkan_BufferAllocation{stagingBuffer, stagingAllocation});
+    stagingBufferAllocationsToDestroy.emplace_back(BufferAllocation{stagingBuffer, stagingAllocation});
 }
 
-void Vulkan_CommandBuffer::cmdTransitionImageLayout(Vulkan_Image* image, uint8_t imageIndex, ImageLayout srcLayout, ImageLayout dstLayout) {
+void CommandBuffer::cmdTransitionImageLayout(Image* image, uint8_t imageIndex, ImageLayout srcLayout, ImageLayout dstLayout) {
     VkFormat vkFormat;
     GET_VK_FORMAT(image->format(), vkFormat);
     VkImageLayout vkSourceImageLayout, vkDestinationImageLayout;
     GET_VK_IMAGE_LAYOUT(srcLayout, vkSourceImageLayout);
     GET_VK_IMAGE_LAYOUT(dstLayout, vkDestinationImageLayout);
 
-    Vulkan_ImageHelper::transitionImageLayout(_getActiveCommandBuffer(), image->image(imageIndex), vkFormat, vkSourceImageLayout, vkDestinationImageLayout, vulkan::getVKImageAspectFlags(image->aspect()), image->layerCount(), image->mipCount());
+    ImageHelper::transitionImageLayout(_getActiveCommandBuffer(), image->image(imageIndex), vkFormat, vkSourceImageLayout, vkDestinationImageLayout, getVKImageAspectFlags(image->aspect()), image->layerCount(), image->mipCount());
 }
 
-void Vulkan_CommandBuffer::cmdGenerateMipmapsForImage(Vulkan_Image* image, uint8_t aFrameCount) {
+void CommandBuffer::cmdGenerateMipmapsForImage(Image* image, uint8_t aFrameCount) {
     if (aFrameCount == 0) aFrameCount = image->frameCount();
 
     VkImageMemoryBarrier barrier{};
@@ -332,11 +334,11 @@ void Vulkan_CommandBuffer::cmdGenerateMipmapsForImage(Vulkan_Image* image, uint8
     }
 }
 
-void Vulkan_CommandBuffer::cmdCopyToImageFromImage(Vulkan_Image* source, Vulkan_Image* destination) {
+void CommandBuffer::cmdCopyToImageFromImage(Image* source, Image* destination) {
     throw std::runtime_error("Not implemented yet");
 }
 
-void Vulkan_CommandBuffer::cmdBlitToImageFromImage(Vulkan_Image* source, Vulkan_Image* destination) {
+void CommandBuffer::cmdBlitToImageFromImage(Image* source, Image* destination) {
     uint8_t srcIndex = g_vulkan_swapChain->crntFrame() % source->frameCount();
     uint8_t dstIndex = g_vulkan_swapChain->crntFrame() % destination->frameCount();
 
@@ -344,7 +346,7 @@ void Vulkan_CommandBuffer::cmdBlitToImageFromImage(Vulkan_Image* source, Vulkan_
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.subresourceRange.aspectMask = vulkan::getVKImageAspectFlags(destination->aspect());
+    barrier.subresourceRange.aspectMask = getVKImageAspectFlags(destination->aspect());
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
     barrier.subresourceRange.baseMipLevel = 0;
@@ -375,14 +377,14 @@ void Vulkan_CommandBuffer::cmdBlitToImageFromImage(Vulkan_Image* source, Vulkan_
     VkImageBlit blit{};
     blit.srcOffsets[0] = {0, 0, 0};
     blit.srcOffsets[1] = {source->width(), source->height(), 1};
-    blit.srcSubresource.aspectMask = vulkan::getVKImageAspectFlags(source->aspect());
+    blit.srcSubresource.aspectMask = getVKImageAspectFlags(source->aspect());
     blit.srcSubresource.mipLevel = 0;
     blit.srcSubresource.baseArrayLayer = 0;
     blit.srcSubresource.layerCount = 1;
 
     blit.dstOffsets[0] = {0, 0, 0};
     blit.dstOffsets[1] = {destination->width(), destination->height(), 1 };
-    blit.dstSubresource.aspectMask = vulkan::getVKImageAspectFlags(destination->aspect());
+    blit.dstSubresource.aspectMask = getVKImageAspectFlags(destination->aspect());
     blit.dstSubresource.mipLevel = 0;
     blit.dstSubresource.baseArrayLayer = 0;
     blit.dstSubresource.layerCount = 1;
@@ -407,5 +409,7 @@ void Vulkan_CommandBuffer::cmdBlitToImageFromImage(Vulkan_Image* source, Vulkan_
         1, &barrier);
     */
 }
+
+} //namespace vulkan
 
 } //namespace lv

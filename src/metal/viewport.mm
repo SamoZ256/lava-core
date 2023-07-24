@@ -1,14 +1,16 @@
-#include "metal/lvcore/core/viewport.hpp"
+#include "metal/lvcore/viewport.hpp"
 
 #include <iostream>
 
 namespace lv {
 
-Metal_Viewport::Metal_Viewport(int32_t x, int32_t y, uint32_t width, uint32_t height) {
+namespace metal {
+
+Viewport::Viewport(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     setViewport(x, y, width, height);
 }
 
-void Metal_Viewport::setViewport(int32_t x, int32_t y, uint32_t width, uint32_t height) {
+void Viewport::setViewport(int32_t x, int32_t y, uint32_t width, uint32_t height) {
     //TODO: uncomment this
     /*
 	uint32_t trueTotalWidth = (totalWidth == 0 ? width : totalWidth);
@@ -33,5 +35,7 @@ void Metal_Viewport::setViewport(int32_t x, int32_t y, uint32_t width, uint32_t 
 	scissor.y = std::max((int)scissor.y, 0);
     */
 }
+
+} //namespace metal
 
 } //namespace lv

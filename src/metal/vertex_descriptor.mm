@@ -1,12 +1,14 @@
-#include "metal/lvcore/core/vertex_descriptor.hpp"
+#include "metal/lvcore/vertex_descriptor.hpp"
 
-#include "metal/lvcore/core/common.hpp"
+#include "metal/lvcore/common.hpp"
 
-#include "metal/lvcore/core/core.hpp"
+#include "metal/lvcore/core.hpp"
 
 namespace lv {
 
-Metal_VertexDescriptor::Metal_VertexDescriptor(Metal_VertexDescriptorCreateInfo createInfo) {
+namespace metal {
+
+VertexDescriptor::VertexDescriptor(internal::VertexDescriptorCreateInfo createInfo) {
     MTLVertexStepFunction mtlVertexStepFunction;
     GET_MTL_VERTEX_STEP_FUNCTION(createInfo.inputRate, mtlVertexStepFunction);
 
@@ -24,5 +26,7 @@ Metal_VertexDescriptor::Metal_VertexDescriptor(Metal_VertexDescriptorCreateInfo 
         ((MTLVertexDescriptor*)_descriptor).attributes[binding.location].offset = binding.offset;
     }
 }
+
+} //namespace metal
 
 } //namespace lv

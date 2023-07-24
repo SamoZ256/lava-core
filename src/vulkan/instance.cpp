@@ -1,15 +1,17 @@
-#include "vulkan/lvcore/core/instance.hpp"
+#include "vulkan/lvcore/instance.hpp"
 
 #define LVND_BACKEND_VULKAN
 #include "lvnd/lvnd.h"
 
-#include "vulkan/lvcore/core/common.hpp"
+#include "vulkan/lvcore/common.hpp"
 
 namespace lv {
 
+namespace vulkan {
+
 //Implementation
-Vulkan_Instance* g_vulkan_instance = nullptr;
-const std::vector<const char *> Vulkan_Instance::validationLayers = {"VK_LAYER_KHRONOS_validation"};
+Instance* g_vulkan_instance = nullptr;
+const std::vector<const char *> Instance::validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
 // local callback functions
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData) {
@@ -34,7 +36,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	}
 }
 
-Vulkan_Instance::Vulkan_Instance(Vulkan_InstanceCreateInfo createInfo) {
+Instance::Instance(InstanceCreateInfo createInfo) {
 	_vulkanVersion = createInfo.vulkanVersion;
 	_validationEnable = createInfo.validationEnable;
     if (_validationEnable && !checkValidationLayerSupport()) {
@@ -80,14 +82,14 @@ Vulkan_Instance::Vulkan_Instance(Vulkan_InstanceCreateInfo createInfo) {
 	g_vulkan_instance = this;
 }
 
-Vulkan_Instance::~Vulkan_Instance() {
+Instance::~Instance() {
 	if (_validationEnable)
 		DestroyDebugUtilsMessengerEXT(_instance, debugMessenger, nullptr);
 
 	vkDestroyInstance(_instance, nullptr);
 }
 
-void Vulkan_Instance::setupDebugMessenger() {
+void Instance::setupDebugMessenger() {
 	if (_validationEnable) {
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		populateDebugMessengerCreateInfo(createInfo);
@@ -95,7 +97,7 @@ void Vulkan_Instance::setupDebugMessenger() {
 	}
 }
 
-bool Vulkan_Instance::checkValidationLayerSupport() {
+bool Instance::checkValidationLayerSupport() {
 	uint32_t layerCount;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -119,7 +121,7 @@ bool Vulkan_Instance::checkValidationLayerSupport() {
 	return true;
 }
 
-void Vulkan_Instance::hasGflwRequiredInstanceExtensions() {
+void Instance::hasGflwRequiredInstanceExtensions() {
 	uint32_t extensionCount = 0;
 	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 	std::vector<VkExtensionProperties> extensions(extensionCount);
@@ -142,7 +144,7 @@ void Vulkan_Instance::hasGflwRequiredInstanceExtensions() {
 	}
 }
 
-void Vulkan_Instance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
+void Instance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
 	createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
@@ -154,7 +156,7 @@ void Vulkan_Instance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCrea
 	createInfo.pUserData = nullptr;  // Optional
 }
 
-std::vector<const char *> Vulkan_Instance::getRequiredExtensions() {
+std::vector<const char *> Instance::getRequiredExtensions() {
 	uint16_t lvndExtensionCount = 0;
 	const char** lvndExtensions;
 	lvndExtensions = lvndVulkanGetRequiredInstanceExtensions(&lvndExtensionCount);
@@ -175,5 +177,7 @@ std::vector<const char *> Vulkan_Instance::getRequiredExtensions() {
 
 	return extensions;
 }
+
+} //namespace vulkan
 
 } //namespace lv

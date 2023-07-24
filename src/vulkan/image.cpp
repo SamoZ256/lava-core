@@ -1,20 +1,22 @@
-#include "vulkan/lvcore/core/image.hpp"
+#include "vulkan/lvcore/image.hpp"
 
 #include "stb/stb_image.h"
 #include "gli/gli.hpp"
 
-#include "vulkan/lvcore/core/core.hpp"
+#include "vulkan/lvcore/core.hpp"
 
-#include "vulkan/lvcore/core/device.hpp"
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/device.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-Vulkan_Image::Vulkan_Image(Vulkan_ImageCreateInfo createInfo) {
+namespace vulkan {
+
+Image::Image(ImageCreateInfo createInfo) {
     create(createInfo);
 }
 
-Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* commandBuffer) {
+Image::Image(ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
     std::string strFilename = std::string(loadInfo.filename);
     std::replace(strFilename.begin(), strFilename.end(), '\\', '/');
     std::string extension = strFilename.substr(strFilename.find_last_of('.'));
@@ -46,7 +48,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* 
         //if (loadInfo.generateMipmaps)
         //    mipCount = std::max(std::max(ceil(log2(width)), ceil(log2(height))), 1.0);
 
-        Vulkan_ImageCreateInfo createInfo{
+        ImageCreateInfo createInfo{
             .frameCount = 1,
             .format = format,
             .width = uint16_t(width),
@@ -65,7 +67,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* 
         //if (loadInfo.generateMipmaps)
         //    commandBuffer->cmdGenerateMipmapsForImage(this);
     } else {
-        Vulkan_ImageCreateInfo createInfo{
+        ImageCreateInfo createInfo{
             .frameCount = 1,
             .format = format,
             .width = 1,
@@ -78,7 +80,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageLoadInfo loadInfo, Vulkan_CommandBuffer* 
     }
 }
 
-Vulkan_Image::Vulkan_Image(Vulkan_ImageViewCreateInfo viewCreateInfo) {
+Image::Image(ImageViewCreateInfo viewCreateInfo) {
     _frameCount = viewCreateInfo.image->frameCount();
     _isOriginal = false;
     _format = viewCreateInfo.image->format();
@@ -101,7 +103,7 @@ Vulkan_Image::Vulkan_Image(Vulkan_ImageViewCreateInfo viewCreateInfo) {
     _createImageView(viewCreateInfo.viewType, viewCreateInfo.image->aspect());
 }
 
-Vulkan_Image::~Vulkan_Image() {
+Image::~Image() {
     for (uint8_t i = 0; i < _frameCount; i++) {
         if (_isOriginal)
             vmaDestroyImage(g_vulkan_device->allocator(), images[i], allocations[i]);
@@ -109,7 +111,7 @@ Vulkan_Image::~Vulkan_Image() {
     }
 }
 
-void Vulkan_Image::create(Vulkan_ImageCreateInfo& createInfo) {
+void Image::create(ImageCreateInfo& createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
     _width = createInfo.width;
@@ -152,27 +154,27 @@ void Vulkan_Image::create(Vulkan_ImageCreateInfo& createInfo) {
     imageViews.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
         //Creating image
-        allocations[i] = Vulkan_ImageHelper::createImage((uint16_t)_width, (uint16_t)_height, vkFormat, VK_IMAGE_TILING_OPTIMAL, vulkan::getVKImageUsageFlags(createInfo.usage), vkImageType, images[i], nullptr, vkMemoryPropertyFlags, _layerCount, _mipCount, vulkan::getVKAllocationCreateFlags(memoryAllocationFlags), flags);
-        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, vulkan::getVKImageAspectFlags(_aspect), vkImageViewType, 0, _layerCount, 0, _mipCount);
+        allocations[i] = ImageHelper::createImage((uint16_t)_width, (uint16_t)_height, vkFormat, VK_IMAGE_TILING_OPTIMAL, getVKImageUsageFlags(createInfo.usage), vkImageType, images[i], nullptr, vkMemoryPropertyFlags, _layerCount, _mipCount, getVKAllocationCreateFlags(memoryAllocationFlags), flags);
+        ImageHelper::createImageView(imageViews[i], images[i], vkFormat, getVKImageAspectFlags(_aspect), vkImageViewType, 0, _layerCount, 0, _mipCount);
     }
 }
 
-void Vulkan_Image::_createImageView(ImageType viewType, ImageAspectFlags aspect) {
+void Image::_createImageView(ImageType viewType, ImageAspectFlags aspect) {
     VkFormat vkFormat;
     GET_VK_FORMAT(_format, vkFormat);
     VkImageViewType vkImageViewType;
     GET_VK_IMAGE_VIEW_TYPE(viewType, vkImageViewType);
 
     for (uint8_t i = 0; i < _frameCount; i++) {
-        Vulkan_ImageHelper::createImageView(imageViews[i], images[i], vkFormat, vulkan::getVKImageAspectFlags(aspect), vkImageViewType, _baseLayer, _layerCount, _baseMip, _mipCount);
+        ImageHelper::createImageView(imageViews[i], images[i], vkFormat, getVKImageAspectFlags(aspect), vkImageViewType, _baseLayer, _layerCount, _baseMip, _mipCount);
     }
 }
 
-Vulkan_ImageDescriptorInfo Vulkan_Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
+ImageDescriptorInfo Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
     VkImageLayout vkImageLayout;
     GET_VK_IMAGE_LAYOUT(imageLayout, vkImageLayout);
 
-    Vulkan_ImageDescriptorInfo info;
+    ImageDescriptorInfo info;
     info.infos.resize(imageViews.size());
     for (uint8_t i = 0; i < info.infos.size(); i++) {
         int8_t index = i + frameOffset;
@@ -188,8 +190,8 @@ Vulkan_ImageDescriptorInfo Vulkan_Image::descriptorInfo(uint32_t binding, Descri
     return info;
 }
     
-Vulkan_Image* Vulkan_Image::newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
-    Vulkan_Image* newImage = new Vulkan_Image({
+Image* Image::newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
+    Image* newImage = new Image({
         .image = this,
         .viewType = viewType,
         .baseLayer = baseLayer,
@@ -200,5 +202,7 @@ Vulkan_Image* Vulkan_Image::newImageView(ImageType viewType, uint16_t baseLayer,
 
     return newImage;
 }
+
+} //namespace vulkan
 
 } //namespace lv

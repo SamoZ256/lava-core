@@ -1,16 +1,18 @@
-#include "vulkan/lvcore/core/descriptor_set.hpp"
+#include "vulkan/lvcore/descriptor_set.hpp"
 
-#include "vulkan/lvcore/core/common.hpp"
+#include "vulkan/lvcore/common.hpp"
 
-#include "vulkan/lvcore/core/device.hpp"
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/device.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 //#include "Core/Renderer.hpp"
 
 namespace lv {
 
+namespace vulkan {
+
 // *************** Descriptor Writer *********************
 
-void Vulkan_DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo *bufferInfo) {
+void DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo *bufferInfo) {
 	//assert(setLayout.bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
 	auto& bindingDescription = pipelineLayout->descriptorSetLayout(layoutIndex).bindings[binding];
@@ -27,7 +29,7 @@ void Vulkan_DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferIn
 	writes.push_back(write);
 }
 
-void Vulkan_DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo *imageInfo) {
+void DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo *imageInfo) {
 	//assert(setLayout.bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
 	auto &bindingDescription = pipelineLayout->descriptorSetLayout(layoutIndex).bindings[binding];
@@ -44,12 +46,12 @@ void Vulkan_DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo
 	writes.push_back(write);
 }
 
-void Vulkan_DescriptorWriter::build(VkDescriptorSet& set) {
+void DescriptorWriter::build(VkDescriptorSet& set) {
 	g_vulkan_descriptorPool->allocateDescriptorSet(pipelineLayout->descriptorSetLayout(layoutIndex).descriptorSetLayout, set);
 	overwrite(set);
 }
 
-void Vulkan_DescriptorWriter::overwrite(VkDescriptorSet &set) {
+void DescriptorWriter::overwrite(VkDescriptorSet &set) {
 	for (auto &write : writes) {
 		write.dstSet = set;
 	}
@@ -65,7 +67,7 @@ void DescriptorSet::destroy() {
 }
 */
 
-Vulkan_DescriptorSet::Vulkan_DescriptorSet(Vulkan_DescriptorSetCreateInfo createInfo) : _pipelineLayout(createInfo.pipelineLayout), _layoutIndex(createInfo.layoutIndex) {
+DescriptorSet::DescriptorSet(DescriptorSetCreateInfo createInfo) : _pipelineLayout(createInfo.pipelineLayout), _layoutIndex(createInfo.layoutIndex) {
 	_frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
 	while (true) {
@@ -86,7 +88,7 @@ Vulkan_DescriptorSet::Vulkan_DescriptorSet(Vulkan_DescriptorSetCreateInfo create
 	
 	descriptorSets.resize(_frameCount);
 	for (uint8_t i = 0; i < _frameCount; i++) {
-		Vulkan_DescriptorWriter writer(_pipelineLayout, _layoutIndex);
+		DescriptorWriter writer(_pipelineLayout, _layoutIndex);
 		for (uint8_t buff = 0; buff < createInfo.bufferBindings.size(); buff++) {
 			uint8_t frameIndex = i < createInfo.bufferBindings[buff].infos.size() ? i : 0;
 			writer.writeBuffer(createInfo.bufferBindings[buff].binding, &createInfo.bufferBindings[buff].infos[frameIndex]);
@@ -101,11 +103,11 @@ Vulkan_DescriptorSet::Vulkan_DescriptorSet(Vulkan_DescriptorSetCreateInfo create
 	pool = &g_vulkan_descriptorPool->descriptorPool;
 }
 
-Vulkan_DescriptorSet::~Vulkan_DescriptorSet() {
+DescriptorSet::~DescriptorSet() {
 	vkFreeDescriptorSets(g_vulkan_device->device(), *pool, descriptorSets.size(), descriptorSets.data());
 }
 
-bool Vulkan_DescriptorSet::registerDescriptor(DescriptorType descriptorType) {
+bool DescriptorSet::registerDescriptor(DescriptorType descriptorType) {
 	uint32_t& count = g_vulkan_descriptorPool->poolSizes[descriptorType];
 	if (count == 0) {
 		g_vulkan_descriptorPool->recreate();
@@ -119,5 +121,7 @@ bool Vulkan_DescriptorSet::registerDescriptor(DescriptorType descriptorType) {
 
 	return true;
 }
+
+} //namespace vulkan
 
 } //namespace lv

@@ -1,15 +1,52 @@
-#include "vulkan/lvcore/core/render_pass.hpp"
+#include "vulkan/lvcore/render_pass.hpp"
 
-#include "vulkan/lvcore/core/common.hpp"
+#include "vulkan/lvcore/common.hpp"
 
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-Vulkan_RenderPass::Vulkan_RenderPass(Vulkan_RenderPassCreateInfo createInfo) : dependencies(createInfo.dependencies) {
+namespace vulkan {
+
+VkAttachmentDescription getAttachmentDescription(RenderPassAttachment& attachment) {
+    VkFormat vkFormat;
+    GET_VK_FORMAT(attachment.format, vkFormat);
+    VkAttachmentLoadOp vkAttachmentLoadOp;
+    GET_VK_ATTACHMENT_LOAD_OP(attachment.loadOp, vkAttachmentLoadOp);
+    VkAttachmentStoreOp vkAttachmentStoreOp;
+    GET_VK_ATTACHMENT_STORE_OP(attachment.storeOp, vkAttachmentStoreOp);
+    VkImageLayout vkInitialImageLayout, vkFinalImageLayout;
+    GET_VK_IMAGE_LAYOUT(attachment.initialLayout, vkInitialImageLayout);
+    GET_VK_IMAGE_LAYOUT(attachment.finalLayout, vkFinalImageLayout);
+
+    VkAttachmentDescription description{};
+    description.format = vkFormat;
+    description.samples = VK_SAMPLE_COUNT_1_BIT;
+    description.loadOp = vkAttachmentLoadOp;
+    description.storeOp = vkAttachmentStoreOp;
+    description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    description.initialLayout = vkInitialImageLayout;
+    description.finalLayout = vkFinalImageLayout;
+
+    return description;
+}
+
+VkAttachmentReference getAttachmentReference(SubpassAttachment& attachment) {
+    VkImageLayout vkImageLayout;
+    GET_VK_IMAGE_LAYOUT(attachment.layout, vkImageLayout);
+
+    VkAttachmentReference reference{};
+    reference.attachment = attachment.index;
+    reference.layout = vkImageLayout;
+
+    return reference;
+}
+
+RenderPass::RenderPass(RenderPassCreateInfo createInfo) : dependencies(createInfo.dependencies) {
     std::vector<VkAttachmentDescription> attachmentDescriptions(createInfo.attachments.size());
     for (int i = 0; i < createInfo.attachments.size(); i++)
-        attachmentDescriptions[createInfo.attachments[i].index] = createInfo.attachments[i].getAttachmentDescription();
+        attachmentDescriptions[createInfo.attachments[i].index] = getAttachmentDescription(createInfo.attachments[i]);
 
     /*
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -48,14 +85,14 @@ Vulkan_RenderPass::Vulkan_RenderPass(Vulkan_RenderPassCreateInfo createInfo) : d
     for (uint8_t i = 0; i < createInfo.subpasses.size(); i++) {
         colorAttachmentReferences[i].resize(createInfo.subpasses[i]->colorAttachments.size());
         for (int j = 0; j < colorAttachmentReferences[i].size(); j++)
-            colorAttachmentReferences[i][j] = createInfo.subpasses[i]->colorAttachments[j].getAttachmentReference();
+            colorAttachmentReferences[i][j] = getAttachmentReference(createInfo.subpasses[i]->colorAttachments[j]);
 
         if (createInfo.subpasses[i]->depthAttachment.index != -1)
-            depthAttachmentReferences[i] = createInfo.subpasses[i]->depthAttachment.getAttachmentReference();
+            depthAttachmentReferences[i] = getAttachmentReference(createInfo.subpasses[i]->depthAttachment);
 
         inputAttachmentReferences[i].resize(createInfo.subpasses[i]->inputAttachments.size());
         for (int j = 0; j < inputAttachmentReferences[i].size(); j++)
-            inputAttachmentReferences[i][j] = createInfo.subpasses[i]->inputAttachments[j].getAttachmentReference();
+            inputAttachmentReferences[i][j] = getAttachmentReference(createInfo.subpasses[i]->inputAttachments[j]);
 
         //std::cout << "Color attachments: " << colorAttachmentReferences[i].size() << std::endl;
         //std::cout << "Depth attachment: " << (subpasses[i]->depthAttachment.index != -1) << std::endl;
@@ -82,8 +119,10 @@ Vulkan_RenderPass::Vulkan_RenderPass(Vulkan_RenderPassCreateInfo createInfo) : d
     VK_CHECK_RESULT(vkCreateRenderPass(g_vulkan_device->device(), &renderPassInfo, nullptr, &_renderPass));
 }
 
-Vulkan_RenderPass::~Vulkan_RenderPass() {
+RenderPass::~RenderPass() {
     vkDestroyRenderPass(g_vulkan_device->device(), _renderPass, nullptr);
 }
+
+} //namespace vulkan
 
 } //namespace lv

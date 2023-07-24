@@ -3,13 +3,11 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/vertex_descriptor.hpp"
+#include "vulkan/lvcore/vertex_descriptor.hpp"
 
 namespace lv {
 
-typedef Vulkan_VertexDescriptorBinding VertexDescriptorBinding;
-typedef Vulkan_VertexDescriptorCreateInfo VertexDescriptorCreateInfo;
-typedef Vulkan_VertexDescriptor VertexDescriptor;
+typedef vulkan::VertexDescriptor VertexDescriptor;
 
 } //namespace lv
 
@@ -17,16 +15,21 @@ typedef Vulkan_VertexDescriptor VertexDescriptor;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/vertex_descriptor.hpp"
+#include "metal/lvcore/vertex_descriptor.hpp"
 
 namespace lv {
 
-typedef Metal_VertexDescriptorBinding VertexDescriptorBinding;
-typedef Metal_VertexDescriptorCreateInfo VertexDescriptorCreateInfo;
-typedef Metal_VertexDescriptor VertexDescriptor;
+typedef metal::VertexDescriptor VertexDescriptor;
 
 } //namespace lv
 
 #endif
+
+namespace lv {
+
+typedef internal::VertexDescriptorBinding VertexDescriptorBinding;
+typedef internal::VertexDescriptorCreateInfo VertexDescriptorCreateInfo;
+
+} //namespace lv
 
 #endif

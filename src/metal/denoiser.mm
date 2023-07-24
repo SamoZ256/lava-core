@@ -1,11 +1,13 @@
-#include "metal/lvcore/core/denoiser.hpp"
+#include "metal/lvcore/denoiser.hpp"
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-void Metal_Denoiser::init(Metal_DenoiserCreateInfo& createInfo) {
+namespace metal {
+
+void Denoiser::init(DenoiserCreateInfo& createInfo) {
     textureAllocator = [[MPSSVGFDefaultTextureAllocator alloc] initWithDevice:g_metal_device->device()];
     
     MPSSVGF* svgf = [[MPSSVGF alloc] initWithDevice:g_metal_device->device()];
@@ -20,16 +22,16 @@ void Metal_Denoiser::init(Metal_DenoiserCreateInfo& createInfo) {
     denoiser.bilateralFilterIterations = createInfo.bilateralFilterPassCount;
 }
 
-void Metal_Denoiser::destroy() {
+void Denoiser::destroy() {
     [textureAllocator release];
     [denoiser release];
 }
 
-void Metal_Denoiser::reset() {
+void Denoiser::reset() {
 
 }
 
-void Metal_Denoiser::cmdDenoise(Metal_CommandBuffer* commandBuffer, Metal_Image* inputImage, Metal_Image* normalDepthImage, Metal_Image* motionImage, Metal_Image* outputColorImage) {
+void Denoiser::cmdDenoise(CommandBuffer* commandBuffer, Image* inputImage, Image* normalDepthImage, Image* motionImage, Image* outputColorImage) {
     int8_t prevNormalDepthImageIndex = (g_metal_swapChain->crntFrame() - 1) % normalDepthImage->frameCount();
     if (prevNormalDepthImageIndex < 0) prevNormalDepthImageIndex += normalDepthImage->frameCount();
     outputColorImage->_setImage([denoiser encodeToCommandBuffer:commandBuffer->_getActiveCommandBuffer()
@@ -39,5 +41,7 @@ void Metal_Denoiser::cmdDenoise(Metal_CommandBuffer* commandBuffer, Metal_Image*
                     previousDepthNormalTexture:normalDepthImage->image(prevNormalDepthImageIndex)],
                     g_metal_swapChain->crntFrame() % outputColorImage->frameCount());
 }
+
+} //namespace metal
 
 } //namespace lv

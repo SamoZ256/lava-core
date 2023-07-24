@@ -1,4 +1,4 @@
-#include "metal/lvcore/core/image.hpp"
+#include "metal/lvcore/image.hpp"
 
 #include <string>
 #include <filesystem>
@@ -8,19 +8,21 @@
 #include "stb/stb_image.h"
 //#include "gli/gli.hpp"
 
-#include "metal/lvcore/core/core.hpp"
+#include "metal/lvcore/core.hpp"
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
-#include "metal/lvcore/core/buffer.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
+#include "metal/lvcore/buffer.hpp"
 
 namespace lv {
 
-id Metal_Image::blitComputeLibrary = nil;
-id Metal_Image::blitComputeFunction = nil;
-id Metal_Image::blitComputePipelineState = nil;
+namespace metal {
 
-Metal_Image::Metal_Image(Metal_ImageCreateInfo createInfo) {
+id Image::blitComputeLibrary = nil;
+id Image::blitComputeFunction = nil;
+id Image::blitComputePipelineState = nil;
+
+Image::Image(internal::ImageCreateInfo createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_metal_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
     _format = createInfo.format;
@@ -35,7 +37,7 @@ Metal_Image::Metal_Image(Metal_ImageCreateInfo createInfo) {
     GET_MTL_TEXTURE_TYPE(createInfo.imageType, mtlTextureType);
     MTLStorageMode mtlStorageMode;
     GET_MTL_STORAGE_MODE(createInfo.memoryType, mtlStorageMode);
-    MTLTextureUsage mtlTextureUsage = metal::getMTLTextureUsageFlags(createInfo.usage); //TODO: remove the metal namespace
+    MTLTextureUsage mtlTextureUsage = getMTLTextureUsageFlags(createInfo.usage); //TODO: remove the metal namespace
     
     if (createInfo.imageType == ImageType::Cube || createInfo.imageType == ImageType::CubeArray)
         _layersPerLayer = 6;
@@ -57,7 +59,7 @@ Metal_Image::Metal_Image(Metal_ImageCreateInfo createInfo) {
     [textureDesc release];
 }
 
-Metal_Image::Metal_Image(Metal_ImageLoadInfo loadInfo, Metal_CommandBuffer* commandBuffer) {
+Image::Image(internal::ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
     _frameCount = 1;
 
     std::string strFilename = std::string(loadInfo.filename);
@@ -114,7 +116,7 @@ Metal_Image::Metal_Image(Metal_ImageLoadInfo loadInfo, Metal_CommandBuffer* comm
             stbi_image_free(data);
 
         if (bGenerateMipmaps) {
-            Metal_CommandBuffer commandBuffer;
+            CommandBuffer commandBuffer;
             commandBuffer.frameCount = 1;
             commandBuffer.init();
             commandBuffer.bind();
@@ -149,12 +151,14 @@ Metal_Image::Metal_Image(Metal_ImageLoadInfo loadInfo, Metal_CommandBuffer* comm
         NSLog(@"Error creating the texture from %@: %@", url.absoluteString, error.localizedDescription);
 }
 
-Metal_Image::Metal_Image(Metal_ImageViewCreateInfo viewCreateInfo) {
-    _frameCount = viewCreateInfo.image->frameCount();
-    _isOriginal = false;
-    _width = viewCreateInfo.image->width();
-    _height = viewCreateInfo.image->height();
-    _format = viewCreateInfo.image->format();
+Image::Image(internal::ImageViewCreateInfo viewCreateInfo) {
+    CAST_FROM_INTERNAL_NAMED(viewCreateInfo.image, Image, image);
+
+    _frameCount = image->frameCount();
+    _isOriginal = False;
+    _width = image->width();
+    _height = image->height();
+    _format = image->format();
 
     _baseLayer = viewCreateInfo.baseLayer;
     _layerCount = viewCreateInfo.layerCount;
@@ -178,30 +182,30 @@ Metal_Image::Metal_Image(Metal_ImageViewCreateInfo viewCreateInfo) {
     }
 }
 
-Metal_Image::~Metal_Image() {
+Image::~Image() {
     if (_isOriginal) {
         for (uint8_t i = 0; i < _frameCount; i++)
             [images[i] release];
     }
 }
 
-Metal_ImageDescriptorInfo Metal_Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
-    Metal_ImageDescriptorInfo info;
-    info.images.resize(_frameCount);
+internal::ImageDescriptorInfo* Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
+    ImageDescriptorInfo* info = new ImageDescriptorInfo;
+    info->images.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
         int8_t index = i + frameOffset;
         if (index < 0) index += _frameCount;
         else if (index >= _frameCount) index -= _frameCount;
-        info.images[i] = images[index];
+        info->images[i] = images[index];
     }
-    info.binding = binding;
-    info.descriptorType = descriptorType;
+    info->binding = binding;
+    info->descriptorType = descriptorType;
 
     return info;
 }
     
-Metal_Image* Metal_Image::newImageView(lv::ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
-    Metal_Image* newImage = new Metal_Image({
+Image* Image::newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) {
+    Image* newImage = new Image({
         .image = this,
         .viewType = viewType,
         .baseLayer = baseLayer,
@@ -212,5 +216,7 @@ Metal_Image* Metal_Image::newImageView(lv::ImageType viewType, uint16_t baseLaye
 
     return newImage;
 }
+
+} //namespace metal
 
 } //namespace lv

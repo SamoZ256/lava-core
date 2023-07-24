@@ -1,4 +1,4 @@
-#include "metal/lvcore/core/core.hpp"
+#include "metal/lvcore/core.hpp"
 
 namespace lv {
 

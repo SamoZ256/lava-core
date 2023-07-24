@@ -1,14 +1,16 @@
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 #import <QuartzCore/QuartzCore.h>
 
-#include "metal/lvcore/core/device.hpp"
+#include "metal/lvcore/device.hpp"
 
 namespace lv {
 
-Metal_SwapChain* g_metal_swapChain = nullptr;
+namespace metal {
 
-Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
+SwapChain* g_metal_swapChain = nullptr;
+
+SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
     g_metal_swapChain = this;
 
     _maxFramesInFlight = createInfo.maxFramesInFlight;
@@ -16,28 +18,28 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
     hasDepthAttachment = createInfo.createDepthAttachment;
     _window = createInfo.window;
 
-    _commandBuffer = new Metal_CommandBuffer({});
+    _commandBuffer = new CommandBuffer({});
 
     create();
 
-    semaphore = new Metal_Semaphore();
+    semaphore = new Semaphore();
 
     //Render pass
-    colorImage = (Metal_Image*)malloc(sizeof(Metal_Image));
+    colorImage = (Image*)malloc(sizeof(Image));
     colorImage->_setFrameCount(_maxFramesInFlight);
     colorImage->_setWidth(_width);
     colorImage->_setHeight(_height);
     colorImage->_setFormat(Format::BGRA8Unorm_sRGB);
 
-    Metal_SubpassCreateInfo subpassCreateInfo{};
+    internal::SubpassCreateInfo subpassCreateInfo{};
     subpassCreateInfo.colorAttachments = {{0}};
 
     if (hasDepthAttachment)
         subpassCreateInfo.depthAttachment = {1};
     
-    _subpass = new Metal_Subpass(subpassCreateInfo);
+    _subpass = new Subpass(subpassCreateInfo);
 
-    Metal_RenderPassCreateInfo renderPassCreateInfo{};
+    internal::RenderPassCreateInfo renderPassCreateInfo{};
     renderPassCreateInfo.subpasses = {_subpass};
     renderPassCreateInfo.attachments = {
         {
@@ -57,9 +59,9 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
         });
     }
 
-    _renderPass = new Metal_RenderPass(renderPassCreateInfo);
+    _renderPass = new RenderPass(renderPassCreateInfo);
 
-    _framebuffer = new Metal_Framebuffer({
+    _framebuffer = new Framebuffer({
         .renderPass = _renderPass,
         .colorAttachments = {
             {0, colorImage}
@@ -67,14 +69,14 @@ Metal_SwapChain::Metal_SwapChain(Metal_SwapChainCreateInfo createInfo) {
     });
 }
 
-Metal_SwapChain::~Metal_SwapChain() {
+SwapChain::~SwapChain() {
     delete _framebuffer;
     delete _renderPass;
     delete depthImage;
     delete semaphore;
 }
 
-void Metal_SwapChain::create() {
+void SwapChain::create() {
     float xscale, yscale;
     lvndWindowGetFramebufferScale(_window, &xscale, &yscale);
 
@@ -88,7 +90,7 @@ void Metal_SwapChain::create() {
 
     //Depth attachment
     if (hasDepthAttachment) {
-        depthImage = new Metal_Image({
+        depthImage = new Image({
             .format = Format::D32Float,
             .width = width,
             .height = height,
@@ -98,12 +100,12 @@ void Metal_SwapChain::create() {
     }
 }
 
-void Metal_SwapChain::resize() {
+void SwapChain::resize() {
     delete depthImage;
     create();
 }
 
-void Metal_SwapChain::acquireNextImage() {
+void SwapChain::acquireNextImage() {
     _drawable = reinterpret_cast<id<CAMetalDrawable> >(lvndMetalNextDrawable(_window));
     if (_drawable == nullptr) {
         throw std::runtime_error("Failed to acquire next drawable");
@@ -114,7 +116,7 @@ void Metal_SwapChain::acquireNextImage() {
     colorAttachment.texture = colorImage->image(_crntFrame);
 }
 
-void Metal_SwapChain::renderAndPresent() {
+void SwapChain::renderAndPresent() {
     _commandBuffer->cmdPresent();
     _commandBuffer->submit(nullptr, semaphore);
 
@@ -122,5 +124,7 @@ void Metal_SwapChain::renderAndPresent() {
 
     _crntFrame = (_crntFrame + 1) % _maxFramesInFlight;
 }
+
+} //namespace metal
 
 } //namespace lv

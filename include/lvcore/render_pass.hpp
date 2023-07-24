@@ -3,12 +3,12 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/render_pass.hpp"
+#include "vulkan/lvcore/render_pass.hpp"
 
 namespace lv {
 
-typedef Vulkan_Subpass Subpass;
-typedef Vulkan_RenderPass RenderPass;
+typedef vulkan::Subpass Subpass;
+typedef vulkan::RenderPass RenderPass;
 
 } //namespace lv
 
@@ -16,25 +16,12 @@ typedef Vulkan_RenderPass RenderPass;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/render_pass.hpp"
+#include "metal/lvcore/render_pass.hpp"
 
 namespace lv {
 
-typedef Metal_Subpass Subpass;
-typedef Metal_RenderPass RenderPass;
-
-} //namespace lv
-
-#endif
-
-#ifdef LV_BACKEND_OPENGL
-
-#include "opengl/lvcore/core/render_pass.hpp"
-
-namespace lv {
-
-typedef OpenGL_Subpass Subpass;
-typedef OpenGL_RenderPass RenderPass;
+typedef metal::Subpass Subpass;
+typedef metal::RenderPass RenderPass;
 
 } //namespace lv
 

@@ -1,20 +1,22 @@
-#include "vulkan/lvcore/core/shader_module.hpp"
+#include "vulkan/lvcore/shader_module.hpp"
 
-#include "vulkan/lvcore/core/core.hpp"
+#include "vulkan/lvcore/core.hpp"
 
-#include "vulkan/lvcore/core/device.hpp"
+#include "vulkan/lvcore/device.hpp"
 
 namespace lv {
 
-Vulkan_ShaderModule::Vulkan_ShaderModule(Vulkan_ShaderModuleCreateInfo createInfo) {
+namespace vulkan {
+
+ShaderModule::ShaderModule(ShaderModuleCreateInfo createInfo) {
     compile(createInfo);
 }
 
-Vulkan_ShaderModule::~Vulkan_ShaderModule() {
+ShaderModule::~ShaderModule() {
     vkDestroyShaderModule(g_vulkan_device->device(), shaderModule, nullptr);
 }
 
-void Vulkan_ShaderModule::compile(Vulkan_ShaderModuleCreateInfo& createInfo) {
+void ShaderModule::compile(ShaderModuleCreateInfo& createInfo) {
     size_t begin = createInfo.source.find("section.spv") + 11 /*"section.spv".size()*/;
     std::string source = createInfo.source.substr(begin, createInfo.source.find("section.metallib") - begin);
 
@@ -33,7 +35,7 @@ void Vulkan_ShaderModule::compile(Vulkan_ShaderModuleCreateInfo& createInfo) {
     //std::cout << "Size: " << constants.size() << " : " << (constants.size() == 0 ? "none" : std::to_string((int)constants[0].constantID) + ", " + std::to_string(*(float*)constantsData) + ", " + std::to_string(constants[0].size)) << std::endl;
 
     _stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    _stageInfo.stage = vulkan::getVKShaderStageFlagBits(createInfo.shaderStage);
+    _stageInfo.stage = getVKShaderStageFlagBits(createInfo.shaderStage);
     _stageInfo.module = shaderModule;
     _stageInfo.pName = "main";
     _stageInfo.flags = 0;
@@ -41,10 +43,12 @@ void Vulkan_ShaderModule::compile(Vulkan_ShaderModuleCreateInfo& createInfo) {
     _stageInfo.pSpecializationInfo = (createInfo.specializationConstants.size() == 0 ? nullptr : &specializationInfo);
 }
 
-void Vulkan_ShaderModule::recompile() {
+void ShaderModule::recompile() {
     vkDestroyShaderModule(g_vulkan_device->device(), shaderModule, nullptr);
     throw std::runtime_error("Not implemented yet");
     //compile();
 }
+
+} //namespace vulkan
 
 } //namespace lv

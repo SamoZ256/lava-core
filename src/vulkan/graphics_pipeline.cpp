@@ -1,12 +1,14 @@
-#include "vulkan/lvcore/core/graphics_pipeline.hpp"
+#include "vulkan/lvcore/graphics_pipeline.hpp"
 
-#include "vulkan/lvcore/core/device.hpp"
-#include "vulkan/lvcore/core/swap_chain.hpp"
-#include "vulkan/lvcore/core/descriptor_set.hpp"
+#include "vulkan/lvcore/device.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
+#include "vulkan/lvcore/descriptor_set.hpp"
 
 namespace lv {
 
-Vulkan_GraphicsPipeline::Vulkan_GraphicsPipeline(Vulkan_GraphicsPipelineCreateInfo createInfo) {
+namespace vulkan {
+
+GraphicsPipeline::GraphicsPipeline(GraphicsPipelineCreateInfo createInfo) {
     if (createInfo.renderPass == nullptr)
         throw std::runtime_error("You must specify a valid render pass");
     
@@ -17,17 +19,17 @@ Vulkan_GraphicsPipeline::Vulkan_GraphicsPipeline(Vulkan_GraphicsPipelineCreateIn
     compile(createInfo);
 }
 
-Vulkan_GraphicsPipeline::~Vulkan_GraphicsPipeline() {
+GraphicsPipeline::~GraphicsPipeline() {
     vkDestroyPipeline(g_vulkan_device->device(), _graphicsPipeline, nullptr);
 }
 
-void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createInfo) {
+void GraphicsPipeline::compile(GraphicsPipelineCreateInfo& createInfo) {
     VkCullModeFlags vkCullMode;
     GET_VK_CULL_MODE(createInfo.cullMode, vkCullMode);
     VkCompareOp vkCompareOp;
     GET_VK_COMPARE_OP(createInfo.depthOp, vkCompareOp);
 
-    Vulkan_PipelineConfigInfo configInfo;
+    PipelineConfigInfo configInfo;
 
     //Input assembly
     configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -156,10 +158,12 @@ void Vulkan_GraphicsPipeline::compile(Vulkan_GraphicsPipelineCreateInfo& createI
     VK_CHECK_RESULT(vkCreateGraphicsPipelines(g_vulkan_device->device(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &_graphicsPipeline));
 }
 
-void Vulkan_GraphicsPipeline::recompile() {
+void GraphicsPipeline::recompile() {
     vkDestroyPipeline(g_vulkan_device->device(), _graphicsPipeline, nullptr);
     throw std::runtime_error("Not implemented yet");
     //compile();
 }
+
+} //namespace vulkan
 
 } //namespace lv

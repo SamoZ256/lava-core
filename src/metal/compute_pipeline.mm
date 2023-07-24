@@ -1,23 +1,25 @@
-#include "metal/lvcore/core/compute_pipeline.hpp"
+#include "metal/lvcore/compute_pipeline.hpp"
 
-#include "metal/lvcore/core/swap_chain.hpp"
-#include "metal/lvcore/core/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
 
 namespace lv {
 
-Metal_ComputePipeline::Metal_ComputePipeline(Metal_ComputePipelineCreateInfo createInfo) {
-    _computeShaderModule = createInfo.computeShaderModule;
-    _pipelineLayout = createInfo.pipelineLayout;
+namespace metal {
+
+ComputePipeline::ComputePipeline(internal::ComputePipelineCreateInfo createInfo) {
+    _computeShaderModule = (ShaderModule*)createInfo.computeShaderModule;
+    _pipelineLayout = (PipelineLayout*)createInfo.pipelineLayout;
     threadGroupSizeIsMultipleOfThreadExecutionWidth = createInfo.threadGroupSizeIsMultipleOfThreadExecutionWidth;
 
     compile();
 }
 
-Metal_ComputePipeline::~Metal_ComputePipeline() {
+ComputePipeline::~ComputePipeline() {
     [_computePipeline release];
 }
 
-void Metal_ComputePipeline::compile() {
+void ComputePipeline::compile() {
     MTLComputePipelineDescriptor* computePipelineDesc = [[MTLComputePipelineDescriptor alloc] init];
     computePipelineDesc.threadGroupSizeIsMultipleOfThreadExecutionWidth = threadGroupSizeIsMultipleOfThreadExecutionWidth;
     computePipelineDesc.computeFunction = _computeShaderModule->function();
@@ -34,9 +36,11 @@ void Metal_ComputePipeline::compile() {
     [computePipelineDesc release];
 }
 
-void Metal_ComputePipeline::recompile() {
+void ComputePipeline::recompile() {
     [_computePipeline release];
     compile();
 }
+
+} //namespace metal
 
 } //namespace lv

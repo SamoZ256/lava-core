@@ -3,11 +3,11 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/framebuffer.hpp"
+#include "vulkan/lvcore/framebuffer.hpp"
 
 namespace lv {
 
-typedef Vulkan_Framebuffer Framebuffer;
+typedef vulkan::Framebuffer Framebuffer;
 
 } //namespace lv
 
@@ -15,23 +15,11 @@ typedef Vulkan_Framebuffer Framebuffer;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/framebuffer.hpp"
+#include "metal/lvcore/framebuffer.hpp"
 
 namespace lv {
 
-typedef Metal_Framebuffer Framebuffer;
-
-} //namespace lv
-
-#endif
-
-#ifdef LV_BACKEND_OPENGL
-
-#include "opengl/lvcore/core/framebuffer.hpp"
-
-namespace lv {
-
-typedef OpenGL_Framebuffer Framebuffer;
+typedef metal::Framebuffer Framebuffer;
 
 } //namespace lv
 

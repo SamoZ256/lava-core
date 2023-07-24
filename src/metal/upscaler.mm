@@ -1,13 +1,15 @@
-#include "metal/lvcore/core/upscaler.hpp"
+#include "metal/lvcore/upscaler.hpp"
 
 #import <MetalFX/MetalFX.h>
 
-#include "metal/lvcore/core/device.hpp"
-#include "metal/lvcore/core/swap_chain.hpp"
+#include "metal/lvcore/device.hpp"
+#include "metal/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-void Metal_Upscaler::init(Metal_UpscalerCreateInfo& createInfo) {
+namespace metal {
+
+void Upscaler::init(UpscalerCreateInfo& createInfo) {
     inputColorImage = createInfo.inputColorImage;
     depthImage = createInfo.depthImage;
     motionImage = createInfo.motionImage;
@@ -29,15 +31,15 @@ void Metal_Upscaler::init(Metal_UpscalerCreateInfo& createInfo) {
     upscaler.motionVectorScaleY = -inputColorImage->height();
 }
 
-void Metal_Upscaler::destroy() {
+void Upscaler::destroy() {
     [upscaler release];
 }
 
-void Metal_Upscaler::reset() {
+void Upscaler::reset() {
     [upscaler reset];
 }
 
-void Metal_Upscaler::cmdUpscale(lv::Metal_CommandBuffer* commandBuffer, float jitterOffsetX, float jitterOffsetY, bool depthReversed) {
+void Upscaler::cmdUpscale(CommandBuffer* commandBuffer, float jitterOffsetX, float jitterOffsetY, bool depthReversed) {
     upscaler.colorTexture = inputColorImage->image(g_metal_swapChain->crntFrame() % inputColorImage->frameCount());
     upscaler.depthTexture = depthImage->image(g_metal_swapChain->crntFrame() % depthImage->frameCount());
     upscaler.motionTexture = motionImage->image(g_metal_swapChain->crntFrame() % motionImage->frameCount());
@@ -48,5 +50,7 @@ void Metal_Upscaler::cmdUpscale(lv::Metal_CommandBuffer* commandBuffer, float ji
 
     [upscaler encodeToCommandBuffer:commandBuffer->_getActiveCommandBuffer()];
 }
+
+} //namespace metal
 
 } //namespace lv

@@ -1,17 +1,17 @@
-#include "vulkan/lvcore/core/device.hpp"
+#include "vulkan/lvcore/device.hpp"
 
-#include "vulkan/lvcore/core/common.hpp"
+#include "vulkan/lvcore/common.hpp"
 
 namespace lv {
 
-//Implementation
-Vulkan_Device* g_vulkan_device = nullptr;
+namespace vulkan {
 
-Vulkan_DescriptorPool* g_vulkan_descriptorPool = nullptr;
+Device* g_vulkan_device = nullptr;
+DescriptorPool* g_vulkan_descriptorPool = nullptr;
 
 // *************** Descriptor Pool *********************
 
-void Vulkan_DescriptorPool::init(uint32_t aMaxSets, std::map<DescriptorType, uint32_t>& aPoolSizes) {
+void DescriptorPool::init(uint32_t aMaxSets, std::map<DescriptorType, uint32_t>& aPoolSizes) {
 	maxSets = aMaxSets;
 	poolSizesBegin = aPoolSizes;
 	poolSizes = aPoolSizes;
@@ -26,7 +26,7 @@ void Vulkan_DescriptorPool::init(uint32_t aMaxSets, std::map<DescriptorType, uin
 	g_vulkan_descriptorPool = this;
 }
 
-void Vulkan_DescriptorPool::create() {
+void DescriptorPool::create() {
 	VkDescriptorPoolCreateInfo descriptorPoolInfo{};
 	descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizesVec.size());
@@ -37,11 +37,11 @@ void Vulkan_DescriptorPool::create() {
 	VK_CHECK_RESULT(vkCreateDescriptorPool(g_vulkan_device->device(), &descriptorPoolInfo, nullptr, &descriptorPool));
 }
 
-void Vulkan_DescriptorPool::destroy() {
+void DescriptorPool::destroy() {
   	vkDestroyDescriptorPool(g_vulkan_device->device(), descriptorPool, nullptr);
 }
 
-void Vulkan_DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
+void DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
 	VkDescriptorSetAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	allocInfo.descriptorPool = descriptorPool;
@@ -73,7 +73,7 @@ void DescriptorPool::addPoolSize(VkDescriptorType descriptorType, uint32_t count
 }
 */
 
-void Vulkan_DescriptorPool::recreate() {
+void DescriptorPool::recreate() {
 	std::cout << "Recreating descriptor pool" << std::endl;
 	oldPools.push_back(descriptorPool);
 	//descriptorPool = VK_NULL_HANDLE;
@@ -82,7 +82,7 @@ void Vulkan_DescriptorPool::recreate() {
 }
 
 // class member functions
-Vulkan_Device::Vulkan_Device(Vulkan_DeviceCreateInfo createInfo) {
+Device::Device(DeviceCreateInfo createInfo) {
 	descriptorPool.init(createInfo.maxDescriptorSets, createInfo.descriptorPoolSizes);
 
 	maxThreadCount = createInfo.threadPool->maxThreadCount();
@@ -107,7 +107,7 @@ Vulkan_Device::Vulkan_Device(Vulkan_DeviceCreateInfo createInfo) {
 	descriptorPool.create();
 }
 
-Vulkan_Device::~Vulkan_Device() {
+Device::~Device() {
 	descriptorPool.destroy();
 
 	vmaDestroyAllocator(_allocator);
@@ -119,7 +119,7 @@ Vulkan_Device::~Vulkan_Device() {
 	vkDestroySurfaceKHR(g_vulkan_instance->instance(), _surface, nullptr);
 }
 
-void Vulkan_Device::pickPhysicalDevice() {
+void Device::pickPhysicalDevice() {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(g_vulkan_instance->instance(), &deviceCount, nullptr);
 	if (deviceCount == 0) {
@@ -145,7 +145,7 @@ void Vulkan_Device::pickPhysicalDevice() {
 	std::cout << "Max push constants size: " << properties.limits.maxPushConstantsSize << " bytes" << std::endl;
 }
 
-void Vulkan_Device::createLogicalDevice() {
+void Device::createLogicalDevice() {
 	QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -190,7 +190,7 @@ void Vulkan_Device::createLogicalDevice() {
 	vkGetDeviceQueue(_device, indices.presentFamily, 0, &_presentQueue);
 }
 
-void Vulkan_Device::createCommandPool(uint8_t index) {
+void Device::createCommandPool(uint8_t index) {
 	QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
 	VkCommandPoolCreateInfo poolInfo = {};
@@ -201,7 +201,7 @@ void Vulkan_Device::createCommandPool(uint8_t index) {
 	VK_CHECK_RESULT(vkCreateCommandPool(_device, &poolInfo, nullptr, &commandPools[index]));
 }
 
-bool Vulkan_Device::isDeviceSuitable(VkPhysicalDevice device) {
+bool Device::isDeviceSuitable(VkPhysicalDevice device) {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
 	bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -218,7 +218,7 @@ bool Vulkan_Device::isDeviceSuitable(VkPhysicalDevice device) {
 	return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
-bool Vulkan_Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -234,7 +234,7 @@ bool Vulkan_Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 	return requiredExtensions.empty();
 }
 
-QueueFamilyIndices Vulkan_Device::findQueueFamilies(VkPhysicalDevice device) {
+QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice device) {
 	QueueFamilyIndices indices;
 
 	uint32_t queueFamilyCount = 0;
@@ -265,7 +265,7 @@ QueueFamilyIndices Vulkan_Device::findQueueFamilies(VkPhysicalDevice device) {
 	return indices;
 }
 
-SwapChainSupportDetails Vulkan_Device::querySwapChainSupport(VkPhysicalDevice device) {
+SwapChainSupportDetails Device::querySwapChainSupport(VkPhysicalDevice device) {
 	SwapChainSupportDetails details;
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _surface, &details.capabilities);
 
@@ -287,7 +287,7 @@ SwapChainSupportDetails Vulkan_Device::querySwapChainSupport(VkPhysicalDevice de
 	return details;
 }
 
-VkFormat Vulkan_Device::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+VkFormat Device::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
 	for (VkFormat format : candidates) {
 		VkFormatProperties props;
 		vkGetPhysicalDeviceFormatProperties(_physicalDevice, format, &props);
@@ -301,7 +301,7 @@ VkFormat Vulkan_Device::findSupportedFormat(const std::vector<VkFormat> &candida
 	throw std::runtime_error("Failed to find supported format");
 }
 
-uint32_t Vulkan_Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+uint32_t Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
 	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
@@ -313,7 +313,7 @@ uint32_t Vulkan_Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlag
 	throw std::runtime_error("Failed to find suitable memory type");
 }
 
-VkCommandBuffer Vulkan_Device::beginSingleTimeCommands(uint8_t threadIndex) {
+VkCommandBuffer Device::beginSingleTimeCommands(uint8_t threadIndex) {
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -332,7 +332,7 @@ VkCommandBuffer Vulkan_Device::beginSingleTimeCommands(uint8_t threadIndex) {
 	return commandBuffer;
 }
 
-void Vulkan_Device::endSingleTimeCommands(uint8_t threadIndex, VkCommandBuffer commandBuffer) {
+void Device::endSingleTimeCommands(uint8_t threadIndex, VkCommandBuffer commandBuffer) {
 	vkEndCommandBuffer(commandBuffer);
 
 	VkSubmitInfo submitInfo{};
@@ -345,5 +345,7 @@ void Vulkan_Device::endSingleTimeCommands(uint8_t threadIndex, VkCommandBuffer c
 
 	vkFreeCommandBuffers(_device, commandPools[threadIndex], 1, &commandBuffer);
 }
+
+} //namespace vulkan
 
 } //namespace lv

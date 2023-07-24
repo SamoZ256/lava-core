@@ -3,12 +3,12 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/core/command_buffer.hpp"
+#include "vulkan/lvcore/command_buffer.hpp"
 
 namespace lv {
 
-typedef Vulkan_CommandBufferCreateInfo CommandBufferCreateInfo;
-typedef Vulkan_CommandBuffer CommandBuffer;
+typedef vulkan::CommandBufferCreateInfo CommandBufferCreateInfo;
+typedef vulkan::CommandBuffer CommandBuffer;
 
 } //namespace lv
 
@@ -16,15 +16,19 @@ typedef Vulkan_CommandBuffer CommandBuffer;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/core/command_buffer.hpp"
+#include "metal/lvcore/command_buffer.hpp"
 
 namespace lv {
-
-typedef Metal_CommandBufferCreateInfo CommandBufferCreateInfo;
-typedef Metal_CommandBuffer CommandBuffer;
+typedef metal::CommandBuffer CommandBuffer;
 
 } //namespace lv
 
 #endif
+
+namespace lv {
+
+typedef internal::CommandBufferCreateInfo CommandBufferCreateInfo;
+
+} //namespace lv
 
 #endif

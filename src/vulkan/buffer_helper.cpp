@@ -1,11 +1,13 @@
-#include "vulkan/lvcore/core/buffer_helper.hpp"
+#include "vulkan/lvcore/buffer_helper.hpp"
 
-#include "vulkan/lvcore/core/device.hpp"
-#include "vulkan/lvcore/core/swap_chain.hpp"
+#include "vulkan/lvcore/device.hpp"
+#include "vulkan/lvcore/swap_chain.hpp"
 
 namespace lv {
 
-VmaAllocation Vulkan_BufferHelper::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage/*, VmaMemoryUsage memoryUsage*/, VkBuffer &buffer, VmaAllocationInfo* allocInfo, VkMemoryPropertyFlags properties, VmaAllocationCreateFlags allocationFlags) {
+namespace vulkan {
+
+VmaAllocation BufferHelper::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage/*, VmaMemoryUsage memoryUsage*/, VkBuffer &buffer, VmaAllocationInfo* allocInfo, VkMemoryPropertyFlags properties, VmaAllocationCreateFlags allocationFlags) {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
@@ -23,7 +25,7 @@ VmaAllocation Vulkan_BufferHelper::createBuffer(VkDeviceSize size, VkBufferUsage
     return allocation;
 }
 
-void Vulkan_BufferHelper::copyBuffer(VkCommandBuffer commandBuffer, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+void BufferHelper::copyBuffer(VkCommandBuffer commandBuffer, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
     VkBufferCopy copyRegion{};
     copyRegion.srcOffset = 0;  // Optional
     copyRegion.dstOffset = 0;  // Optional
@@ -31,7 +33,7 @@ void Vulkan_BufferHelper::copyBuffer(VkCommandBuffer commandBuffer, VkBuffer src
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 }
 
-void Vulkan_BufferHelper::copyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount, uint8_t arrayLayer, VkImageAspectFlagBits aspectMask) {
+void BufferHelper::copyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount, uint8_t arrayLayer, VkImageAspectFlagBits aspectMask) {
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
     region.bufferRowLength = 0;
@@ -48,7 +50,7 @@ void Vulkan_BufferHelper::copyBufferToImage(VkCommandBuffer commandBuffer, VkBuf
     vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
 
-void Vulkan_BufferHelper::copyImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height, uint32_t srcLayerCount, uint8_t srcArrayLayer, uint32_t dstLayerCount, uint8_t dstArrayLayer , VkImageAspectFlagBits aspectMask) {
+void BufferHelper::copyImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height, uint32_t srcLayerCount, uint8_t srcArrayLayer, uint32_t dstLayerCount, uint8_t dstArrayLayer , VkImageAspectFlagBits aspectMask) {
     VkImageCopy region{};
     region.srcOffset = {0, 0, 0};
     
@@ -67,5 +69,7 @@ void Vulkan_BufferHelper::copyImage(VkCommandBuffer commandBuffer, VkImage srcIm
 
     vkCmdCopyImage(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
+
+} //namespace vulkan
 
 } //namespace lv

@@ -1025,27 +1025,27 @@ public:
         //Shadow
         shadowPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
-                }}
+                }
             }
         });
 
         //Shadow with alpha
         shadowWithAlphaPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1059,9 +1059,9 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Compute},
-                }}
+                }
             }
         });
 
@@ -1075,15 +1075,15 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
                     {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Vertex},
                     {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Vertex},
                     {2, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1097,38 +1097,38 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
         //Tree
         treePipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
                     {1, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
         //Grass
         grassPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
                     {1, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }},
-                {{
+                },
+                {
                     {0, lv::DescriptorType::StorageBuffer, lv::ShaderStageFlags::Vertex}
-                }}
+                }
             }
         });
 
@@ -1142,21 +1142,21 @@ public:
                 }
             },
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
                     {1, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
                     {2, lv::DescriptorType::InputAttachment, lv::ShaderStageFlags::Fragment},
                     {3, lv::DescriptorType::CombinedImageSampler, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
         //HDR
         hdrPipelineLayout = new lv::PipelineLayout({
             .descriptorSetLayouts = {
-                {{
+                {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
-                }}
+                }
             }
         });
 
@@ -1373,7 +1373,7 @@ public:
         terrainTescComputePipeline = new lv::ComputePipeline({
             .computeShaderModule = tescTerrainShaderModule,
             .pipelineLayout = tescPipelineLayout,
-            .threadGroupSizeIsMultipleOfThreadExecutionWidth = false
+            .threadGroupSizeIsMultipleOfThreadExecutionWidth = lv::False
         });
 
         //Copy commands
