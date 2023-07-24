@@ -1,36 +1,28 @@
 #ifndef LV_VULKAN_SHADER_MODULE_H
 #define LV_VULKAN_SHADER_MODULE_H
 
-#include "common.hpp"
+#include "lvcore/internal/shader_module.hpp"
 
-#include "lvcore/internal/core.hpp"
+#include "common.hpp"
 
 namespace lv {
 
 namespace vulkan {
 
-struct ShaderModuleCreateInfo {
-    ShaderStageFlags shaderStage;
-    std::string source;
-    std::vector<VkSpecializationMapEntry> specializationConstants;
-    void* constantsData = nullptr;
-    size_t constantsSize;
-};
-
-class ShaderModule {
+class ShaderModule : public internal::ShaderModule {
 private:
     VkShaderModule shaderModule;
     VkPipelineShaderStageCreateInfo _stageInfo;
     VkSpecializationInfo specializationInfo{};
 
 public:
-    ShaderModule(ShaderModuleCreateInfo createInfo);
+    ShaderModule(internal::ShaderModuleCreateInfo createInfo);
 
-    ~ShaderModule();
+    ~ShaderModule() override;
 
-    void compile(ShaderModuleCreateInfo& createInfo);
+    void compile(internal::ShaderModuleCreateInfo& createInfo);
 
-    void recompile();
+    void recompile() override;
 
     //Getters
     inline VkPipelineShaderStageCreateInfo& stageInfo() { return _stageInfo; }

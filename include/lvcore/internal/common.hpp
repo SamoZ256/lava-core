@@ -2,15 +2,20 @@
 #define LV_COMMON_H
 
 #include <stdio.h>
+#include <iostream>
 #include <vector>
 #include <string>
-#include <iostream>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
 
 #include "core.hpp"
 
-#define CAST_FROM_INTERNAL(name, type) type* name##_ = (type*)name;
+#define CAST_FROM_INTERNAL(name, type) type* name##_ = static_cast<type*>(name);
 
-#define CAST_FROM_INTERNAL_NAMED(name, type, newName) type* newName = (type*)name;
+#define CAST_FROM_INTERNAL_NAMED(name, type, newName) type* newName = static_cast<type*>(name);
 
 //Errors and warnings
 #define _LV_MSG(type, msg) fprintf(stderr, "[LV:" type "]::%s: %s\n", __FUNCTION__, msg)

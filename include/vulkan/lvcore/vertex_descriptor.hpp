@@ -1,7 +1,7 @@
 #ifndef LV_VULKAN_VERTEX_DESCRIPTOR_H
 #define LV_VULKAN_VERTEX_DESCRIPTOR_H
 
-#include <vector>
+#include "lvcore/internal/vertex_descriptor.hpp"
 
 #include "core.hpp"
 
@@ -9,24 +9,13 @@ namespace lv {
 
 namespace vulkan {
 
-struct VertexDescriptorBinding {
-    uint16_t location;
-    Format format;
-    uint32_t offset;
-};
-
-struct VertexDescriptorCreateInfo {
-    size_t size;
-    std::vector<VertexDescriptorBinding> bindings;
-};
-
-class VertexDescriptor {
+class VertexDescriptor : public internal::VertexDescriptor {
 private:
     std::vector<VkVertexInputBindingDescription> bindingDescriptions;
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
 
 public:
-    VertexDescriptor(VertexDescriptorCreateInfo createInfo);
+    VertexDescriptor(internal::VertexDescriptorCreateInfo createInfo);
 
     //Getters
     inline size_t bindingDescriptionCount() { return bindingDescriptions.size(); }

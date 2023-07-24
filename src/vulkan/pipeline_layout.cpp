@@ -8,9 +8,9 @@ namespace lv {
 
 namespace vulkan {
 
-// *************** Descriptor Set Layout *********************
+//---------------- Descriptor Set Layout ----------------
 
-DescriptorSetLayout::DescriptorSetLayout(std::vector<DescriptorSetLayoutBinding> aBindings) {
+DescriptorSetLayout::DescriptorSetLayout(std::vector<internal::DescriptorSetLayoutBinding> aBindings) {
 	bindings.resize(aBindings.size());
 	for (uint32_t i = 0; i < bindings.size(); i++) {
 		VkDescriptorType vkDescriptorType;
@@ -35,9 +35,13 @@ void DescriptorSetLayout::destroy() {
 	//descriptorSetLayout = VK_NULL_HANDLE;
 }
 
-// *************** Pipeline Layout *********************
+//---------------- Pipeline Layout ----------------
 
-PipelineLayout::PipelineLayout(PipelineLayoutCreateInfo createInfo) : descriptorSetLayouts(createInfo.descriptorSetLayouts), pushConstantRanges(createInfo.pushConstantRanges.size()) {
+PipelineLayout::PipelineLayout(internal::PipelineLayoutCreateInfo createInfo) : pushConstantRanges(createInfo.pushConstantRanges.size()) {
+	descriptorSetLayouts.reserve(createInfo.descriptorSetLayouts.size());
+	for (uint32_t i = 0; i < createInfo.descriptorSetLayouts.size(); i++)
+		descriptorSetLayouts.emplace_back(createInfo.descriptorSetLayouts[i]);
+
 	for (uint32_t i = 0; i < pushConstantRanges.size(); i++) {
 		pushConstantRanges[i].stageFlags = getVKShaderStageFlags(createInfo.pushConstantRanges[i].stageFlags);
 		pushConstantRanges[i].offset = createInfo.pushConstantRanges[i].offset;

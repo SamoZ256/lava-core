@@ -1,45 +1,33 @@
 #ifndef LV_VULKAN_RENDER_PASS_H
 #define LV_VULKAN_RENDER_PASS_H
 
-#include <vector>
+#include <vulkan/vulkan.h>
 
-#include "attachment.hpp"
+#include "lvcore/internal/render_pass.hpp"
 
 namespace lv {
 
 namespace vulkan {
 
-struct SubpassCreateInfo {
-    std::vector<SubpassAttachment> colorAttachments;
-    SubpassAttachment depthAttachment;
-    std::vector<SubpassAttachment> inputAttachments;
-};
-
-class Subpass {
+class Subpass : public internal::Subpass {
 public:
-    std::vector<SubpassAttachment> colorAttachments;
-    SubpassAttachment depthAttachment;
-    std::vector<SubpassAttachment> inputAttachments;
+    std::vector<internal::SubpassAttachment> colorAttachments;
+    internal::SubpassAttachment depthAttachment;
+    std::vector<internal::SubpassAttachment> inputAttachments;
 
-    Subpass(SubpassCreateInfo createInfo) : colorAttachments(createInfo.colorAttachments), depthAttachment(createInfo.depthAttachment), inputAttachments(createInfo.inputAttachments) {}
+    Subpass(internal::SubpassCreateInfo createInfo) : colorAttachments(createInfo.colorAttachments), depthAttachment(createInfo.depthAttachment), inputAttachments(createInfo.inputAttachments) {}
 };
 
-struct RenderPassCreateInfo {
-    std::vector<Subpass*> subpasses;
-    std::vector<RenderPassAttachment> attachments;
-    std::vector<VkSubpassDependency> dependencies;
-};
-
-class RenderPass {
+class RenderPass : public internal::RenderPass {
 private:
     VkRenderPass _renderPass;
 
     std::vector<VkSubpassDependency> dependencies;
 
 public:
-    RenderPass(RenderPassCreateInfo createInfo);
+    RenderPass(internal::RenderPassCreateInfo createInfo, std::vector<VkSubpassDependency> aDependencies = {});
 
-    ~RenderPass();
+    ~RenderPass() override;
 
     //Getters
     inline VkRenderPass renderPass() { return _renderPass; }

@@ -1,23 +1,16 @@
 #ifndef LV_VULKAN_FRAMEBUFFER_H
 #define LV_VULKAN_FRAMEBUFFER_H
 
+#include "lvcore/internal/framebuffer.hpp"
+
 #include "render_pass.hpp"
 
 namespace lv {
 
 namespace vulkan {
 
-struct FramebufferCreateInfo {
-    uint8_t frameCount = 0;
-    RenderPass* renderPass;
-    std::vector<FramebufferAttachment> colorAttachments;
-    FramebufferAttachment depthAttachment;
-};
-
-class Framebuffer {
+class Framebuffer : public internal::Framebuffer {
 private:
-    uint8_t _frameCount;
-
     std::vector<VkFramebuffer> framebuffers;
     RenderPass* _renderPass;
 
@@ -27,13 +20,11 @@ private:
     std::vector<VkClearValue> clearValues{};
 
 public:
-    Framebuffer(FramebufferCreateInfo createInfo);
+    Framebuffer(internal::FramebufferCreateInfo createInfo);
 
-    ~Framebuffer();
+    ~Framebuffer() override;
 
     //Getters
-    inline uint8_t frameCount() { return _frameCount; }
-
     inline VkFramebuffer framebuffer(uint8_t index) { return framebuffers[index]; }
 
     inline RenderPass* renderPass() { return _renderPass; }

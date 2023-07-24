@@ -4,7 +4,7 @@ namespace lv {
 
 namespace vulkan {
 
-VertexDescriptor::VertexDescriptor(VertexDescriptorCreateInfo createInfo) {
+VertexDescriptor::VertexDescriptor(internal::VertexDescriptorCreateInfo createInfo) {
     bindingDescriptions.resize(1);
     bindingDescriptions[0].binding = 0;
     bindingDescriptions[0].stride = createInfo.size;

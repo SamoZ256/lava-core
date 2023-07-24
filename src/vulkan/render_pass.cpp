@@ -8,7 +8,7 @@ namespace lv {
 
 namespace vulkan {
 
-VkAttachmentDescription getAttachmentDescription(RenderPassAttachment& attachment) {
+VkAttachmentDescription getAttachmentDescription(internal::RenderPassAttachment& attachment) {
     VkFormat vkFormat;
     GET_VK_FORMAT(attachment.format, vkFormat);
     VkAttachmentLoadOp vkAttachmentLoadOp;
@@ -32,7 +32,7 @@ VkAttachmentDescription getAttachmentDescription(RenderPassAttachment& attachmen
     return description;
 }
 
-VkAttachmentReference getAttachmentReference(SubpassAttachment& attachment) {
+VkAttachmentReference getAttachmentReference(internal::SubpassAttachment& attachment) {
     VkImageLayout vkImageLayout;
     GET_VK_IMAGE_LAYOUT(attachment.layout, vkImageLayout);
 
@@ -43,7 +43,7 @@ VkAttachmentReference getAttachmentReference(SubpassAttachment& attachment) {
     return reference;
 }
 
-RenderPass::RenderPass(RenderPassCreateInfo createInfo) : dependencies(createInfo.dependencies) {
+RenderPass::RenderPass(internal::RenderPassCreateInfo createInfo, std::vector<VkSubpassDependency> aDependencies) : dependencies(aDependencies)/* : dependencies(createInfo.dependencies)*/ {
     std::vector<VkAttachmentDescription> attachmentDescriptions(createInfo.attachments.size());
     for (int i = 0; i < createInfo.attachments.size(); i++)
         attachmentDescriptions[createInfo.attachments[i].index] = getAttachmentDescription(createInfo.attachments[i]);
@@ -83,26 +83,24 @@ RenderPass::RenderPass(RenderPassCreateInfo createInfo) : dependencies(createInf
     std::vector<VkAttachmentReference> depthAttachmentReferences(createInfo.subpasses.size());
     std::vector<std::vector<VkAttachmentReference> > inputAttachmentReferences(createInfo.subpasses.size());
     for (uint8_t i = 0; i < createInfo.subpasses.size(); i++) {
-        colorAttachmentReferences[i].resize(createInfo.subpasses[i]->colorAttachments.size());
+        CAST_FROM_INTERNAL_NAMED(createInfo.subpasses[i], Subpass, subpass);
+
+        colorAttachmentReferences[i].resize(subpass->colorAttachments.size());
         for (int j = 0; j < colorAttachmentReferences[i].size(); j++)
-            colorAttachmentReferences[i][j] = getAttachmentReference(createInfo.subpasses[i]->colorAttachments[j]);
+            colorAttachmentReferences[i][j] = getAttachmentReference(subpass->colorAttachments[j]);
 
-        if (createInfo.subpasses[i]->depthAttachment.index != -1)
-            depthAttachmentReferences[i] = getAttachmentReference(createInfo.subpasses[i]->depthAttachment);
+        if (subpass->depthAttachment.index != -1)
+            depthAttachmentReferences[i] = getAttachmentReference(subpass->depthAttachment);
 
-        inputAttachmentReferences[i].resize(createInfo.subpasses[i]->inputAttachments.size());
+        inputAttachmentReferences[i].resize(subpass->inputAttachments.size());
         for (int j = 0; j < inputAttachmentReferences[i].size(); j++)
-            inputAttachmentReferences[i][j] = getAttachmentReference(createInfo.subpasses[i]->inputAttachments[j]);
-
-        //std::cout << "Color attachments: " << colorAttachmentReferences[i].size() << std::endl;
-        //std::cout << "Depth attachment: " << (subpasses[i]->depthAttachment.index != -1) << std::endl;
-        //std::cout << "Input attachments: " << inputAttachmentReferences[i].size() << std::endl;
+            inputAttachmentReferences[i][j] = getAttachmentReference(subpass->inputAttachments[j]);
 
         subpassDescs[i] = {};
         subpassDescs[i].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpassDescs[i].colorAttachmentCount = colorAttachmentReferences[i].size();
         subpassDescs[i].pColorAttachments = colorAttachmentReferences[i].data();
-        subpassDescs[i].pDepthStencilAttachment = createInfo.subpasses[i]->depthAttachment.index == -1 ? nullptr : &depthAttachmentReferences[i];
+        subpassDescs[i].pDepthStencilAttachment = subpass->depthAttachment.index == -1 ? nullptr : &depthAttachmentReferences[i];
         subpassDescs[i].inputAttachmentCount = inputAttachmentReferences[i].size();
         subpassDescs[i].pInputAttachments = inputAttachmentReferences[i].data();
     }

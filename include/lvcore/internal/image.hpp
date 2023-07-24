@@ -55,6 +55,8 @@ protected:
     uint16_t _baseMip = 0;
     uint16_t _mipCount = 1;
 
+    ImageAspectFlags _aspect;
+
     uint8_t _layersPerLayer = 1;
     Bool _isOriginal = True;
     
@@ -81,6 +83,8 @@ public:
     inline uint16_t baseMip() { return _baseMip; }
 
     inline uint16_t mipCount() { return _mipCount; }
+
+    inline ImageAspectFlags aspect() { return _aspect; }
 
     inline uint8_t layersPerLayer() { return _layersPerLayer; }
 

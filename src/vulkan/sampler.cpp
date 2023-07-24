@@ -8,7 +8,7 @@ namespace lv {
 
 namespace vulkan {
 
-Sampler::Sampler(SamplerCreateInfo createInfo) {
+Sampler::Sampler(internal::SamplerCreateInfo createInfo) {
     VkFilter vkFilter;
     GET_VK_FILTER(createInfo.filter, vkFilter);
     VkCompareOp vkCompareOp;
@@ -21,22 +21,24 @@ Sampler::~Sampler() {
     vkDestroySampler(g_vulkan_device->device(), _sampler, nullptr);
 }
 
-ImageDescriptorInfo Sampler::descriptorInfo(Image* image, uint32_t binding, ImageLayout imageLayout, int8_t frameOffset) {
+internal::ImageDescriptorInfo* Sampler::descriptorInfo(internal::Image* image, uint32_t binding, ImageLayout imageLayout, int8_t frameOffset) {
+    CAST_FROM_INTERNAL(image, Image);
+
     VkImageLayout vkImageLayout;
     GET_VK_IMAGE_LAYOUT(imageLayout, vkImageLayout);
 
-    ImageDescriptorInfo info;
-    info.infos.resize(image->frameCount());
-    for (uint8_t i = 0; i < info.infos.size(); i++) {
+    ImageDescriptorInfo* info = new ImageDescriptorInfo;
+    info->infos.resize(image_->frameCount());
+    for (uint8_t i = 0; i < info->infos.size(); i++) {
         int8_t index = i + frameOffset;
-        if (index < 0) index += image->frameCount();
-        else if (index >= image->frameCount()) index -= image->frameCount();
-        info.infos[i].imageLayout = vkImageLayout;
-        info.infos[i].imageView = image->imageView(index);
-        info.infos[i].sampler = _sampler;
+        if (index < 0) index += image_->frameCount();
+        else if (index >= image_->frameCount()) index -= image_->frameCount();
+        info->infos[i].imageLayout = vkImageLayout;
+        info->infos[i].imageView = image_->imageView(index);
+        info->infos[i].sampler = _sampler;
     }
-    info.binding = binding;
-    info.descriptorType = DescriptorType::CombinedImageSampler;
+    info->binding = binding;
+    info->descriptorType = DescriptorType::CombinedImageSampler;
 
     return info;
 }

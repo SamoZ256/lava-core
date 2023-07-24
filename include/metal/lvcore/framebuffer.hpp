@@ -11,6 +11,9 @@ class Framebuffer : public internal::Framebuffer {
 private:
     std::vector<void* /*MTLRenderPassDescriptor*/> renderPasses;
 
+    std::vector<internal::FramebufferAttachment> colorAttachments;
+    internal::FramebufferAttachment depthAttachment;
+
 public:
     Framebuffer(internal::FramebufferCreateInfo createInfo);
 

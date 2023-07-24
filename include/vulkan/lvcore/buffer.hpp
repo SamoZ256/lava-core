@@ -1,7 +1,7 @@
 #ifndef LV_VULKAN_BUFFER_H
 #define LV_VULKAN_BUFFER_H
 
-#include <vector>
+#include "lvcore/internal/buffer.hpp"
 
 #include "core.hpp"
 
@@ -9,44 +9,28 @@ namespace lv {
 
 namespace vulkan {
 
-struct BufferDescriptorInfo {
+struct BufferDescriptorInfo : internal::BufferDescriptorInfo {
     std::vector<VkDescriptorBufferInfo> infos;
     uint32_t binding;
     DescriptorType descriptorType;
 };
 
-struct BufferCreateInfo {
-    uint8_t frameCount = 0;
-    size_t size;
-    BufferUsageFlags usage = BufferUsageFlags::None;
-    MemoryType memoryType = MemoryType::Private;
-    MemoryAllocationCreateFlags memoryAllocationFlags = MemoryAllocationCreateFlags::None;
-};
-
-class Buffer {
+class Buffer : public internal::Buffer {
 private:
-	uint8_t _frameCount = 0;
-	
 	std::vector<VkBuffer> buffers;
 	std::vector<VmaAllocation> allocations;
-
-	size_t _size;
 	
 public:
-	Buffer(BufferCreateInfo createInfo);
+	Buffer(internal::BufferCreateInfo createInfo);
 
-    ~Buffer();
+    ~Buffer() override;
 
-    void copyDataTo(void* data, size_t aSize = 0);
+    void copyDataTo(void* data, size_t aSize = 0, uint32_t offset = 0) override;
 
-	BufferDescriptorInfo descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::UniformBuffer/*VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0*/);
+	internal::BufferDescriptorInfo* descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::UniformBuffer/*VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0*/) override;
 
     //Getters
-    inline uint8_t frameCount() { return _frameCount; }
-
     inline VkBuffer buffer(uint8_t index) { return buffers[index]; }
-
-    inline size_t size() { return _size; }
 };
 
 } //namespace vulkan

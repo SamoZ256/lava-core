@@ -35,9 +35,8 @@ public:
 
     PipelineLayout(internal::PipelineLayoutCreateInfo createInfo) {
         descriptorSetLayouts.reserve(createInfo.descriptorSetLayouts.size());
-        for (uint32_t i = 0; i < createInfo.descriptorSetLayouts.size(); i++) {
+        for (uint32_t i = 0; i < createInfo.descriptorSetLayouts.size(); i++)
             descriptorSetLayouts.emplace_back(createInfo.descriptorSetLayouts[i]);
-        }
         pushConstantRanges = createInfo.pushConstantRanges;
     }
 

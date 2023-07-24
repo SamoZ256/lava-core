@@ -8,13 +8,13 @@ namespace lv {
 
 namespace vulkan {
 
-GraphicsPipeline::GraphicsPipeline(GraphicsPipelineCreateInfo createInfo) {
+GraphicsPipeline::GraphicsPipeline(internal::GraphicsPipelineCreateInfo createInfo) {
     if (createInfo.renderPass == nullptr)
         throw std::runtime_error("You must specify a valid render pass");
     
-    vertexShaderModule = createInfo.vertexShaderModule;
-    fragmentShaderModule = createInfo.fragmentShaderModule;
-    _pipelineLayout = createInfo.pipelineLayout;
+    vertexShaderModule = static_cast<ShaderModule*>(createInfo.vertexShaderModule);
+    fragmentShaderModule = static_cast<ShaderModule*>(createInfo.fragmentShaderModule);
+    _pipelineLayout = static_cast<PipelineLayout*>(createInfo.pipelineLayout);
     
     compile(createInfo);
 }
@@ -23,7 +23,10 @@ GraphicsPipeline::~GraphicsPipeline() {
     vkDestroyPipeline(g_vulkan_device->device(), _graphicsPipeline, nullptr);
 }
 
-void GraphicsPipeline::compile(GraphicsPipelineCreateInfo& createInfo) {
+void GraphicsPipeline::compile(internal::GraphicsPipelineCreateInfo& createInfo) {
+    CAST_FROM_INTERNAL_NAMED(createInfo.renderPass, RenderPass, renderPass);
+    CAST_FROM_INTERNAL_NAMED(createInfo.vertexDescriptor, VertexDescriptor, vertexDescriptor);
+
     VkCullModeFlags vkCullMode;
     GET_VK_CULL_MODE(createInfo.cullMode, vkCullMode);
     VkCompareOp vkCompareOp;
@@ -126,10 +129,10 @@ void GraphicsPipeline::compile(GraphicsPipelineCreateInfo& createInfo) {
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     if (createInfo.vertexDescriptor != nullptr) {
-        vertexInputInfo.vertexBindingDescriptionCount = createInfo.vertexDescriptor->bindingDescriptionCount();
-        vertexInputInfo.pVertexBindingDescriptions = createInfo.vertexDescriptor->bindingDescriptionsData();
-        vertexInputInfo.vertexAttributeDescriptionCount = createInfo.vertexDescriptor->attributeDescriptionCount();
-        vertexInputInfo.pVertexAttributeDescriptions = createInfo.vertexDescriptor->attributeDescriptionsData();
+        vertexInputInfo.vertexBindingDescriptionCount = vertexDescriptor->bindingDescriptionCount();
+        vertexInputInfo.pVertexBindingDescriptions = vertexDescriptor->bindingDescriptionsData();
+        vertexInputInfo.vertexAttributeDescriptionCount = vertexDescriptor->attributeDescriptionCount();
+        vertexInputInfo.pVertexAttributeDescriptions = vertexDescriptor->attributeDescriptionsData();
     }
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages(2);
@@ -149,7 +152,7 @@ void GraphicsPipeline::compile(GraphicsPipelineCreateInfo& createInfo) {
     graphicsPipelineCreateInfo.pDynamicState = &configInfo.dynamicStateInfo;
 
     graphicsPipelineCreateInfo.layout = _pipelineLayout->pipelineLayout();
-    graphicsPipelineCreateInfo.renderPass = createInfo.renderPass->renderPass();
+    graphicsPipelineCreateInfo.renderPass = renderPass->renderPass();
     graphicsPipelineCreateInfo.subpass = createInfo.subpassIndex;
 
     graphicsPipelineCreateInfo.basePipelineIndex = -1;

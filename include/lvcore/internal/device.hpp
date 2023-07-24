@@ -3,6 +3,10 @@
 
 #include <map>
 
+#define LVND_BACKEND_VULKAN
+#ifdef __APPLE__
+#define LVND_BACKEND_METAL
+#endif
 #include "lvnd/lvnd.h"
 
 #include "common.hpp"
@@ -17,9 +21,13 @@ struct DeviceCreateInfo {
     LvndWindow* window;
     ThreadPool* threadPool;
     uint32_t maxDescriptorSets = 1024;
-	std::map<DescriptorType, uint16_t> descriptorPoolSizes = {
-		{DescriptorType::UniformBuffer, 4},
-    	{DescriptorType::CombinedImageSampler, 4}
+	std::map<DescriptorType, uint32_t> descriptorPoolSizes = {
+		{DescriptorType::UniformBuffer, 128},
+    	{DescriptorType::CombinedImageSampler, 512},
+        {DescriptorType::SampledImage, 64},
+        {DescriptorType::StorageImage, 16},
+        {DescriptorType::InputAttachment, 16},
+        {DescriptorType::StorageBuffer, 16}
 	};
 };
 

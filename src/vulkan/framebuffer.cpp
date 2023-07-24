@@ -8,10 +8,10 @@ namespace lv {
 
 namespace vulkan {
 
-Framebuffer::Framebuffer(FramebufferCreateInfo createInfo) {
+Framebuffer::Framebuffer(internal::FramebufferCreateInfo createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
-    _renderPass = createInfo.renderPass;
+    _renderPass = static_cast<RenderPass*>(createInfo.renderPass);
 
     /*
     bool hasDepthAttachment = (depthAttachment.attachmentIndex != -1);
@@ -50,10 +50,14 @@ Framebuffer::Framebuffer(FramebufferCreateInfo createInfo) {
     framebuffers.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
         std::vector<VkImageView> imageViews;
-        for (auto& colorAttachment : createInfo.colorAttachments)
-            imageViews.push_back(colorAttachment.image->imageView(i));
-        if (createInfo.depthAttachment.index != -1)
-            imageViews.push_back(createInfo.depthAttachment.image->imageView(i));
+        for (auto& colorAttachment : createInfo.colorAttachments) {
+            CAST_FROM_INTERNAL_NAMED(colorAttachment.image, Image, image);
+            imageViews.push_back(image->imageView(i));
+        }
+        if (createInfo.depthAttachment.index != -1) {
+            CAST_FROM_INTERNAL_NAMED(createInfo.depthAttachment.image, Image, image);
+            imageViews.push_back(image->imageView(i));
+        }
 
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

@@ -1,12 +1,7 @@
 #ifndef LV_VULKAN_IMAGE_H
 #define LV_VULKAN_IMAGE_H
 
-#include <cassert>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include "lvcore/internal/core.hpp"
+#include "lvcore/internal/image.hpp"
 
 #include "common.hpp"
 
@@ -18,105 +13,40 @@ namespace lv {
 namespace vulkan {
 
 class CommandBuffer;
-class Image;
 
-struct ImageDescriptorInfo {
+struct ImageDescriptorInfo : internal::ImageDescriptorInfo {
     std::vector<VkDescriptorImageInfo> infos;
     uint32_t binding;
     DescriptorType descriptorType;
 };
 
-struct ImageCreateInfo {
-    uint8_t frameCount = 0;
-    Format format;
-    uint16_t width;
-    uint16_t height;
-    uint16_t layerCount = 1;
-    uint16_t mipCount = 1;
-    ImageType imageType = ImageType::_2D;
-    ImageUsageFlags usage = ImageUsageFlags::None;
-    ImageAspectFlags aspect = ImageAspectFlags::Color;
-    MemoryType memoryType = MemoryType::Private;
-    MemoryAllocationCreateFlags memoryAllocationFlags = MemoryAllocationCreateFlags::None;
-};
-
-struct ImageLoadInfo {
-    const char* filename;
-    bool isSRGB = false;
-    bool generateMipmaps = false;
-};
-
-struct ImageViewCreateInfo {
-    Image* image;
-    ImageType viewType;
-    uint16_t baseLayer;
-    uint16_t layerCount;
-    uint16_t baseMip;
-    uint16_t mipCount;
-};
-
-class Image {
+class Image : public internal::Image {
 private:
-    uint8_t _frameCount;
-
     std::vector<VkImage> images;
     std::vector<VmaAllocation> allocations;
     std::vector<VkImageView> imageViews;
 
-    Format _format;
-
-    uint16_t _width, _height;
-
-    uint16_t _baseLayer = 0;
-    uint16_t _layerCount = 1;
-    uint16_t _baseMip = 0;
-    uint16_t _mipCount = 1;
-
-    ImageAspectFlags _aspect;
-
-    bool _isOriginal = true;
-
 public:
-    Image(ImageCreateInfo createInfo);
+    Image(internal::ImageCreateInfo createInfo);
 
-    Image(ImageLoadInfo loadInfo, CommandBuffer* commandBuffer);
+    Image(internal::ImageLoadInfo loadInfo, CommandBuffer* commandBuffer);
 
-    Image(ImageViewCreateInfo viewCreateInfo);
+    Image(internal::ImageViewCreateInfo viewCreateInfo);
 
-    ~Image();
+    ~Image() override;
 
-    void create(ImageCreateInfo& createInfo);
+    void create(internal::ImageCreateInfo& createInfo);
 
     void _createImageView(ImageType viewType, ImageAspectFlags aspect);
 
-    ImageDescriptorInfo descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::SampledImage, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0);
+    internal::ImageDescriptorInfo* descriptorInfo(uint32_t binding, DescriptorType descriptorType = DescriptorType::SampledImage, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0) override;
     
-    Image* newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount);
+    Image* newImageView(ImageType viewType, uint16_t baseLayer, uint16_t layerCount, uint16_t baseMip, uint16_t mipCount) override;
 
     //Getters
-    inline uint8_t frameCount() { return _frameCount; }
-
     inline VkImage image(uint8_t index) { return images[index]; }
 
     inline VkImageView imageView(uint8_t index) { return imageViews[index]; }
-
-    inline uint16_t width() { return _width; }
-
-    inline uint16_t height() { return _height; }
-
-    inline lv::Format format() { return _format; }
-
-    inline uint16_t baseLayer() { return _baseLayer; }
-
-    inline uint16_t layerCount() { return _layerCount; }
-
-    inline uint16_t baseMip() { return _baseMip; }
-
-    inline uint16_t mipCount() { return _mipCount; }
-
-    inline ImageAspectFlags aspect() { return _aspect; }
-
-    inline bool isOriginal() { return _isOriginal; }
 
     inline VkImage* _imagesData() { return images.data(); }
 

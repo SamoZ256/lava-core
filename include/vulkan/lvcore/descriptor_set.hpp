@@ -1,13 +1,7 @@
 #ifndef LV_VULKAN_DESCRIPTOR_SET_H
 #define LV_VULKAN_DESCRIPTOR_SET_H
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
-#include <cassert>
-#include <stdexcept>
-#include <map>
-#include <iostream>
+#include "lvcore/internal/descriptor_set.hpp"
 
 #include "buffer.hpp"
 #include "sampler.hpp"
@@ -32,29 +26,17 @@ public:
     void overwrite(VkDescriptorSet &set);
 };
 
-struct DescriptorSetCreateInfo {
-    uint8_t frameCount = 0;
-    PipelineLayout* pipelineLayout;
-    uint8_t layoutIndex = 0;
-    std::vector<BufferDescriptorInfo> bufferBindings;
-    std::vector<ImageDescriptorInfo> imageBindings;
-};
-
-class DescriptorSet {
+class DescriptorSet : public internal::DescriptorSet {
 private:
-    uint8_t _frameCount;
-
     std::vector<VkDescriptorSet> descriptorSets;
 
-    //uint16_t shaderType;
     PipelineLayout* _pipelineLayout;
-    uint8_t _layoutIndex;
     VkDescriptorPool* pool;
 
 public:
-    DescriptorSet(DescriptorSetCreateInfo createInfo);
+    DescriptorSet(internal::DescriptorSetCreateInfo createInfo);
 
-    ~DescriptorSet();
+    ~DescriptorSet() override;
 
     static bool registerDescriptor(DescriptorType descriptorType);
 

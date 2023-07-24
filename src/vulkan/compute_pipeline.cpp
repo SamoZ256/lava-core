@@ -6,9 +6,9 @@ namespace lv {
 
 namespace vulkan {
 
-ComputePipeline::ComputePipeline(ComputePipelineCreateInfo createInfo) {
-    _computeShaderModule = createInfo.computeShaderModule;
-    _pipelineLayout = createInfo.pipelineLayout;
+ComputePipeline::ComputePipeline(internal::ComputePipelineCreateInfo createInfo) {
+    _computeShaderModule = static_cast<ShaderModule*>(createInfo.computeShaderModule);
+    _pipelineLayout = static_cast<PipelineLayout*>(createInfo.pipelineLayout);
 
     compile();
 }

@@ -12,11 +12,11 @@ namespace lv {
 
 namespace vulkan {
 
-Image::Image(ImageCreateInfo createInfo) {
+Image::Image(internal::ImageCreateInfo createInfo) {
     create(createInfo);
 }
 
-Image::Image(ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
+Image::Image(internal::ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
     std::string strFilename = std::string(loadInfo.filename);
     std::replace(strFilename.begin(), strFilename.end(), '\\', '/');
     std::string extension = strFilename.substr(strFilename.find_last_of('.'));
@@ -48,7 +48,7 @@ Image::Image(ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
         //if (loadInfo.generateMipmaps)
         //    mipCount = std::max(std::max(ceil(log2(width)), ceil(log2(height))), 1.0);
 
-        ImageCreateInfo createInfo{
+        internal::ImageCreateInfo createInfo{
             .frameCount = 1,
             .format = format,
             .width = uint16_t(width),
@@ -67,7 +67,7 @@ Image::Image(ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
         //if (loadInfo.generateMipmaps)
         //    commandBuffer->cmdGenerateMipmapsForImage(this);
     } else {
-        ImageCreateInfo createInfo{
+        internal::ImageCreateInfo createInfo{
             .frameCount = 1,
             .format = format,
             .width = 1,
@@ -80,12 +80,14 @@ Image::Image(ImageLoadInfo loadInfo, CommandBuffer* commandBuffer) {
     }
 }
 
-Image::Image(ImageViewCreateInfo viewCreateInfo) {
-    _frameCount = viewCreateInfo.image->frameCount();
-    _isOriginal = false;
-    _format = viewCreateInfo.image->format();
-    _width = viewCreateInfo.image->width();
-    _height = viewCreateInfo.image->height();
+Image::Image(internal::ImageViewCreateInfo viewCreateInfo) {
+    CAST_FROM_INTERNAL_NAMED(viewCreateInfo.image, Image, image);
+
+    _frameCount = image->frameCount();
+    _isOriginal = False;
+    _format = image->format();
+    _width = image->width();
+    _height = image->height();
 
     _baseLayer = viewCreateInfo.baseLayer;
     _layerCount = viewCreateInfo.layerCount;
@@ -98,9 +100,9 @@ Image::Image(ImageViewCreateInfo viewCreateInfo) {
     images.resize(_frameCount);
     imageViews.resize(_frameCount);
     for (uint8_t i = 0; i < _frameCount; i++) {
-        images[i] = viewCreateInfo.image->image(i);
+        images[i] = image->image(i);
     }
-    _createImageView(viewCreateInfo.viewType, viewCreateInfo.image->aspect());
+    _createImageView(viewCreateInfo.viewType, image->aspect());
 }
 
 Image::~Image() {
@@ -111,7 +113,7 @@ Image::~Image() {
     }
 }
 
-void Image::create(ImageCreateInfo& createInfo) {
+void Image::create(internal::ImageCreateInfo& createInfo) {
     _frameCount = (createInfo.frameCount == 0 ? g_vulkan_swapChain->maxFramesInFlight() : createInfo.frameCount);
 
     _width = createInfo.width;
@@ -170,22 +172,22 @@ void Image::_createImageView(ImageType viewType, ImageAspectFlags aspect) {
     }
 }
 
-ImageDescriptorInfo Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
+internal::ImageDescriptorInfo* Image::descriptorInfo(uint32_t binding, DescriptorType descriptorType, ImageLayout imageLayout, int8_t frameOffset) {
     VkImageLayout vkImageLayout;
     GET_VK_IMAGE_LAYOUT(imageLayout, vkImageLayout);
 
-    ImageDescriptorInfo info;
-    info.infos.resize(imageViews.size());
-    for (uint8_t i = 0; i < info.infos.size(); i++) {
+    ImageDescriptorInfo* info = new ImageDescriptorInfo;
+    info->infos.resize(imageViews.size());
+    for (uint8_t i = 0; i < imageViews.size(); i++) {
         int8_t index = i + frameOffset;
         if (index < 0) index += _frameCount;
         else if (index >= _frameCount) index -= _frameCount;
-        info.infos[i].imageLayout = vkImageLayout;
-        info.infos[i].imageView = imageViews[index];
-        info.infos[i].sampler = VK_NULL_HANDLE;
+        info->infos[i].imageLayout = vkImageLayout;
+        info->infos[i].imageView = imageViews[index];
+        info->infos[i].sampler = VK_NULL_HANDLE;
     }
-    info.binding = binding;
-    info.descriptorType = descriptorType;
+    info->binding = binding;
+    info->descriptorType = descriptorType;
 
     return info;
 }

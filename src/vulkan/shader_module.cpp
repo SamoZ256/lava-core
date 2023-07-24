@@ -8,7 +8,7 @@ namespace lv {
 
 namespace vulkan {
 
-ShaderModule::ShaderModule(ShaderModuleCreateInfo createInfo) {
+ShaderModule::ShaderModule(internal::ShaderModuleCreateInfo createInfo) {
     compile(createInfo);
 }
 
@@ -16,7 +16,7 @@ ShaderModule::~ShaderModule() {
     vkDestroyShaderModule(g_vulkan_device->device(), shaderModule, nullptr);
 }
 
-void ShaderModule::compile(ShaderModuleCreateInfo& createInfo) {
+void ShaderModule::compile(internal::ShaderModuleCreateInfo& createInfo) {
     size_t begin = createInfo.source.find("section.spv") + 11 /*"section.spv".size()*/;
     std::string source = createInfo.source.substr(begin, createInfo.source.find("section.metallib") - begin);
 
@@ -29,10 +29,9 @@ void ShaderModule::compile(ShaderModuleCreateInfo& createInfo) {
 
     //Specialization constants
     specializationInfo.mapEntryCount = createInfo.specializationConstants.size();
-    specializationInfo.pMapEntries = createInfo.specializationConstants.data();
+    specializationInfo.pMapEntries = (VkSpecializationMapEntry*)createInfo.specializationConstants.data();
     specializationInfo.dataSize = createInfo.constantsSize;
     specializationInfo.pData = createInfo.constantsData;
-    //std::cout << "Size: " << constants.size() << " : " << (constants.size() == 0 ? "none" : std::to_string((int)constants[0].constantID) + ", " + std::to_string(*(float*)constantsData) + ", " + std::to_string(constants[0].size)) << std::endl;
 
     _stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     _stageInfo.stage = getVKShaderStageFlagBits(createInfo.shaderStage);

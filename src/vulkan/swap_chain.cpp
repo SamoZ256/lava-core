@@ -7,7 +7,7 @@ namespace vulkan {
 //Implementation
 SwapChain* g_vulkan_swapChain = nullptr;
 
-SwapChain::SwapChain(SwapChainCreateInfo createInfo) {
+SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
 	g_vulkan_swapChain = this;
 
 	vsyncEnable = createInfo.vsyncEnable;
@@ -59,9 +59,8 @@ SwapChain::SwapChain(SwapChainCreateInfo createInfo) {
 				.storeOp = AttachmentStoreOperation::Store,
 				.finalLayout = ImageLayout::PresentSource_KHR
 			}
-		},
-		.dependencies = {dependencies[0], dependencies[1]}
-	});
+		}
+	}, {dependencies[0], dependencies[1]});
 
 	create();
 	createSyncObjects();

@@ -18,9 +18,6 @@ class Framebuffer {
 protected:
     uint8_t _frameCount;
 
-    std::vector<FramebufferAttachment> colorAttachments;
-    FramebufferAttachment depthAttachment;
-
 public:
     virtual ~Framebuffer() {}
 

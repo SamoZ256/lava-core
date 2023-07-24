@@ -37,7 +37,7 @@ public:
 
     ~SwapChain() override;
 
-    void create() override;
+    void create();
 
     void resize() override;
 

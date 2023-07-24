@@ -1,9 +1,7 @@
 #ifndef LV_VULKAN_SAMPLER_H
 #define LV_VULKAN_SAMPLER_H
 
-#include <iostream>
-
-#include "lvcore/internal/common.hpp"
+#include "lvcore/internal/sampler.hpp"
 
 #include "image.hpp"
 
@@ -11,25 +9,16 @@ namespace lv {
 
 namespace vulkan {
 
-struct SamplerCreateInfo {
-    Filter filter = Filter::Nearest;
-    SamplerAddressMode addressMode = SamplerAddressMode::ClampToEdge;
-    Bool compareEnable = False;
-    CompareOperation compareOp = CompareOperation::Less;
-    float minLod = 0.0f;
-    float maxLod = 0.0f;
-};
-
-class Sampler {
+class Sampler : public internal::Sampler {
 private:
     VkSampler _sampler;
 
 public:
-    Sampler(SamplerCreateInfo createInfo);
+    Sampler(internal::SamplerCreateInfo createInfo);
 
-    ~Sampler();
+    ~Sampler() override;
 
-    ImageDescriptorInfo descriptorInfo(Image* image, uint32_t binding, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0);
+    internal::ImageDescriptorInfo* descriptorInfo(internal::Image* image, uint32_t binding, ImageLayout imageLayout = ImageLayout::ShaderReadOnlyOptimal, int8_t frameOffset = 0) override;
 };
 
 } //namespace vulkan

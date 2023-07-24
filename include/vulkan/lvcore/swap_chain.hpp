@@ -1,15 +1,7 @@
 #ifndef LV_VULKAN_SWAP_CHAIN_H
 #define LV_VULKAN_SWAP_CHAIN_H
 
-#include <array>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <limits>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "lvcore/internal/swap_chain.hpp"
 
 #include "framebuffer.hpp"
 #include "device.hpp"
@@ -19,21 +11,10 @@ namespace lv {
 
 namespace vulkan {
 
-struct SwapChainCreateInfo {
-	LvndWindow* window;
-  	bool vsyncEnable = true;
-	uint8_t maxFramesInFlight = 2;
-	bool clearAttachment = false;
-	bool createDepthAttachment = false;
-};
-
-class SwapChain {
+class SwapChain : public internal::SwapChain {
 private:
-	bool vsyncEnable;
+	Bool vsyncEnable;
 
-	uint8_t _maxFramesInFlight;
-
-	uint8_t _crntFrame = 0;
 	uint32_t _imageIndex = 0;
 
 	LvndWindow* _window;
@@ -61,17 +42,17 @@ private:
 	std::vector<VkFence> imagesInFlight;
 
 public:
-	SwapChain(SwapChainCreateInfo createInfo);
+	SwapChain(internal::SwapChainCreateInfo createInfo);
 
-	~SwapChain();
+	~SwapChain() override;
 
 	void destroyToResize();
 
 	void create();
 
-	void resize();
+	void resize() override;
 
-	void renderAndPresent();
+	void renderAndPresent() override;
 
 	//SwapChain(const SwapChain &) = delete;
 	//void operator=(const SwapChain &) = delete;
@@ -85,7 +66,7 @@ public:
 		return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
 	}
 
-	void acquireNextImage(/*uint32_t *imageIndex*/);
+	void acquireNextImage(/*uint32_t *imageIndex*/) override;
 	VkResult submitCommandBuffers(const VkCommandBuffer *buffers/*, uint32_t *imageIndex*/);
 
 	void createSwapChain();
@@ -97,10 +78,6 @@ public:
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
 	//Getters
-	inline uint8_t maxFramesInFlight() { return _maxFramesInFlight; }
-
-	inline uint8_t crntFrame() { return _crntFrame; }
-
 	inline uint32_t imageIndex() { return _imageIndex; }
 
 	inline RenderPass* renderPass() { return _renderPass; }

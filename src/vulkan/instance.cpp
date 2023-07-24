@@ -36,17 +36,17 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	}
 }
 
-Instance::Instance(InstanceCreateInfo createInfo) {
-	_vulkanVersion = createInfo.vulkanVersion;
-	_validationEnable = createInfo.validationEnable;
-    if (_validationEnable && !checkValidationLayerSupport()) {
+Instance::Instance(internal::InstanceCreateInfo createInfo) {
+	_vulkanVersion = VK_API_VERSION_1_0;
+	validationEnable = createInfo.validationEnable;
+    if (validationEnable && !checkValidationLayerSupport()) {
 		throw std::runtime_error("Validation layers requested, but not available");
 	}
 
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = createInfo.applicationName;
-	appInfo.applicationVersion = createInfo.applicationVersion;
+	appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
 	appInfo.pEngineName = "Lava Engine";
 	appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
 	appInfo.apiVersion = _vulkanVersion;
@@ -63,7 +63,7 @@ Instance::Instance(InstanceCreateInfo createInfo) {
 	instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-	if (_validationEnable) {
+	if (validationEnable) {
 		instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 		instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
 
@@ -83,14 +83,14 @@ Instance::Instance(InstanceCreateInfo createInfo) {
 }
 
 Instance::~Instance() {
-	if (_validationEnable)
+	if (validationEnable)
 		DestroyDebugUtilsMessengerEXT(_instance, debugMessenger, nullptr);
 
 	vkDestroyInstance(_instance, nullptr);
 }
 
 void Instance::setupDebugMessenger() {
-	if (_validationEnable) {
+	if (validationEnable) {
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		populateDebugMessengerCreateInfo(createInfo);
 		VK_CHECK_RESULT(CreateDebugUtilsMessengerEXT(_instance, &createInfo, nullptr, &debugMessenger));
@@ -167,13 +167,13 @@ std::vector<const char *> Instance::getRequiredExtensions() {
 		std::cout << "GLFWextension[" << (int)i << "]: " << extensions[i] << std::endl;
 	}
 	*/
+	//TODO: query for support instead
 #ifdef __APPLE__
 	extensions.push_back("VK_KHR_portability_enumeration");
 #endif
 
-	if (_validationEnable) {
+	if (validationEnable)
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	}
 
 	return extensions;
 }

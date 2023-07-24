@@ -7,7 +7,6 @@
 
 namespace lv {
 
-typedef vulkan::CommandBufferCreateInfo CommandBufferCreateInfo;
 typedef vulkan::CommandBuffer CommandBuffer;
 
 } //namespace lv

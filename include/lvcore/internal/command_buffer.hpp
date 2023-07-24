@@ -53,6 +53,7 @@ public:
     virtual void cmdDrawIndexed(Buffer* indexBuffer, IndexType indexType, uint32_t indexCount, uint32_t instanceCount = 1) = 0;
 
     //TODO: add option to specify index buffer?
+    //TODO: Merge into @ref cmdDrawIndexed?
     virtual void cmdDrawPatches(uint32_t controlPointCount, uint32_t patchCount, uint32_t instanceCount = 1) = 0; //Metal only
 
     virtual void cmdBindDescriptorSet(DescriptorSet* descriptorSet) = 0;

@@ -1,7 +1,7 @@
 #ifndef LV_VULKAN_GRAPHICS_PIPELINE_H
 #define LV_VULKAN_GRAPHICS_PIPELINE_H
 
-#include <cassert>
+#include "lvcore/internal/graphics_pipeline.hpp"
 
 #include "render_pass.hpp"
 #include "descriptor_set.hpp"
@@ -27,22 +27,7 @@ struct PipelineConfigInfo {
     uint32_t subpass = 0;
 };
 
-struct GraphicsPipelineCreateInfo {
-    ShaderModule* vertexShaderModule = nullptr;
-    ShaderModule* fragmentShaderModule = nullptr;
-    PipelineLayout* pipelineLayout = nullptr;
-    RenderPass* renderPass = nullptr;
-    uint8_t subpassIndex = 0;
-    VertexDescriptor* vertexDescriptor = nullptr;
-    std::vector<ColorBlendAttachment> colorBlendAttachments;
-
-    CullMode cullMode = CullMode::None;
-    Bool depthTestEnable = False;
-    Bool depthWriteEnable = True;
-    CompareOperation depthOp = CompareOperation::Less;
-};
-
-class GraphicsPipeline {
+class GraphicsPipeline : public internal::GraphicsPipeline {
 private:
     VkPipeline _graphicsPipeline;
 
@@ -53,13 +38,13 @@ private:
     PipelineLayout* _pipelineLayout;
 
 public:
-    GraphicsPipeline(GraphicsPipelineCreateInfo createInfo);
+    GraphicsPipeline(internal::GraphicsPipelineCreateInfo createInfo);
 
-    ~GraphicsPipeline();
+    ~GraphicsPipeline() override;
 
-    void compile(GraphicsPipelineCreateInfo& createInfo);
+    void compile(internal::GraphicsPipelineCreateInfo& createInfo);
 
-    void recompile();
+    void recompile() override;
 
     //Getters
     inline VkPipeline graphicsPipeline() { return _graphicsPipeline; }

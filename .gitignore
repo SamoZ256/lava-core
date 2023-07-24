@@ -2,6 +2,7 @@
 **/build/**
 **/build_vulkan/**
 **/xcode/**
+**/xcode_vulkan/**
 **/lib/**
 **/.temp/**
 **/.vscode/**

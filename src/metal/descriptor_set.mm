@@ -16,7 +16,7 @@ DescriptorSet::DescriptorSet(internal::DescriptorSetCreateInfo createInfo) {
 
         buffers.push_back(bufferBinding_->buffers);
         bufferBindingIndices.push_back(bufferBinding_->binding);
-        free(bufferBinding);
+        free(bufferBinding_);
     }
     for (auto* imageBinding : createInfo.imageBindings) {
         CAST_FROM_INTERNAL(imageBinding, ImageDescriptorInfo);
@@ -29,7 +29,7 @@ DescriptorSet::DescriptorSet(internal::DescriptorSetCreateInfo createInfo) {
                 samplerBindingIndices.push_back(imageBinding_->binding);
             }
         }
-        free(imageBinding);
+        free(imageBinding_);
     }
 }
 

@@ -1,6 +1,8 @@
 #ifndef LV_VULKAN_COMPUTE_PIPELINE_H
 #define LV_VULKAN_COMPUTE_PIPELINE_H
 
+#include "lvcore/internal/compute_pipeline.hpp"
+
 #include "shader_module.hpp"
 #include "descriptor_set.hpp"
 
@@ -8,12 +10,7 @@ namespace lv {
 
 namespace vulkan {
 
-struct ComputePipelineCreateInfo {
-    ShaderModule* computeShaderModule;
-    PipelineLayout* pipelineLayout;
-};
-
-class ComputePipeline {
+class ComputePipeline : public internal::ComputePipeline {
 private:
     VkPipeline _computePipeline;
 
@@ -21,13 +18,13 @@ private:
     PipelineLayout* _pipelineLayout;
 
 public:
-    ComputePipeline(ComputePipelineCreateInfo createInfo);
+    ComputePipeline(internal::ComputePipelineCreateInfo createInfo);
 
-    ~ComputePipeline();
+    ~ComputePipeline() override;
 
     void compile();
 
-    void recompile();
+    void recompile() override;
 
     //Getters
     inline VkPipeline computePipeline() { return _computePipeline; }

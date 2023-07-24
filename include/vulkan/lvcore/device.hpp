@@ -1,22 +1,13 @@
 #ifndef LV_VULKAN_DEVICE_H
 #define LV_VULKAN_DEVICE_H
 
-#include <string>
-#include <vector>
-#include <cstring>
-#include <iostream>
-#include <map>
+#include "lvcore/internal/device.hpp"
 
 #include <vk_mem_alloc.h>
-
-#define LVND_BACKEND_VULKAN
-#include "lvnd/lvnd.h"
 
 #include "core.hpp"
 
 #include "instance.hpp"
-
-#include "lvcore/threading/thread_pool.hpp"
 
 namespace lv {
 
@@ -69,21 +60,7 @@ struct QueueFamilyIndices {
 	bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
 };
 
-struct DeviceCreateInfo {
-    LvndWindow* window;
-    ThreadPool* threadPool;
-    uint32_t maxDescriptorSets = 1024;
-	std::map<DescriptorType, uint32_t> descriptorPoolSizes = {
-		{DescriptorType::UniformBuffer, 128},
-    	{DescriptorType::CombinedImageSampler, 512},
-        {DescriptorType::SampledImage, 64},
-        {DescriptorType::StorageImage, 16},
-        {DescriptorType::InputAttachment, 16},
-        {DescriptorType::StorageBuffer, 16}
-	};
-};
-
-class Device {
+class Device : public internal::Device {
 private:
     uint8_t maxThreadCount;
 
@@ -102,11 +79,11 @@ private:
     VkQueue _presentQueue;
 
 public:
-    Device(DeviceCreateInfo createInfo);
+    Device(internal::DeviceCreateInfo createInfo);
 
-    ~Device();
+    ~Device() override;
 
-    void waitIdle() { vkDeviceWaitIdle(_device); }
+    void waitIdle() override { vkDeviceWaitIdle(_device); }
 
     SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(_physicalDevice); }
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

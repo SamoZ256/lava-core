@@ -13,6 +13,9 @@ protected:
 
 public:
     virtual ~Semaphore() {}
+
+    //Getters
+    inline uint8_t frameCount() { return _frameCount; }
 };
 
 } //namespace internal

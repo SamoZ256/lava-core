@@ -29,8 +29,6 @@ protected:
 public:
     virtual ~SwapChain() {}
 
-    virtual void create() = 0;
-
     virtual void resize() = 0;
 
     virtual void acquireNextImage() = 0;

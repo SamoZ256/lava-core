@@ -82,7 +82,7 @@ void DescriptorPool::recreate() {
 }
 
 // class member functions
-Device::Device(DeviceCreateInfo createInfo) {
+Device::Device(internal::DeviceCreateInfo createInfo) {
 	descriptorPool.init(createInfo.maxDescriptorSets, createInfo.descriptorPoolSizes);
 
 	maxThreadCount = createInfo.threadPool->maxThreadCount();
@@ -177,7 +177,7 @@ void Device::createLogicalDevice() {
 
 	// might not really be necessary anymore because device specific validation layers
 	// have been deprecated
-	if (g_vulkan_instance->validationEnable()) {
+	if (g_vulkan_instance->getValidationEnable()) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(g_vulkan_instance->validationLayerCount());
 		createInfo.ppEnabledLayerNames = g_vulkan_instance->validationLayersData();
 	} else {

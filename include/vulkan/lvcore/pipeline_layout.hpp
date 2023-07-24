@@ -1,7 +1,7 @@
 #ifndef LV_VULKAN_PIPELINE_LAYOUT_H
 #define LV_VULKAN_PIPELINE_LAYOUT_H
 
-#include <vector>
+#include "lvcore/internal/pipeline_layout.hpp"
 
 #include "core.hpp"
 
@@ -9,42 +9,24 @@ namespace lv {
 
 namespace vulkan {
 
-struct PushConstantRange {
-    ShaderStageFlags stageFlags;
-    uint32_t offset;
-    uint32_t size;
-};
-
-struct DescriptorSetLayoutBinding {
-    uint32_t binding;
-    DescriptorType descriptorType;
-    ShaderStageFlags shaderStage;
-};
-
-//TODO: use contructors and destructors
 class DescriptorSetLayout {
 public:
     VkDescriptorSetLayout descriptorSetLayout;
     std::vector<VkDescriptorSetLayoutBinding> bindings;
 
-    DescriptorSetLayout(std::vector<DescriptorSetLayoutBinding> aBindings);
+    DescriptorSetLayout(std::vector<internal::DescriptorSetLayoutBinding> aBindings);
     
     void destroy(); //TODO: probably make this a destructor? Or maybe just move the whole class into pipeline layout
 };
 
-struct PipelineLayoutCreateInfo {
-    std::vector<DescriptorSetLayout> descriptorSetLayouts;
-    std::vector<PushConstantRange> pushConstantRanges;
-};
-
-class PipelineLayout {
+class PipelineLayout : public internal::PipelineLayout {
 private:
     VkPipelineLayout _pipelineLayout;
     std::vector<DescriptorSetLayout> descriptorSetLayouts;
     std::vector<VkPushConstantRange> pushConstantRanges;
 
 public:
-    PipelineLayout(PipelineLayoutCreateInfo createInfo);
+    PipelineLayout(internal::PipelineLayoutCreateInfo createInfo);
 
     ~PipelineLayout();
 
