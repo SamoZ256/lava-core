@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/upscaler.hpp"
+#include "lvcore/vulkan/upscaler.hpp"
 
 namespace lv {
 
@@ -16,7 +16,7 @@ typedef vulkan::Upscaler Upscaler;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/upscaler.hpp"
+#include "lvcore/metal/upscaler.hpp"
 
 namespace lv {
 

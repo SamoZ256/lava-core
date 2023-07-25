@@ -1,9 +1,9 @@
-#include "metal/lvcore/shader_module.hpp"
+#include "lvcore/metal/shader_module.hpp"
 
 #include <json/json.h>
 
-#include "metal/lvcore/device.hpp"
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 #include <iostream>
 

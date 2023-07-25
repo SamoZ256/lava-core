@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/instance.hpp"
+#include "lvcore/vulkan/instance.hpp"
 
 #define g_instance g_vulkan_instance
 
@@ -17,7 +17,7 @@ typedef vulkan::Instance Instance;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/instance.hpp"
+#include "lvcore/metal/instance.hpp"
 
 #define g_instance g_metal_instance
 

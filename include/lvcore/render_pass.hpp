@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/render_pass.hpp"
+#include "lvcore/vulkan/render_pass.hpp"
 
 namespace lv {
 
@@ -16,7 +16,7 @@ typedef vulkan::RenderPass RenderPass;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/render_pass.hpp"
+#include "lvcore/metal/render_pass.hpp"
 
 namespace lv {
 

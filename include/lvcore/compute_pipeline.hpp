@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/compute_pipeline.hpp"
+#include "lvcore/vulkan/compute_pipeline.hpp"
 
 namespace lv {
 typedef vulkan::ComputePipeline ComputePipeline;
@@ -14,7 +14,7 @@ typedef vulkan::ComputePipeline ComputePipeline;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/compute_pipeline.hpp"
+#include "lvcore/metal/compute_pipeline.hpp"
 
 namespace lv {
 typedef metal::ComputePipeline ComputePipeline;

@@ -1,6 +1,6 @@
-#include "vulkan/lvcore/viewport.hpp"
+#include "lvcore/vulkan/viewport.hpp"
 
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 
 namespace lv {
 

@@ -1,11 +1,11 @@
-#include "metal/lvcore/buffer.hpp"
+#include "lvcore/metal/buffer.hpp"
 
 #import <Metal/Metal.h>
 
-#include "metal/lvcore/core.hpp"
+#include "lvcore/metal/core.hpp"
 
-#include "metal/lvcore/device.hpp"
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 #include <iostream>
 

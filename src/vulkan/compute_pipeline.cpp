@@ -1,6 +1,6 @@
-#include "vulkan/lvcore/compute_pipeline.hpp"
+#include "lvcore/vulkan/compute_pipeline.hpp"
 
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/device.hpp"
 
 namespace lv {
 

@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/vertex_descriptor.hpp"
+#include "lvcore/vulkan/vertex_descriptor.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::VertexDescriptor VertexDescriptor;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/vertex_descriptor.hpp"
+#include "lvcore/metal/vertex_descriptor.hpp"
 
 namespace lv {
 

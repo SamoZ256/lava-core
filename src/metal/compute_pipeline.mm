@@ -1,7 +1,7 @@
-#include "metal/lvcore/compute_pipeline.hpp"
+#include "lvcore/metal/compute_pipeline.hpp"
 
-#include "metal/lvcore/swap_chain.hpp"
-#include "metal/lvcore/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
+#include "lvcore/metal/device.hpp"
 
 namespace lv {
 

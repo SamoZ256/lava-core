@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/device.hpp"
 
 #define g_device g_vulkan_device
 
@@ -17,7 +17,7 @@ typedef vulkan::Device Device;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/device.hpp"
+#include "lvcore/metal/device.hpp"
 
 #define g_device g_metal_device
 

@@ -1,8 +1,8 @@
-#include "metal/lvcore/vertex_descriptor.hpp"
+#include "lvcore/metal/vertex_descriptor.hpp"
 
-#include "metal/lvcore/common.hpp"
+#include "lvcore/metal/common.hpp"
 
-#include "metal/lvcore/core.hpp"
+#include "lvcore/metal/core.hpp"
 
 namespace lv {
 

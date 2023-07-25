@@ -1,8 +1,8 @@
-#include "vulkan/lvcore/command_buffer.hpp"
+#include "lvcore/vulkan/command_buffer.hpp"
 
-#include "vulkan/lvcore/core.hpp"
+#include "lvcore/vulkan/core.hpp"
 
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 
 namespace lv {
 

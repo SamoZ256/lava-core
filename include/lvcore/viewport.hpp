@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/viewport.hpp"
+#include "lvcore/vulkan/viewport.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::Viewport Viewport;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/viewport.hpp"
+#include "lvcore/metal/viewport.hpp"
 
 namespace lv {
 

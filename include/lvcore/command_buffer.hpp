@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/command_buffer.hpp"
+#include "lvcore/vulkan/command_buffer.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::CommandBuffer CommandBuffer;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/command_buffer.hpp"
+#include "lvcore/metal/command_buffer.hpp"
 
 namespace lv {
 typedef metal::CommandBuffer CommandBuffer;

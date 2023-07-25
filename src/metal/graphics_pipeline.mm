@@ -1,12 +1,12 @@
-#include "metal/lvcore/graphics_pipeline.hpp"
+#include "lvcore/metal/graphics_pipeline.hpp"
 
 #include <string>
 #include <iostream>
 
-#include "metal/lvcore/core.hpp"
+#include "lvcore/metal/core.hpp"
 
-#include "metal/lvcore/device.hpp"
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 namespace lv {
 

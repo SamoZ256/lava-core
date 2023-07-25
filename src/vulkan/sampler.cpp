@@ -1,8 +1,8 @@
-#include "vulkan/lvcore/sampler.hpp"
+#include "lvcore/vulkan/sampler.hpp"
 
-#include "vulkan/lvcore/core.hpp"
+#include "lvcore/vulkan/core.hpp"
 
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/device.hpp"
 
 namespace lv {
 

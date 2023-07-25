@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/sampler.hpp"
+#include "lvcore/vulkan/sampler.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::Sampler Sampler;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/sampler.hpp"
+#include "lvcore/metal/sampler.hpp"
 
 namespace lv {
 

@@ -1,8 +1,8 @@
-#include "vulkan/lvcore/graphics_pipeline.hpp"
+#include "lvcore/vulkan/graphics_pipeline.hpp"
 
-#include "vulkan/lvcore/device.hpp"
-#include "vulkan/lvcore/swap_chain.hpp"
-#include "vulkan/lvcore/descriptor_set.hpp"
+#include "lvcore/vulkan/device.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
+#include "lvcore/vulkan/descriptor_set.hpp"
 
 namespace lv {
 

@@ -1,4 +1,4 @@
-#include "metal/lvcore/image.hpp"
+#include "lvcore/metal/image.hpp"
 
 #include <string>
 #include <filesystem>
@@ -8,11 +8,11 @@
 #include "stb/stb_image.h"
 //#include "gli/gli.hpp"
 
-#include "metal/lvcore/core.hpp"
+#include "lvcore/metal/core.hpp"
 
-#include "metal/lvcore/device.hpp"
-#include "metal/lvcore/swap_chain.hpp"
-#include "metal/lvcore/buffer.hpp"
+#include "lvcore/metal/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
+#include "lvcore/metal/buffer.hpp"
 
 namespace lv {
 

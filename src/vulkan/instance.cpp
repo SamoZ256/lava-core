@@ -1,9 +1,9 @@
-#include "vulkan/lvcore/instance.hpp"
+#include "lvcore/vulkan/instance.hpp"
 
 #define LVND_BACKEND_VULKAN
 #include "lvnd/lvnd.h"
 
-#include "vulkan/lvcore/common.hpp"
+#include "lvcore/vulkan/common.hpp"
 
 namespace lv {
 
@@ -37,8 +37,10 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 }
 
 Instance::Instance(internal::InstanceCreateInfo createInfo) {
-	_vulkanVersion = VK_API_VERSION_1_0;
+    renderAPI = createInfo.renderAPI;
 	validationEnable = createInfo.validationEnable;
+	
+	_vulkanVersion = VK_API_VERSION_1_0;
     if (validationEnable && !checkValidationLayerSupport()) {
 		throw std::runtime_error("Validation layers requested, but not available");
 	}

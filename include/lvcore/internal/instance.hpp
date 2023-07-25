@@ -8,18 +8,22 @@ namespace lv {
 namespace internal {
 
 struct InstanceCreateInfo {
+    RenderAPI renderAPI = defaultRenderAPI;
     const char* applicationName;
     Bool validationEnable = False;
 };
 
 class Instance {
 protected:
+    RenderAPI renderAPI;
     Bool validationEnable;
 
 public:
     virtual ~Instance() {}
 
     //Getters
+    inline RenderAPI getRenderAPI() { return renderAPI; }
+
     inline Bool getValidationEnable() { return validationEnable; }
 };
 

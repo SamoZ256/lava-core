@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/pipeline_layout.hpp"
+#include "lvcore/vulkan/pipeline_layout.hpp"
 
 namespace lv {
 
@@ -16,7 +16,7 @@ typedef vulkan::PipelineLayout PipelineLayout;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/pipeline_layout.hpp"
+#include "lvcore/metal/pipeline_layout.hpp"
 
 namespace lv {
 

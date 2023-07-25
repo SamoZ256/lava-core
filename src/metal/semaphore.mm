@@ -1,6 +1,6 @@
-#include "metal/lvcore/semaphore.hpp"
+#include "lvcore/metal/semaphore.hpp"
 
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 namespace lv {
 

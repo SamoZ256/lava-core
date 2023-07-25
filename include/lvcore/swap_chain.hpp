@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 
 #define g_swapChain g_vulkan_swapChain
 
@@ -17,7 +17,7 @@ typedef vulkan::SwapChain SwapChain;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 #define g_swapChain g_metal_swapChain
 

@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/framebuffer.hpp"
+#include "lvcore/vulkan/framebuffer.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::Framebuffer Framebuffer;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/framebuffer.hpp"
+#include "lvcore/metal/framebuffer.hpp"
 
 namespace lv {
 

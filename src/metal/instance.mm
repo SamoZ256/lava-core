@@ -1,4 +1,4 @@
-#include "metal/lvcore/instance.hpp"
+#include "lvcore/metal/instance.hpp"
 
 namespace lv {
 
@@ -8,6 +8,7 @@ namespace metal {
 Instance* g_metal_instance = nullptr;
 
 Instance::Instance(internal::InstanceCreateInfo createInfo) {
+    renderAPI = createInfo.renderAPI;
     validationEnable = createInfo.validationEnable;
 
     g_metal_instance = this;

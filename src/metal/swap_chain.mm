@@ -1,8 +1,8 @@
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 #import <QuartzCore/QuartzCore.h>
 
-#include "metal/lvcore/device.hpp"
+#include "lvcore/metal/device.hpp"
 
 namespace lv {
 

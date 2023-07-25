@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/graphics_pipeline.hpp"
+#include "lvcore/vulkan/graphics_pipeline.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::GraphicsPipeline GraphicsPipeline;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/graphics_pipeline.hpp"
+#include "lvcore/metal/graphics_pipeline.hpp"
 
 namespace lv {
 

@@ -1,11 +1,11 @@
-#include "metal/lvcore/command_buffer.hpp"
+#include "lvcore/metal/command_buffer.hpp"
 
-#include "metal/lvcore/core.hpp"
+#include "lvcore/metal/core.hpp"
 
 #include "lvcore/filesystem/filesystem.hpp"
 
-#include "metal/lvcore/device.hpp"
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 namespace lv {
 

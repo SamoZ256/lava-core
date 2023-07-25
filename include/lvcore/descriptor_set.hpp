@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/descriptor_set.hpp"
+#include "lvcore/vulkan/descriptor_set.hpp"
 
 namespace lv {
 typedef vulkan::DescriptorSet DescriptorSet;
@@ -14,7 +14,7 @@ typedef vulkan::DescriptorSet DescriptorSet;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/descriptor_set.hpp"
+#include "lvcore/metal/descriptor_set.hpp"
 
 namespace lv {
 typedef metal::DescriptorSet DescriptorSet;

@@ -1,9 +1,9 @@
-#include "metal/lvcore/upscaler.hpp"
+#include "lvcore/metal/upscaler.hpp"
 
 #import <MetalFX/MetalFX.h>
 
-#include "metal/lvcore/device.hpp"
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/device.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 namespace lv {
 

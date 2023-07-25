@@ -1,8 +1,8 @@
-#include "vulkan/lvcore/pipeline_layout.hpp"
+#include "lvcore/vulkan/pipeline_layout.hpp"
 
-#include "vulkan/lvcore/common.hpp"
+#include "lvcore/vulkan/common.hpp"
 
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/device.hpp"
 
 namespace lv {
 

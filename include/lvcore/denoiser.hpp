@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/denoiser.hpp"
+#include "lvcore/vulkan/denoiser.hpp"
 
 namespace lv {
 
@@ -16,7 +16,7 @@ typedef vulkan::Denoiser Denoiser;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/denoiser.hpp"
+#include "lvcore/metal/denoiser.hpp"
 
 namespace lv {
 

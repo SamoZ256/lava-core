@@ -1,8 +1,8 @@
-#include "vulkan/lvcore/framebuffer.hpp"
+#include "lvcore/vulkan/framebuffer.hpp"
 
 #include <cmath>
 
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 
 namespace lv {
 

@@ -1,9 +1,9 @@
-#include "vulkan/lvcore/image_helper.hpp"
+#include "lvcore/vulkan/image_helper.hpp"
 
-#include "vulkan/lvcore/common.hpp"
+#include "lvcore/vulkan/common.hpp"
 
-#include "vulkan/lvcore/buffer_helper.hpp"
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/buffer_helper.hpp"
+#include "lvcore/vulkan/device.hpp"
 
 namespace lv {
 

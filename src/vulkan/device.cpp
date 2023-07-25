@@ -1,6 +1,6 @@
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/device.hpp"
 
-#include "vulkan/lvcore/common.hpp"
+#include "lvcore/vulkan/common.hpp"
 
 namespace lv {
 

@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/semaphore.hpp"
+#include "lvcore/vulkan/semaphore.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::Semaphore Semaphore;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/semaphore.hpp"
+#include "lvcore/metal/semaphore.hpp"
 
 namespace lv {
 

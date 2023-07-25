@@ -1,6 +1,6 @@
-#include "metal/lvcore/descriptor_set.hpp"
+#include "lvcore/metal/descriptor_set.hpp"
 
-#include "metal/lvcore/swap_chain.hpp"
+#include "lvcore/metal/swap_chain.hpp"
 
 namespace lv {
 

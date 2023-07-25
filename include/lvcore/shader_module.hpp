@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/shader_module.hpp"
+#include "lvcore/vulkan/shader_module.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::ShaderModule ShaderModule;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/shader_module.hpp"
+#include "lvcore/metal/shader_module.hpp"
 
 namespace lv {
 

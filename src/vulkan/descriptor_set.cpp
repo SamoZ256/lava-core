@@ -1,9 +1,9 @@
-#include "vulkan/lvcore/descriptor_set.hpp"
+#include "lvcore/vulkan/descriptor_set.hpp"
 
-#include "vulkan/lvcore/common.hpp"
+#include "lvcore/vulkan/common.hpp"
 
-#include "vulkan/lvcore/device.hpp"
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/device.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 //#include "Core/Renderer.hpp"
 
 namespace lv {

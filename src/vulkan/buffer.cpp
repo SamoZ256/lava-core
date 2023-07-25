@@ -1,7 +1,7 @@
-#include "vulkan/lvcore/buffer.hpp"
+#include "lvcore/vulkan/buffer.hpp"
 
-#include "vulkan/lvcore/buffer_helper.hpp"
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/buffer_helper.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 
 namespace lv {
 

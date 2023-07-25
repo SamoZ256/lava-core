@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/image.hpp"
+#include "lvcore/vulkan/image.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::Image Image;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/image.hpp"
+#include "lvcore/metal/image.hpp"
 
 namespace lv {
 

@@ -1,8 +1,8 @@
-#include "vulkan/lvcore/shader_module.hpp"
+#include "lvcore/vulkan/shader_module.hpp"
 
-#include "vulkan/lvcore/core.hpp"
+#include "lvcore/vulkan/core.hpp"
 
-#include "vulkan/lvcore/device.hpp"
+#include "lvcore/vulkan/device.hpp"
 
 namespace lv {
 

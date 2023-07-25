@@ -1,12 +1,12 @@
-#include "vulkan/lvcore/image.hpp"
+#include "lvcore/vulkan/image.hpp"
 
 #include "stb/stb_image.h"
 #include "gli/gli.hpp"
 
-#include "vulkan/lvcore/core.hpp"
+#include "lvcore/vulkan/core.hpp"
 
-#include "vulkan/lvcore/device.hpp"
-#include "vulkan/lvcore/swap_chain.hpp"
+#include "lvcore/vulkan/device.hpp"
+#include "lvcore/vulkan/swap_chain.hpp"
 
 namespace lv {
 

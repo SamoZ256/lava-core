@@ -3,7 +3,7 @@
 
 #ifdef LV_BACKEND_VULKAN
 
-#include "vulkan/lvcore/buffer.hpp"
+#include "lvcore/vulkan/buffer.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ typedef vulkan::Buffer Buffer;
 
 #ifdef LV_BACKEND_METAL
 
-#include "metal/lvcore/buffer.hpp"
+#include "lvcore/metal/buffer.hpp"
 
 namespace lv {
 
