@@ -49,7 +49,7 @@ SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
 	dependencies[1].srcAccessMask = 0;  // or VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 	dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-	_renderPass = new RenderPass({
+	renderPass = new RenderPass({
 		.subpasses = {subpass},
 		.attachments = {
 			{
@@ -81,9 +81,9 @@ SwapChain::~SwapChain() {
 void SwapChain::destroyToResize() {
 	oldSwapChain = swapChain;
 
-	delete _framebuffer;
-	delete _commandBuffer;
-	delete _renderPass;
+	delete framebuffer;
+	delete commandBuffer;
+	delete renderPass;
 }
 
 void SwapChain::create() {
@@ -96,15 +96,15 @@ void SwapChain::create() {
 
 	//createDepthResources();
 
-	_framebuffer = new Framebuffer({
+	framebuffer = new Framebuffer({
 		.frameCount = uint8_t(imageCount()),
-		.renderPass = _renderPass,
+		.renderPass = renderPass,
 		.colorAttachments = {
 			{0, image}
 		}
 	});
 
-	_commandBuffer = new CommandBuffer({
+	commandBuffer = new CommandBuffer({
 		.frameCount = uint8_t(imageCount())
 	});
 
@@ -130,7 +130,7 @@ void SwapChain::resize() {
 }
 
 void SwapChain::renderAndPresent() {
-	VkCommandBuffer cmdBuffer = _commandBuffer->commandBuffer(_imageIndex);
+	VkCommandBuffer cmdBuffer = commandBuffer->commandBuffer(_imageIndex);
 	VK_CHECK_RESULT(submitCommandBuffers(&cmdBuffer));
 	//_commandBuffer->submit();
 }

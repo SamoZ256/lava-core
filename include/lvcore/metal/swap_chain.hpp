@@ -27,10 +27,10 @@ private:
     Image* colorImage;
     Image* depthImage;
 
-    Framebuffer* _framebuffer;
-    CommandBuffer* _commandBuffer;
-    Subpass* _subpass;
-    RenderPass* _renderPass;
+    Subpass* subpass;
+    RenderPass* renderPass;
+    Framebuffer* framebuffer;
+    CommandBuffer* commandBuffer;
 
 public:
     SwapChain(internal::SwapChainCreateInfo createInfo);
@@ -52,13 +52,19 @@ public:
 
     inline id /*CAMetalDrawable*/ drawable() { return _drawable; }
 
-    inline Framebuffer* framebuffer() { return _framebuffer; }
+    inline Subpass* getSubpass() { return subpass; }
 
-    inline CommandBuffer* commandBuffer() { return _commandBuffer; }
+    internal::RenderPass* getRenderPass() override {
+        return renderPass;
+    }
 
-    inline Subpass* subpass() { return _subpass; }
+    internal::Framebuffer* getFramebuffer() override {
+        return framebuffer;
+    }
 
-    inline RenderPass* renderPass() { return _renderPass; }
+    internal::CommandBuffer* getCommandBuffer() override {
+        return commandBuffer;
+    }
 };
 
 extern SwapChain* g_metal_swapChain;

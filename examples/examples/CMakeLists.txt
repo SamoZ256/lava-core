@@ -7,6 +7,14 @@ include_directories(
     ${ASSIMP_INCLUDE_DIRS}
 )
 
+if(APPLE)
+    find_library(NS_FOUNDATION_LIB Foundation)
+    find_library(QUARTZCORE_LIB QuartzCore)
+    find_library(UNIFORMTYPEIDENTIFIERS_LIB UniformTypeIdentifiers)
+    find_library(APPKIT_LIB AppKit)
+    find_library(METAL_LIB Metal)
+endif()
+
 function(ADD_EXAMPLE EXAMPLE_NAME)
     add_executable(${EXAMPLE_NAME}
         "${EXAMPLE_NAME}/main.cpp"
@@ -20,29 +28,19 @@ function(ADD_EXAMPLE EXAMPLE_NAME)
     )
 
     if (APPLE)
-        find_library(NS_FOUNDATION_LIB Foundation)
-        find_library(QUARTZCORE_LIB QuartzCore)
-        find_library(UNIFORMTYPEIDENTIFIERS_LIB UniformTypeIdentifiers)
-        find_library(APPKIT_LIB AppKit)
-
         target_link_libraries(${EXAMPLE_NAME} PUBLIC
             "-framework GameController"
             ${NS_FOUNDATION_LIB}
             ${QUARTZCORE_LIB}
             ${UNIFORMTYPEIDENTIFIERS_LIB}
             ${APPKIT_LIB}
+            ${METAL_LIB}
         )
     endif ()
 
-    if (BACKEND_VULKAN)
-        target_link_libraries(${EXAMPLE_NAME} PUBLIC
-            ${Vulkan_LIBRARIES}
-        )
-    elseif (BACKEND_METAL)
-        find_library(METAL_LIB Metal)
-
-        target_link_libraries(${EXAMPLE_NAME} PUBLIC ${METAL_LIB})
-    endif ()
+    target_link_libraries(${EXAMPLE_NAME} PUBLIC
+        ${Vulkan_LIBRARIES}
+    )
 endfunction(ADD_EXAMPLE)
 
 ADD_EXAMPLE("01-window")

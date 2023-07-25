@@ -18,7 +18,7 @@ SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
     hasDepthAttachment = createInfo.createDepthAttachment;
     _window = createInfo.window;
 
-    _commandBuffer = new CommandBuffer({});
+    commandBuffer = new CommandBuffer({});
 
     create();
 
@@ -37,10 +37,10 @@ SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
     if (hasDepthAttachment)
         subpassCreateInfo.depthAttachment = {1};
     
-    _subpass = new Subpass(subpassCreateInfo);
+    subpass = new Subpass(subpassCreateInfo);
 
     internal::RenderPassCreateInfo renderPassCreateInfo{};
-    renderPassCreateInfo.subpasses = {_subpass};
+    renderPassCreateInfo.subpasses = {subpass};
     renderPassCreateInfo.attachments = {
         {
             .format = colorImage->format(),
@@ -59,10 +59,10 @@ SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
         });
     }
 
-    _renderPass = new RenderPass(renderPassCreateInfo);
+    renderPass = new RenderPass(renderPassCreateInfo);
 
-    _framebuffer = new Framebuffer({
-        .renderPass = _renderPass,
+    framebuffer = new Framebuffer({
+        .renderPass = renderPass,
         .colorAttachments = {
             {0, colorImage}
         }
@@ -70,8 +70,8 @@ SwapChain::SwapChain(internal::SwapChainCreateInfo createInfo) {
 }
 
 SwapChain::~SwapChain() {
-    delete _framebuffer;
-    delete _renderPass;
+    delete framebuffer;
+    delete renderPass;
     delete depthImage;
     delete semaphore;
 }
@@ -112,13 +112,13 @@ void SwapChain::acquireNextImage() {
     }
 
     colorImage->_setImage([_drawable texture], _crntFrame);
-    MTLRenderPassColorAttachmentDescriptor* colorAttachment = ((MTLRenderPassDescriptor*)_framebuffer->renderPass(_crntFrame)).colorAttachments[0];
+    MTLRenderPassColorAttachmentDescriptor* colorAttachment = ((MTLRenderPassDescriptor*)framebuffer->renderPass(_crntFrame)).colorAttachments[0];
     colorAttachment.texture = colorImage->image(_crntFrame);
 }
 
 void SwapChain::renderAndPresent() {
-    _commandBuffer->cmdPresent();
-    _commandBuffer->submit(nullptr, semaphore);
+    commandBuffer->cmdPresent();
+    commandBuffer->submit(nullptr, semaphore);
 
     [_drawable release];
 

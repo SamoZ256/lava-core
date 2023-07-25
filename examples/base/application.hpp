@@ -6,14 +6,18 @@
 #define LVND_DEBUG
 #include "lvnd/lvnd.h"
 
+#include "lvcore/lvcore.hpp"
+
 class Application {
 public:
     LvndWindow* window;
 
+    lv::Instance* instance;
+
     std::string exampleName;
     std::string assetDir;
 
-    Application(std::string aExampleName);
+    Application(std::string aExampleName, int argc, char* argv[]);
 
     ~Application();
 

@@ -9,28 +9,22 @@
 
 #include "glm.hpp"
 
-#include "lvcore/buffer.hpp"
-#include "lvcore/image.hpp"
-#include "lvcore/sampler.hpp"
-#include "lvcore/descriptor_set.hpp"
-#include "lvcore/pipeline_layout.hpp"
-#include "lvcore/graphics_pipeline.hpp"
-#include "lvcore/command_buffer.hpp"
+#include "lvcore/lvcore.hpp"
 
 struct Texture {
     std::string filename;
     lv::Image* image;
     lv::Sampler* sampler;
 
-    void init(lv::CommandBuffer* commandBuffer, const char* aFilename, bool isSRGB, bool generateMipmaps = false) {
+    void init(lv::Device* device, lv::CommandBuffer* commandBuffer, const char* aFilename, bool isSRGB, bool generateMipmaps = false) {
         filename = std::string(aFilename);
-        image = new lv::Image({
+        image = device->loadImage({
             .filename = aFilename,
             .isSRGB = isSRGB,
             .generateMipmaps = generateMipmaps
         }, commandBuffer);
         commandBuffer->cmdTransitionImageLayout(image, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
-        sampler = new lv::Sampler({
+        sampler = device->createSampler({
             .filter = lv::Filter::Linear,
             .addressMode = lv::SamplerAddressMode::Repeat,
             .maxLod = float(image->mipCount())
@@ -81,11 +75,11 @@ public:
             textures[2] = &normalNeutralTexture;
     }
 
-    void init(lv::CommandBuffer* commandBuffer, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices/*, std::vector<Texture*>& aTextures*/);
+    void init(lv::Device* device, lv::CommandBuffer* commandBuffer, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices/*, std::vector<Texture*>& aTextures*/);
 
     void destroy();
 
-    void initDescriptorSet(lv::PipelineLayout* pipelineLayout, lv::PipelineLayout* shadowPipelineLayout, uint8_t descriptorSetLayoutIndex, uint8_t shadowDescriptorSetLayoutIndex);
+    void initDescriptorSet(lv::Device* device, lv::PipelineLayout* pipelineLayout, lv::PipelineLayout* shadowPipelineLayout, uint8_t descriptorSetLayoutIndex, uint8_t shadowDescriptorSetLayoutIndex);
 
     void destroyDescriptorSet();
 
@@ -97,10 +91,10 @@ public:
 
     void renderNoTextures(lv::CommandBuffer* commandBuffer, uint16_t instanceCount);
 
-	void createPlane(lv::CommandBuffer* commandBuffer);
+	void createPlane(lv::Device* device, lv::CommandBuffer* commandBuffer);
 
     //Static functions
-    static Texture* loadTextureFromFile(lv::CommandBuffer* commandBuffer, const char* filename, bool isSRGB);
+    static Texture* loadTextureFromFile(lv::Device* device, lv::CommandBuffer* commandBuffer, const char* filename, bool isSRGB);
 };
 
 class Model {
@@ -122,7 +116,7 @@ public:
     uint8_t descriptorSetLayoutIndex;
     uint8_t shadowDescriptorSetLayoutIndex;
 
-	void init(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipelineLayout, lv::PipelineLayout* aShadowPipelineLayout, const char* filename, uint8_t aTextureCount, uint8_t aDescriptorSetLayoutIndex, uint8_t aShadowDescriptorSetLayoutIndex, bool flipUVs = true);
+	void init(lv::Device* device, lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipelineLayout, lv::PipelineLayout* aShadowPipelineLayout, const char* filename, uint8_t aTextureCount, uint8_t aDescriptorSetLayoutIndex, uint8_t aShadowDescriptorSetLayoutIndex, bool flipUVs = true);
 
     void destroy();
 
@@ -135,11 +129,11 @@ public:
     void renderNoTextures(lv::CommandBuffer* commandBuffer, uint16_t instanceCount = 1, bool uploadModel = true);
 
 private:
-	void processNode(lv::CommandBuffer* commandBuffer, aiNode* node, const aiScene* scene);
+	void processNode(lv::Device* device, lv::CommandBuffer* commandBuffer, aiNode* node, const aiScene* scene);
 
-	void processMesh(lv::CommandBuffer* commandBuffer, aiNode* node, aiMesh* mesh, const aiScene* scene);
+	void processMesh(lv::Device* device, lv::CommandBuffer* commandBuffer, aiNode* node, aiMesh* mesh, const aiScene* scene);
 
-	Texture* loadMaterialTextures(lv::CommandBuffer* commandBuffer, aiMaterial* mat, aiTextureType type);
+	Texture* loadMaterialTextures(lv::Device* device, lv::CommandBuffer* commandBuffer, aiMaterial* mat, aiTextureType type);
 };
 
 #endif

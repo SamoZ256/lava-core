@@ -9,12 +9,10 @@ namespace metal {
 
 class Instance : public internal::Instance {
 public:
-    Instance(internal::InstanceCreateInfo createInfo);
+    Instance(internal::InstanceCreateInfo createInfo) {}
 
     ~Instance() override {}
 };
-
-extern Instance* g_metal_instance;
 
 } //namespace metal
 

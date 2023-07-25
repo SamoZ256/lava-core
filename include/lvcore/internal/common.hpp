@@ -20,7 +20,11 @@
 //Errors and warnings
 #define _LV_MSG(type, msg) fprintf(stderr, "[LV:" type "]::%s: %s\n", __FUNCTION__, msg)
 
-#define LV_ERROR(msg) _LV_MSG("error", msg)
+#define LV_ERROR(msg) \
+{ \
+_LV_MSG("error", msg); \
+abort(); \
+}
 
 #define LV_WARN(msg) _LV_MSG("warning", msg)
 
@@ -29,6 +33,8 @@
 #define LV_CHECK_ARGUMENT(type, arg) \
 if (arg < (type)0 || arg >= type::MaxEnum) \
     LV_INVALID_ARGUMENT(#arg)
+
+#define LV_ERROR_UNSUPPORTED_API(apiName) LV_ERROR("'" apiName "' is not a supported render API on this platform");
 
 #define LV_WARN_UNSUPPORTED(featureName) LV_WARN("'" featureName "' is unsupported")
 

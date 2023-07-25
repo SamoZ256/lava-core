@@ -4,20 +4,7 @@
 
 #include "lvcore/filesystem/filesystem.hpp"
 
-#include "lvcore/instance.hpp"
-#include "lvcore/device.hpp"
-#include "lvcore/swap_chain.hpp"
-#include "lvcore/pipeline_layout.hpp"
-#include "lvcore/shader_module.hpp"
-#include "lvcore/graphics_pipeline.hpp"
-#include "lvcore/vertex_descriptor.hpp"
-#include "lvcore/buffer.hpp"
-#include "lvcore/descriptor_set.hpp"
-#include "lvcore/image.hpp"
-#include "lvcore/sampler.hpp"
-#include "lvcore/render_pass.hpp"
-#include "lvcore/framebuffer.hpp"
-#include "lvcore/command_buffer.hpp"
+#include "lvcore/lvcore.hpp"
 
 #include "model.hpp"
 #include "first_person_camera.hpp"
@@ -158,9 +145,7 @@ struct MainRenderPass {
     lv::Image* motionImage;
     lv::Image* f0Image;
     lv::Image* depthImage;
-#ifdef LV_BACKEND_METAL
-    lv::Image* depthAsColorImage;
-#endif
+    lv::Image* depthAsColorImage; //Metal only
     lv::Image* halfDepthImage;
 };
 
@@ -192,7 +177,6 @@ struct CompositeRenderPass {
 class LavaCoreExampleApp : public Application {
 public:
     lv::ThreadPool* threadPool;
-    lv::Instance* instance;
     lv::Device* device;
     lv::SwapChain* swapChain;
 
@@ -301,20 +285,15 @@ public:
     PCDeferredVP deferredVP;
     UBOLight light;
 
-    LavaCoreExampleApp() : Application("modern_rendering") {
+    LavaCoreExampleApp(int argc, char* argv[]) : Application("modern_rendering", argc, argv) {
         threadPool = new lv::ThreadPool({});
 
-        instance = new lv::Instance({
-            .applicationName = exampleName.c_str(),
-            .validationEnable = lv::True
-        });
-
-        device = new lv::Device({
+        device = instance->createDevice({
             .window = window,
             .threadPool = threadPool
         });
 
-        swapChain = new lv::SwapChain({
+        swapChain = device->createSwapChain({
             .window = window,
             .maxFramesInFlight = 2
         });
@@ -323,14 +302,14 @@ public:
         lvndWindowGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
 
         //Vertex descriptor
-        shadowVertexDescriptor = new lv::VertexDescriptor({
+        shadowVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
                 {0, lv::Format::RGB32Float, offsetof(MainVertex, position)}
             }
         });
 
-        mainVertexDescriptor = new lv::VertexDescriptor({
+        mainVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
                 {0, lv::Format::RGB32Float, offsetof(MainVertex, position)},
@@ -340,7 +319,7 @@ public:
             }
         });
 
-        skyboxVertexDescriptor = new lv::VertexDescriptor({
+        skyboxVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(glm::vec3),
             .bindings = {
                 {0, lv::Format::RGB32Float, 0}
@@ -349,13 +328,13 @@ public:
 
         //Render passes
 
-        basicSampler = new lv::Sampler({});
-        repeatSampler = new lv::Sampler({
+        basicSampler = device->createSampler({});
+        repeatSampler = device->createSampler({
             .addressMode = lv::SamplerAddressMode::Repeat
         });
 
         //Shadow
-        shadowRenderPass.depthImage = new lv::Image({
+        shadowRenderPass.depthImage = device->createImage({
             .format = lv::Format::D32Float,
             .width = SHADOW_MAP_SIZE,
             .height = SHADOW_MAP_SIZE,
@@ -364,16 +343,16 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
             .aspect = lv::ImageAspectFlags::Depth
         });
-        shadowRenderPass.depthSampler = new lv::Sampler({
+        shadowRenderPass.depthSampler = device->createSampler({
             .filter = lv::Filter::Linear,
             .compareEnable = lv::True
         });
 
-        shadowRenderPass.subpass = new lv::Subpass({
+        shadowRenderPass.subpass = device->createSubpass({
             .depthAttachment = {0, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
-        shadowRenderPass.renderPass = new lv::RenderPass({
+        shadowRenderPass.renderPass = device->createRenderPass({
             .subpasses = {shadowRenderPass.subpass},
             .attachments = {
                 {
@@ -387,15 +366,15 @@ public:
         });
 
 
-        shadowRenderPass.framebuffer = new lv::Framebuffer({
+        shadowRenderPass.framebuffer = device->createFramebuffer({
             .renderPass = shadowRenderPass.renderPass,
             .depthAttachment = {0, shadowRenderPass.depthImage}
         });
         
-        shadowRenderPass.commandBuffer = new lv::CommandBuffer({});
+        shadowRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Main
-        mainRenderPass.colorImage = new lv::Image({
+        mainRenderPass.colorImage = device->createImage({
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -405,7 +384,7 @@ public:
         //mainRenderPass.colorSampler.maxLod = SSR_MIP_COUNT;
         //mainRenderPass.colorSampler.init();
 
-        mainRenderPass.albedoMetallicImage = new lv::Image({
+        mainRenderPass.albedoMetallicImage = device->createImage({
             .format = lv::Format::RGBA8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -413,32 +392,29 @@ public:
             .memoryType = lv::MemoryType::Memoryless
         });
 
-        mainRenderPass.normalRoughnessImage = new lv::Image({
+        mainRenderPass.normalRoughnessImage = device->createImage({
             .format = lv::Format::RGBA16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment
         });
 
-        mainRenderPass.motionImage = new lv::Image({
+        mainRenderPass.motionImage = device->createImage({
             .format = lv::Format::RG16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        mainRenderPass.f0Image = new lv::Image({
-#ifdef LV_BACKEND_VULKAN //TODO: query whether the device supports this format instead
-            .format = lv::Format::B10GR11UFloat,
-#elif defined(LV_BACKEND_METAL)
-            .format = lv::Format::B5G6R5Unorm,
-#endif
+        mainRenderPass.f0Image = device->createImage({
+            //TODO: query whether the device supports this format instead
+            .format = (instance->getRenderAPI() == lv::RenderAPI::Vulkan ? lv::Format::B10GR11UFloat : lv::Format::B5G6R5Unorm),
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        mainRenderPass.depthImage = new lv::Image({
+        mainRenderPass.depthImage = device->createImage({
             .format = lv::Format::D32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -446,7 +422,7 @@ public:
             .aspect = lv::ImageAspectFlags::Depth
         });
 
-        mainRenderPass.halfDepthImage = new lv::Image({
+        mainRenderPass.halfDepthImage = device->createImage({
             .format = lv::Format::D32Float,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
@@ -454,29 +430,29 @@ public:
             .aspect = lv::ImageAspectFlags::Depth
         });
 
-#ifdef LV_BACKEND_METAL
-        mainRenderPass.depthAsColorImage = new lv::Image({
-            .format = lv::Format::R32Float,
-            .width = framebufferWidth,
-            .height = framebufferHeight,
-            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment,
-            .memoryType = lv::MemoryType::Memoryless
-        });
-#endif
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal) {
+            mainRenderPass.depthAsColorImage = device->createImage({
+                .format = lv::Format::R32Float,
+                .width = framebufferWidth,
+                .height = framebufferHeight,
+                .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment | lv::ImageUsageFlags::InputAttachment,
+                .memoryType = lv::MemoryType::Memoryless
+            });
+        }
 
-        mainRenderPass.gbufferSubpass = new lv::Subpass({
+        lv::SubpassCreateInfo gbufferSubpassCI{
             .colorAttachments = {
                 {1, lv::ImageLayout::ColorAttachmentOptimal},
                 {2, lv::ImageLayout::ColorAttachmentOptimal},
-                {3, lv::ImageLayout::ColorAttachmentOptimal},
-#ifdef LV_BACKEND_METAL
-                {6, lv::ImageLayout::ColorAttachmentOptimal}
-#endif
+                {3, lv::ImageLayout::ColorAttachmentOptimal}
             },
             .depthAttachment = {5, lv::ImageLayout::DepthStencilAttachmentOptimal}
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            gbufferSubpassCI.colorAttachments.push_back({6, lv::ImageLayout::ColorAttachmentOptimal});
+        mainRenderPass.gbufferSubpass = device->createSubpass(gbufferSubpassCI);
 
-        mainRenderPass.deferredSubpass = new lv::Subpass({
+        lv::SubpassCreateInfo deferredSubpassCI{
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal},
                 {4, lv::ImageLayout::ColorAttachmentOptimal}
@@ -484,23 +460,23 @@ public:
             .depthAttachment = {5, lv::ImageLayout::DepthStencilReadOnlyOptimal},
             .inputAttachments = {
                 {1, lv::ImageLayout::ShaderReadOnlyOptimal},
-                {2, lv::ImageLayout::ShaderReadOnlyOptimal},
-#ifdef LV_BACKEND_VULKAN
-                {5, lv::ImageLayout::DepthStencilReadOnlyOptimal}
-#elif defined(LV_BACKEND_METAL)
-                {6, lv::ImageLayout::ShaderReadOnlyOptimal}
-#endif
+                {2, lv::ImageLayout::ShaderReadOnlyOptimal}
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            gbufferSubpassCI.inputAttachments.push_back({5, lv::ImageLayout::DepthStencilReadOnlyOptimal});
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            gbufferSubpassCI.inputAttachments.push_back({6, lv::ImageLayout::ShaderReadOnlyOptimal});
+        mainRenderPass.deferredSubpass = device->createSubpass(deferredSubpassCI);
 
-        mainRenderPass.skyboxSubpass = new lv::Subpass({
+        mainRenderPass.skyboxSubpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal},
             },
             .depthAttachment = {5, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
-        mainRenderPass.renderPass = new lv::RenderPass({
+        lv::RenderPassCreateInfo mainRenderPassCI{
             .subpasses = {mainRenderPass.gbufferSubpass, mainRenderPass.deferredSubpass, mainRenderPass.skyboxSubpass},
             .attachments = {
                 {
@@ -545,50 +521,50 @@ public:
                     .initialLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal,
                     .finalLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal
                 },
-        #ifdef LV_BACKEND_METAL
-                {
-                    .format = mainRenderPass.depthAsColorImage->format(),
-                    .index = 6,
-                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
-                }
-        #endif
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal) {
+            mainRenderPassCI.attachments.push_back({
+                .format = mainRenderPass.depthAsColorImage->format(),
+                .index = 6,
+                .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
+            });
+        }
+        mainRenderPass.renderPass = device->createRenderPass(mainRenderPassCI);
 
-        //mainRenderPass.framebuffer.frameCount = 2;
-        mainRenderPass.framebuffer = new lv::Framebuffer({
+        lv::FramebufferCreateInfo mainFramebufferCI{
             .renderPass = mainRenderPass.renderPass,
             .colorAttachments = {
                 {0, mainRenderPass.colorImage},
                 {1, mainRenderPass.albedoMetallicImage},
                 {2, mainRenderPass.normalRoughnessImage},
                 {3, mainRenderPass.motionImage},
-                {4, mainRenderPass.f0Image},
-#ifdef LV_BACKEND_METAL
-                {6, mainRenderPass.depthAsColorImage},
-#endif
+                {4, mainRenderPass.f0Image}
             },
             .depthAttachment = {5, mainRenderPass.depthImage}
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            mainFramebufferCI.colorAttachments.push_back({6, mainRenderPass.depthAsColorImage});
+        mainRenderPass.framebuffer = device->createFramebuffer(mainFramebufferCI);
 
-        mainRenderPass.commandBuffer = new lv::CommandBuffer({});
+        mainRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //SSR
-        ssrRenderPass.colorImage = new lv::Image({
+        ssrRenderPass.colorImage = device->createImage({
             .format = lv::Format::RGBA16Float,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        ssrRenderPass.subpass = new lv::Subpass({
+        ssrRenderPass.subpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal}
             },
             .depthAttachment = {1, lv::ImageLayout::DepthStencilReadOnlyOptimal}
         });
 
-        ssrRenderPass.renderPass = new lv::RenderPass({
+        ssrRenderPass.renderPass = device->createRenderPass({
             .subpasses = {ssrRenderPass.subpass},
             .attachments = {
                 {
@@ -608,7 +584,7 @@ public:
             }
         });
 
-        ssrRenderPass.framebuffer = new lv::Framebuffer({
+        ssrRenderPass.framebuffer = device->createFramebuffer({
             .renderPass = ssrRenderPass.renderPass,
             .colorAttachments = {
                 {0, ssrRenderPass.colorImage}
@@ -616,24 +592,24 @@ public:
             .depthAttachment = {1, mainRenderPass.halfDepthImage}
         });
 
-        ssrRenderPass.commandBuffer = new lv::CommandBuffer({});
+        ssrRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Light shaft
-        lightShaftRenderPass.colorImage = new lv::Image({
+        lightShaftRenderPass.colorImage = device->createImage({
             .format = lv::Format::R8Unorm,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        lightShaftRenderPass.subpass = new lv::Subpass({
+        lightShaftRenderPass.subpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal}
             },
             .depthAttachment = {1, lv::ImageLayout::DepthStencilReadOnlyOptimal}
         });
 
-        lightShaftRenderPass.renderPass = new lv::RenderPass({
+        lightShaftRenderPass.renderPass = device->createRenderPass({
             .subpasses = {lightShaftRenderPass.subpass},
             .attachments = {
                 {
@@ -653,7 +629,7 @@ public:
             }
         });
 
-        lightShaftRenderPass.framebuffer = new lv::Framebuffer({
+        lightShaftRenderPass.framebuffer = device->createFramebuffer({
             .renderPass = lightShaftRenderPass.renderPass,
             .colorAttachments = {
                 {0, lightShaftRenderPass.colorImage}
@@ -661,23 +637,23 @@ public:
             .depthAttachment = {1, mainRenderPass.halfDepthImage}
         });
 
-        lightShaftRenderPass.commandBuffer = new lv::CommandBuffer({});
+        lightShaftRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Blur
-        blurRenderPass.lightShaftBlurImage = new lv::Image({
+        blurRenderPass.lightShaftBlurImage = device->createImage({
             .format = lv::Format::R8Unorm,
             .width = uint16_t(framebufferWidth / 2),
             .height = uint16_t(framebufferHeight / 2),
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        blurRenderPass.subpass = new lv::Subpass({
+        blurRenderPass.subpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal}
             }
         });
 
-        blurRenderPass.renderPass = new lv::RenderPass({
+        blurRenderPass.renderPass = device->createRenderPass({
             .subpasses = {blurRenderPass.subpass},
             .attachments = {
                 {
@@ -690,17 +666,17 @@ public:
             }
         });
 
-        blurRenderPass.lightShaftBlurFramebuffer = new lv::Framebuffer({
+        blurRenderPass.lightShaftBlurFramebuffer = device->createFramebuffer({
             .renderPass = blurRenderPass.renderPass,
             .colorAttachments = {
                 {0, blurRenderPass.lightShaftBlurImage}
             }
         });
 
-        blurRenderPass.commandBuffer = new lv::CommandBuffer({});
+        blurRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Composite
-        compositeRenderPass.ssaoImage = new lv::Image({
+        compositeRenderPass.ssaoImage = device->createImage({
             .format = lv::Format::R8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -708,7 +684,7 @@ public:
             .memoryType = lv::MemoryType::Memoryless
         });
 
-        compositeRenderPass.resolvedSsrImage = new lv::Image({
+        compositeRenderPass.resolvedSsrImage = device->createImage({
             .frameCount = 2, //Set the frame count to 2 so as to be able to accumulate the results over the time
             .format = lv::Format::B10GR11UFloat,
             .width = framebufferWidth,
@@ -716,7 +692,7 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        compositeRenderPass.resolvedSsaoImage = new lv::Image({
+        compositeRenderPass.resolvedSsaoImage = device->createImage({
             .frameCount = 2,
             .format = lv::Format::R8Unorm,
             .width = framebufferWidth,
@@ -724,7 +700,7 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        compositeRenderPass.resolvedColorImage = new lv::Image({
+        compositeRenderPass.resolvedColorImage = device->createImage({
             .frameCount = 2,
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
@@ -732,7 +708,7 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        compositeRenderPass.finalColorImage = new lv::Image({
+        compositeRenderPass.finalColorImage = device->createImage({
             .frameCount = 2,
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
@@ -740,14 +716,14 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        compositeRenderPass.ssaoSubpass = new lv::Subpass({
+        compositeRenderPass.ssaoSubpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal}
             },
             .depthAttachment = {5, lv::ImageLayout::DepthStencilReadOnlyOptimal}
         });
 
-        compositeRenderPass.temporalResolveSubpass = new lv::Subpass({
+        compositeRenderPass.temporalResolveSubpass = device->createSubpass({
             .colorAttachments = {
                 {1, lv::ImageLayout::ColorAttachmentOptimal},
                 {2, lv::ImageLayout::ColorAttachmentOptimal},
@@ -760,7 +736,7 @@ public:
             }
         });
         
-        compositeRenderPass.renderPass = new lv::RenderPass({
+        compositeRenderPass.renderPass = device->createRenderPass({
             .subpasses = {compositeRenderPass.ssaoSubpass, compositeRenderPass.temporalResolveSubpass},
             .attachments = {
                 {
@@ -806,7 +782,7 @@ public:
             }
         });
 
-        compositeRenderPass.framebuffer = new lv::Framebuffer({
+        compositeRenderPass.framebuffer = device->createFramebuffer({
             .frameCount = 2,
             .renderPass = compositeRenderPass.renderPass,
             .colorAttachments = {
@@ -827,23 +803,23 @@ public:
             .depthAttachment = {5, mainRenderPass.depthImage}
         });
 
-        compositeRenderPass.commandBuffer = new lv::CommandBuffer({});
+        compositeRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Motion blur
-        motionBlurRenderPass.colorImage = new lv::Image({
+        motionBlurRenderPass.colorImage = device->createImage({
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        motionBlurRenderPass.subpass = new lv::Subpass({
+        motionBlurRenderPass.subpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal}
             }
         });
 
-        motionBlurRenderPass.renderPass = new lv::RenderPass({
+        motionBlurRenderPass.renderPass = device->createRenderPass({
             .subpasses = {motionBlurRenderPass.subpass},
             .attachments = {
                 {
@@ -856,19 +832,19 @@ public:
             }
         });
 
-        motionBlurRenderPass.framebuffer = new lv::Framebuffer({
+        motionBlurRenderPass.framebuffer = device->createFramebuffer({
             .renderPass = motionBlurRenderPass.renderPass,
             .colorAttachments = {
                 {0, motionBlurRenderPass.colorImage}
             }
         });
 
-        motionBlurRenderPass.commandBuffer = new lv::CommandBuffer({});
+        motionBlurRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Pipeline layout
 
         //Shadow
-        shadowPipelineLayout = new lv::PipelineLayout({
+        shadowPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Vertex,
@@ -884,7 +860,7 @@ public:
         });
 
         //GBuffer
-        gbufferPipelineLayout = new lv::PipelineLayout({
+        gbufferPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Vertex,
@@ -905,7 +881,7 @@ public:
         });
 
         //Deferred
-        deferredPipelineLayout = new lv::PipelineLayout({
+        deferredPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -925,7 +901,7 @@ public:
         });
 
         //Skybox
-        skyboxPipelineLayout = new lv::PipelineLayout({
+        skyboxPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Vertex,
@@ -941,7 +917,7 @@ public:
         });
 
         //SSR
-        ssrPipelineLayout = new lv::PipelineLayout({
+        ssrPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -958,7 +934,7 @@ public:
         });
 
         //Light shaft
-        lightShaftPipelineLayout = new lv::PipelineLayout({
+        lightShaftPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -975,7 +951,7 @@ public:
         });
 
         //Blur
-        blurPipelineLayout = new lv::PipelineLayout({
+        blurPipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
@@ -984,7 +960,7 @@ public:
         });
 
         //SSAO
-        ssaoPipelineLayout = new lv::PipelineLayout({
+        ssaoPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -1002,7 +978,7 @@ public:
         });
 
         //Temporal resolve
-        temporalResolvePipelineLayout = new lv::PipelineLayout({
+        temporalResolvePipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -1033,7 +1009,7 @@ public:
         });
 
         //Motion blur
-        motionBlurPipelineLayout = new lv::PipelineLayout({
+        motionBlurPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -1050,7 +1026,7 @@ public:
         });
 
         //HDR
-        hdrPipelineLayout = new lv::PipelineLayout({
+        hdrPipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
@@ -1061,17 +1037,17 @@ public:
         //Graphics pipeline
 
         //Shadow
-        vertShadowShaderModule = new lv::ShaderModule({
+        vertShadowShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/shadow.json").c_str())
         });
 
-        fragShadowShaderModule = new lv::ShaderModule({
+        fragShadowShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/shadow.json").c_str())
         });;
 
-        shadowGraphicsPipeline = new lv::GraphicsPipeline({
+        shadowGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertShadowShaderModule,
             .fragmentShaderModule = fragShadowShaderModule,
             .pipelineLayout = shadowPipelineLayout,
@@ -1082,52 +1058,43 @@ public:
         });
 
         //GBuffer
-        vertGBufferShaderModule = new lv::ShaderModule({
+        vertGBufferShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/gbuffer.json").c_str())
         });
 
-        fragGBufferShaderModule = new lv::ShaderModule({
+        fragGBufferShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/gbuffer.json").c_str())
         });
 
-        gbufferGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo gbufferGraphicsPipelineCI{
             .vertexShaderModule = vertGBufferShaderModule,
             .fragmentShaderModule = fragGBufferShaderModule,
             .pipelineLayout = gbufferPipelineLayout,
             .renderPass = mainRenderPass.renderPass,
             .vertexDescriptor = mainVertexDescriptor,
             .depthTestEnable = lv::True,
-            .cullMode = lv::CullMode::Back,
-            .colorBlendAttachments = {
-#ifdef LV_BACKEND_METAL
-                {0},
-#endif
-                {1},
-                {2},
-                {3},
-#ifdef LV_BACKEND_METAL
-                {4},
-#endif
-#ifdef LV_BACKEND_METAL
-                {6}
-#endif
-            }
-        });
+            .cullMode = lv::CullMode::Back
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            gbufferGraphicsPipelineCI.colorBlendAttachments = {{1}, {2}, {3}};
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            gbufferGraphicsPipelineCI.colorBlendAttachments = {{0}, {1}, {2}, {3}, {4}, {6}};
+        gbufferGraphicsPipeline = device->createGraphicsPipeline(gbufferGraphicsPipelineCI);
 
         //Deferred
-        vertTriangleShaderModule = new lv::ShaderModule({
+        vertTriangleShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/triangle.json").c_str())
         });
 
-        fragDeferredShaderModule = new lv::ShaderModule({
+        fragDeferredShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/deferred.json").c_str())
         });
 
-        deferredGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo deferredGraphicsPipelineCI{
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragDeferredShaderModule,
             .pipelineLayout = deferredPipelineLayout,
@@ -1135,33 +1102,26 @@ public:
             .subpassIndex = 1,
             .depthTestEnable = lv::True,
             .depthWriteEnable = lv::False,
-            .depthOp = lv::CompareOperation::NotEqual,
-            .colorBlendAttachments = {
-                {0},
-#ifdef LV_BACKEND_METAL
-                {1},
-                {2},
-                {3},
-#endif
-                {4},
-#ifdef LV_BACKEND_METAL
-                {6}
-#endif
-            }
-        });
+            .depthOp = lv::CompareOperation::NotEqual
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            deferredGraphicsPipelineCI.colorBlendAttachments = {{0}, {4}};
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            deferredGraphicsPipelineCI.colorBlendAttachments = {{0}, {1}, {2}, {3}, {4}, {6}};
+        deferredGraphicsPipeline = device->createGraphicsPipeline(deferredGraphicsPipelineCI);
 
         //Skybox
-        vertSkyboxShaderModule = new lv::ShaderModule({
+        vertSkyboxShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/skybox.json").c_str())
         });
 
-        fragSkyboxShaderModule = new lv::ShaderModule({
+        fragSkyboxShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/skybox.json").c_str())
         });
 
-        skyboxGraphicsPipeline = new lv::GraphicsPipeline({
+        skyboxGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertSkyboxShaderModule,
             .fragmentShaderModule = fragSkyboxShaderModule,
             .pipelineLayout = skyboxPipelineLayout,
@@ -1177,12 +1137,12 @@ public:
         });
 
         //SSR
-        fragSsrShaderModule = new lv::ShaderModule({
+        fragSsrShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/ssr.json").c_str())
         });
 
-        ssrGraphicsPipeline = new lv::GraphicsPipeline({
+        ssrGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragSsrShaderModule,
             .pipelineLayout = ssrPipelineLayout,
@@ -1196,12 +1156,12 @@ public:
         });
 
         //Light shaft
-        fragLightShaftShaderModule = new lv::ShaderModule({
+        fragLightShaftShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/light_shaft.json").c_str())
         });
 
-        lightShaftGraphicsPipeline = new lv::GraphicsPipeline({
+        lightShaftGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragLightShaftShaderModule,
             .pipelineLayout = lightShaftPipelineLayout,
@@ -1215,12 +1175,12 @@ public:
         });
 
         //Blur
-        fragBlurShaderModule = new lv::ShaderModule({
+        fragBlurShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/blur.json").c_str())
         });
 
-        blurGraphicsPipeline = new lv::GraphicsPipeline({
+        blurGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragBlurShaderModule,
             .pipelineLayout = blurPipelineLayout,
@@ -1231,12 +1191,12 @@ public:
         });
 
         //SSAO
-        fragSsaoShaderModule = new lv::ShaderModule({
+        fragSsaoShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/ssao.json").c_str())
         });
 
-        ssaoGraphicsPipeline = new lv::GraphicsPipeline({
+        ssaoGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragSsaoShaderModule,
             .pipelineLayout = ssaoPipelineLayout,
@@ -1250,35 +1210,31 @@ public:
         });
 
         //Temporal resolve
-        fragTemporalResolveShaderModule = new lv::ShaderModule({
+        fragTemporalResolveShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/temporal_resolve.json").c_str())
         });
 
-        temporalResolveGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo temporalResolveGraphicsPipelineCI{
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragTemporalResolveShaderModule,
             .pipelineLayout = temporalResolvePipelineLayout,
             .renderPass = compositeRenderPass.renderPass,
-            .subpassIndex = 1,
-            .colorBlendAttachments = {
-#ifdef LV_BACKEND_METAL
-                {0},
-#endif
-                {1},
-                {2},
-                {3},
-                {4}
-            }
-        });
+            .subpassIndex = 1
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            temporalResolveGraphicsPipelineCI.colorBlendAttachments = {{1}, {2}, {3}, {4}};
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            temporalResolveGraphicsPipelineCI.colorBlendAttachments = {{0}, {1}, {2}, {3}, {4}};
+        temporalResolveGraphicsPipeline = device->createGraphicsPipeline(temporalResolveGraphicsPipelineCI);
 
         //Motion blur
-        fragMotionBlurShaderModule = new lv::ShaderModule({
+        fragMotionBlurShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/motion_blur.json").c_str())
         });
 
-        motionBlurGraphicsPipeline = new lv::GraphicsPipeline({
+        motionBlurGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragMotionBlurShaderModule,
             .pipelineLayout = motionBlurPipelineLayout,
@@ -1289,35 +1245,35 @@ public:
         });
 
         //HDR
-        fragHdrShaderModule = new lv::ShaderModule({
+        fragHdrShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/hdr.json").c_str())
         });
 
-        hdrGraphicsPipeline = new lv::GraphicsPipeline({
+        hdrGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragHdrShaderModule,
             .pipelineLayout = hdrPipelineLayout,
-            .renderPass = swapChain->renderPass(),
+            .renderPass = swapChain->getRenderPass(),
             .colorBlendAttachments = {
                 {0}
             }
         });
 
         //Uniform buffers
-        shadowUniformBuffer = new lv::Buffer({
+        shadowUniformBuffer = device->createBuffer({
             .usage = lv::BufferUsageFlags::UniformBuffer,
             .memoryType = lv::MemoryType::Shared,
             .size = sizeof(glm::mat4) * SHADOW_CASCADE_COUNT
         });
 
-        gbufferUniformBuffer = new lv::Buffer({
+        gbufferUniformBuffer = device->createBuffer({
             .usage = lv::BufferUsageFlags::UniformBuffer,
             .memoryType = lv::MemoryType::Shared,
             .size = sizeof(UBOGBufferVP)
         });
 
-        lightUniformBuffer = new lv::Buffer({
+        lightUniformBuffer = device->createBuffer({
             .frameCount = 1,
             .usage = lv::BufferUsageFlags::UniformBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(UBOLight)
@@ -1383,7 +1339,7 @@ public:
         precomputeSkylight();
 
         //Copy commands
-        lv::CommandBuffer* copyCommandBuffer = new lv::CommandBuffer({
+        lv::CommandBuffer* copyCommandBuffer = device->createCommandBuffer({
             .flags = lv::CommandBufferCreateFlags::CreateFenceToWaitUntilComplete
         });
         copyCommandBuffer->beginRecording();
@@ -1401,14 +1357,14 @@ public:
         //Copy to data
         copyCommandBuffer->cmdStagingCopyDataToBuffer(lightUniformBuffer, &light);
 
-        skyboxVertexBuffer = new lv::Buffer({
+        skyboxVertexBuffer = device->createBuffer({
             .frameCount = 1,
             .usage = lv::BufferUsageFlags::VertexBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(skyboxVertices)
         });
         copyCommandBuffer->cmdStagingCopyDataToBuffer(skyboxVertexBuffer, skyboxVertices);
 
-        skyboxIndexBuffer = new lv::Buffer({
+        skyboxIndexBuffer = device->createBuffer({
             .frameCount = 1,
             .usage = lv::BufferUsageFlags::IndexBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(skyboxIndices)
@@ -1441,7 +1397,7 @@ public:
             //std::cout << "Noise " << i << ": " << (int)hbaoNoise[i] << std::endl;
         }
 
-        aoNoiseImage = new lv::Image({
+        aoNoiseImage = device->createImage({
             .frameCount = 1,
             .format = (AO_TYPE == AO_TYPE_SSAO ? lv::Format::RG8Snorm : lv::Format::R8Unorm),
             .width = AO_NOISE_TEX_SIZE,
@@ -1454,25 +1410,25 @@ public:
             copyCommandBuffer->cmdStagingCopyDataToImage(aoNoiseImage, hbaoNoise.data(), 1);
         copyCommandBuffer->cmdTransitionImageLayout(aoNoiseImage, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
         
-        brdfLUTImage = new lv::Image({"../examples/assets/textures/brdf_lut.png"}, copyCommandBuffer);
+        brdfLUTImage = device->loadImage({"../examples/assets/textures/brdf_lut.png"}, copyCommandBuffer);
         copyCommandBuffer->cmdTransitionImageLayout(brdfLUTImage, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
 
         //Descriptor sets
-        shadowDescriptorSet = new lv::DescriptorSet({
+        shadowDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = shadowPipelineLayout,
             .bufferBindings = {
                 shadowUniformBuffer->descriptorInfo(0)
             }
         });
 
-        gbufferDescriptorSet = new lv::DescriptorSet({
+        gbufferDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = gbufferPipelineLayout,
             .bufferBindings = {
                 gbufferUniformBuffer->descriptorInfo(0)
             }
         });
 
-        deferredDescriptorSet = new lv::DescriptorSet({
+        lv::DescriptorSetCreateInfo deferredDescriptorSetCI{
             .pipelineLayout = deferredPipelineLayout,
             .bufferBindings = {
                 lightUniformBuffer->descriptorInfo(4)
@@ -1480,23 +1436,23 @@ public:
             .imageBindings = {
                 mainRenderPass.albedoMetallicImage->descriptorInfo(0, lv::DescriptorType::InputAttachment),
                 mainRenderPass.normalRoughnessImage->descriptorInfo(1, lv::DescriptorType::InputAttachment),
-#ifdef LV_BACKEND_VULKAN
-                mainRenderPass.depthImage->descriptorInfo(2, lv::DescriptorType::InputAttachment, lv::ImageLayout::DepthStencilReadOnlyOptimal),
-#elif defined(LV_BACKEND_METAL)
-                mainRenderPass.depthAsColorImage->descriptorInfo(2, lv::DescriptorType::InputAttachment),
-#endif
                 shadowRenderPass.depthSampler->descriptorInfo(shadowRenderPass.depthImage, 3)
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            deferredDescriptorSetCI.imageBindings.push_back(mainRenderPass.depthImage->descriptorInfo(2, lv::DescriptorType::InputAttachment, lv::ImageLayout::DepthStencilReadOnlyOptimal));
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            deferredDescriptorSetCI.imageBindings.push_back(mainRenderPass.depthAsColorImage->descriptorInfo(2, lv::DescriptorType::InputAttachment));
+        deferredDescriptorSet = device->createDescriptorSet(deferredDescriptorSetCI);
 
-        skyboxDescriptorSet = new lv::DescriptorSet({
+        skyboxDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = skyboxPipelineLayout,
             .imageBindings = {
                 basicSampler->descriptorInfo(skylightImage, 0)
             }
         });
 
-        ssrDescriptorSet = new lv::DescriptorSet({
+        ssrDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = ssrPipelineLayout,
             .imageBindings = {
                 basicSampler->descriptorInfo(mainRenderPass.halfDepthImage, 0, lv::ImageLayout::DepthStencilReadOnlyOptimal),
@@ -1504,7 +1460,7 @@ public:
             }
         });
 
-        lightShaftDescriptorSet = new lv::DescriptorSet({
+        lightShaftDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = lightShaftPipelineLayout,
             .imageBindings = {
                 mainRenderPass.halfDepthImage->descriptorInfo(0, lv::DescriptorType::SampledImage, lv::ImageLayout::DepthStencilReadOnlyOptimal),
@@ -1512,14 +1468,14 @@ public:
             }
         });
 
-        lightShaftBlurDescriptorSet = new lv::DescriptorSet({
+        lightShaftBlurDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = blurPipelineLayout,
             .imageBindings = {
                 lightShaftRenderPass.colorImage->descriptorInfo(0)
             }
         });
 
-        ssaoDescriptorSet = new lv::DescriptorSet({
+        ssaoDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = ssaoPipelineLayout,
             .imageBindings = {
                 basicSampler->descriptorInfo(mainRenderPass.depthImage, 0, lv::ImageLayout::DepthStencilReadOnlyOptimal),
@@ -1528,7 +1484,7 @@ public:
             }
         });
 
-        temporalResolveDescriptorSet1 = new lv::DescriptorSet({
+        temporalResolveDescriptorSet1 = device->createDescriptorSet({
             .pipelineLayout = temporalResolvePipelineLayout,
             .imageBindings = {
                 basicSampler->descriptorInfo(mainRenderPass.colorImage, 0),
@@ -1539,7 +1495,7 @@ public:
             }
         });
 
-        temporalResolveDescriptorSet2 = new lv::DescriptorSet({
+        temporalResolveDescriptorSet2 = device->createDescriptorSet({
             .pipelineLayout = temporalResolvePipelineLayout,
             .layoutIndex = 1,
             .imageBindings = {
@@ -1550,7 +1506,7 @@ public:
             }
         });
 
-        temporalResolveDescriptorSet3 = new lv::DescriptorSet({
+        temporalResolveDescriptorSet3 = device->createDescriptorSet({
             .pipelineLayout = temporalResolvePipelineLayout,
             .layoutIndex = 2,
             .imageBindings = {
@@ -1560,7 +1516,7 @@ public:
             }
         });
 
-        motionBlurDescriptorSet = new lv::DescriptorSet({
+        motionBlurDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = motionBlurPipelineLayout,
             .imageBindings = {
                 basicSampler->descriptorInfo(compositeRenderPass.finalColorImage, 0),
@@ -1568,7 +1524,7 @@ public:
             }
         });
 
-        hdrDescriptorSet = new lv::DescriptorSet({
+        hdrDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = hdrPipelineLayout,
             .imageBindings = {
                 motionBlurRenderPass.colorImage->descriptorInfo(0)
@@ -1584,7 +1540,7 @@ public:
 
         //Model
         sponzaModel.scale = glm::vec3(0.01f);
-        sponzaModel.init(copyCommandBuffer, gbufferPipelineLayout, nullptr, "../examples/assets/models/sponza/scene.gltf", 3, 1, 0); //TODO: make the model class play nicely with the rest of the API
+        sponzaModel.init(device, copyCommandBuffer, gbufferPipelineLayout, nullptr, "../examples/assets/models/sponza/scene.gltf", 3, 1, 0); //TODO: make the model class play nicely with the rest of the API
         //backpackModel.scale = glm::vec3(32.0f, 2.0f, 32.0f);
         //backpackModel.init(gbufferPipelineLayout, "../assets/models/pan/brass_pan_01_4k.gltf", 3, 1);
 
@@ -1938,23 +1894,23 @@ public:
 
         //HDR pass
         std::cout << "HDR PASS" << std::endl;
-        swapChain->commandBuffer()->beginRecording();
-        swapChain->commandBuffer()->beginRenderCommands(swapChain->framebuffer());
+        swapChain->getCommandBuffer()->beginRecording();
+        swapChain->getCommandBuffer()->beginRenderCommands(swapChain->getFramebuffer());
 
-        swapChain->commandBuffer()->cmdBindGraphicsPipeline(hdrGraphicsPipeline);
+        swapChain->getCommandBuffer()->cmdBindGraphicsPipeline(hdrGraphicsPipeline);
 
-        swapChain->commandBuffer()->cmdBindDescriptorSet(hdrDescriptorSet);
+        swapChain->getCommandBuffer()->cmdBindDescriptorSet(hdrDescriptorSet);
 
-        swapChain->commandBuffer()->cmdDraw(3);
+        swapChain->getCommandBuffer()->cmdDraw(3);
 
-        swapChain->commandBuffer()->endRecording();
+        swapChain->getCommandBuffer()->endRecording();
         swapChain->renderAndPresent();
 
         frameIndex++;
     }
 
     void precomputeSkylight() {
-        skylightImage = new lv::Image({
+        skylightImage = device->createImage({
             .frameCount = 1,
             .format = lv::Format::B10GR11UFloat,
             .width = SKYLIGHT_IMAGE_SIZE,
@@ -1963,13 +1919,13 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        lv::Subpass* subpass = new lv::Subpass({
+        lv::Subpass* subpass = device->createSubpass({
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal}
             }
         });
 
-        lv::RenderPass* renderPass = new lv::RenderPass({
+        lv::RenderPass* renderPass = device->createRenderPass({
             .subpasses = {subpass},
             .attachments = {
                 {
@@ -1981,7 +1937,7 @@ public:
             }
         });
 
-        lv::Framebuffer* framebuffer = new lv::Framebuffer({
+        lv::Framebuffer* framebuffer = device->createFramebuffer({
             .frameCount = 1,
             .renderPass = renderPass,
             .colorAttachments = {
@@ -1989,12 +1945,12 @@ public:
             }
         });
 
-        lv::CommandBuffer* commandBuffer = new lv::CommandBuffer({
+        lv::CommandBuffer* commandBuffer = device->createCommandBuffer({
             .frameCount = 1
         });
 
         //Pipeline layout
-        lv::PipelineLayout* pipelineLayout = new lv::PipelineLayout({
+        lv::PipelineLayout* pipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Vertex,
@@ -2010,17 +1966,17 @@ public:
         });
 
         //Graphics pipeline
-        lv::ShaderModule* vertShaderModule = new lv::ShaderModule({
+        lv::ShaderModule* vertShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/vertex/skylight.json").c_str())
         });
 
-        lv::ShaderModule* fragShaderModule = new lv::ShaderModule({
+        lv::ShaderModule* fragShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/fragment/skylight.json").c_str())
         });
 
-        lv::GraphicsPipeline* graphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipeline* graphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertShaderModule,
             .fragmentShaderModule = fragShaderModule,
             .pipelineLayout = pipelineLayout,
@@ -2036,14 +1992,14 @@ public:
         //Uniform buffer
         glm::vec3 lightPos = -light.direction;
 
-        lv::Buffer* uniformBuffer = new lv::Buffer({
+        lv::Buffer* uniformBuffer = device->createBuffer({
             .frameCount = 1,
             .usage = lv::BufferUsageFlags::UniformBuffer | lv::BufferUsageFlags::TransferDestination,
             .size = sizeof(glm::vec3)
         });
 
         //Descriptor set
-        lv::DescriptorSet* descriptorSet = new lv::DescriptorSet({
+        lv::DescriptorSet* descriptorSet = device->createDescriptorSet({
             .frameCount = 1,
             .pipelineLayout = pipelineLayout,
             .bufferBindings = {
@@ -2173,8 +2129,8 @@ public:
     }
 };
 
-int main() {
-    LavaCoreExampleApp application;
+int main(int argc, char* argv[]) {
+    LavaCoreExampleApp application(argc, argv);
     application.run();
 
     return 0;

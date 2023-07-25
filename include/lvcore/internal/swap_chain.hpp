@@ -1,7 +1,8 @@
 #ifndef LV_INTERNAL_SWAP_CHAIN_H
 #define LV_INTERNAL_SWAP_CHAIN_H
 
-#include "common.hpp"
+#include "framebuffer.hpp"
+#include "command_buffer.hpp"
 
 #define LVND_BACKEND_VULKAN
 #ifdef __APPLE__
@@ -39,6 +40,12 @@ public:
     inline uint8_t maxFramesInFlight() { return _maxFramesInFlight; }
 
     inline uint8_t crntFrame() { return _crntFrame; }
+
+    virtual RenderPass* getRenderPass() = 0;
+
+    virtual Framebuffer* getFramebuffer() = 0;
+
+    virtual CommandBuffer* getCommandBuffer() = 0;
 };
 
 } //namespace internal

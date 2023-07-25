@@ -2,28 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(lava_core_examples)
 
-option(BACKEND_METAL OFF)
-option(BACKEND_VULKAN OFF)
-
-set(BACKEND)
-
-if (BACKEND_VULKAN)
-    set(BACKEND vulkan)
-
-    add_compile_definitions(
-        LV_BACKEND_VULKAN
-    )
-
-    include_directories(
-        "../../external/vma"
-    )
-elseif (BACKEND_METAL)
-    set(BACKEND metal)
-
-    add_compile_definitions(
-        LV_BACKEND_METAL
-    )
-endif ()
+include_directories(
+    "../../external/vma"
+)
 
 find_package(Assimp)
 

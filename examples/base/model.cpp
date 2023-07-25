@@ -7,18 +7,18 @@ Texture Mesh::normalNeutralTexture = Texture();
 bool Mesh::neautralTexturesCreated = false;
 std::vector<Texture*> Mesh::loadedTextures = std::vector<Texture*>();
 
-void Mesh::init(lv::CommandBuffer* commandBuffer, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices) {
+void Mesh::init(lv::Device* device, lv::CommandBuffer* commandBuffer, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices) {
     vertices = aVertices;
     indices = aIndices;
 	
-    vertexBuffer = new lv::Buffer({
+    vertexBuffer = device->createBuffer({
 		.frameCount = 1,
 		.usage = lv::BufferUsageFlags::TransferDestination | lv::BufferUsageFlags::VertexBuffer,
 		.size = vertices.size() * sizeof(MainVertex)
 	});
     commandBuffer->cmdStagingCopyDataToBuffer(vertexBuffer, vertices.data());
 
-	indexBuffer = new lv::Buffer({
+	indexBuffer = device->createBuffer({
 		.frameCount = 1,
 		.usage = lv::BufferUsageFlags::TransferDestination | lv::BufferUsageFlags::IndexBuffer,
 		.size = indices.size() * sizeof(uint32_t)
@@ -31,8 +31,8 @@ void Mesh::destroy() {
     delete indexBuffer;
 }
 
-void Mesh::initDescriptorSet(lv::PipelineLayout* pipelineLayout, lv::PipelineLayout* shadowPipelineLayout, uint8_t descriptorSetLayoutIndex, uint8_t shadowDescriptorSetLayoutIndex) {
-	lv::DescriptorSetCeateInfo descriptorSetCreateInfo;
+void Mesh::initDescriptorSet(lv::Device* device, lv::PipelineLayout* pipelineLayout, lv::PipelineLayout* shadowPipelineLayout, uint8_t descriptorSetLayoutIndex, uint8_t shadowDescriptorSetLayoutIndex) {
+	lv::DescriptorSetCreateInfo descriptorSetCreateInfo;
 	descriptorSetCreateInfo.pipelineLayout = pipelineLayout;
 	descriptorSetCreateInfo.layoutIndex = descriptorSetLayoutIndex;
     for (uint8_t i = 0; i < textures.size(); i++) {
@@ -40,7 +40,7 @@ void Mesh::initDescriptorSet(lv::PipelineLayout* pipelineLayout, lv::PipelineLay
     }
 
 	if (shadowPipelineLayout) {
-		shadowDescriptorSet = new lv::DescriptorSet({
+		shadowDescriptorSet = device->createDescriptorSet({
 			.pipelineLayout = shadowPipelineLayout,
 			.layoutIndex = shadowDescriptorSetLayoutIndex,
 			.imageBindings = {
@@ -49,7 +49,7 @@ void Mesh::initDescriptorSet(lv::PipelineLayout* pipelineLayout, lv::PipelineLay
 		});
 	}
 
-    descriptorSet = new lv::DescriptorSet(descriptorSetCreateInfo);
+    descriptorSet = device->createDescriptorSet(descriptorSetCreateInfo);
 }
 
 void Mesh::destroyDescriptorSet() {
@@ -76,7 +76,7 @@ void Mesh::renderNoTextures(lv::CommandBuffer* commandBuffer, uint16_t instanceC
     commandBuffer->cmdDrawIndexed(indexBuffer, lv::IndexType::Uint32, indexBuffer->size() / sizeof(uint32_t), instanceCount);
 }
 
-void Mesh::createPlane(lv::CommandBuffer* commandBuffer) {
+void Mesh::createPlane(lv::Device* device, lv::CommandBuffer* commandBuffer) {
     static std::vector<MainVertex> vertices = {
         {{-0.5f, 0.0f, -0.5f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}},
         {{ 0.5f, 0.0f, -0.5f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}},
@@ -88,10 +88,10 @@ void Mesh::createPlane(lv::CommandBuffer* commandBuffer) {
         0, 3, 2
     };
 
-    init(commandBuffer, vertices, indices);
+    init(device, commandBuffer, vertices, indices);
 }
 
-Texture* Mesh::loadTextureFromFile(lv::CommandBuffer* commandBuffer, const char* filename, bool isSRGB) {
+Texture* Mesh::loadTextureFromFile(lv::Device* device, lv::CommandBuffer* commandBuffer, const char* filename, bool isSRGB) {
     std::string strFilename(filename);
 
     //Check if it has not been loaded yet
@@ -102,7 +102,7 @@ Texture* Mesh::loadTextureFromFile(lv::CommandBuffer* commandBuffer, const char*
 	}
 
 	Texture* texture = new Texture;
-    texture->init(commandBuffer, filename, isSRGB, true);
+    texture->init(device, commandBuffer, filename, isSRGB, true);
 
 	loadedTextures.push_back(texture);
 
@@ -110,7 +110,7 @@ Texture* Mesh::loadTextureFromFile(lv::CommandBuffer* commandBuffer, const char*
 }
 
 //Model
-void Model::init(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipelineLayout, lv::PipelineLayout* aShadowPipelineLayout, const char* filename, uint8_t aTextureCount, uint8_t aDescriptorSetLayoutIndex, uint8_t aShadowDescriptorSetLayoutIndex, bool flipUVs) {
+void Model::init(lv::Device* device, lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipelineLayout, lv::PipelineLayout* aShadowPipelineLayout, const char* filename, uint8_t aTextureCount, uint8_t aDescriptorSetLayoutIndex, uint8_t aShadowDescriptorSetLayoutIndex, bool flipUVs) {
 	pipelineLayout = aPipelineLayout;
 	shadowPipelineLayout = aShadowPipelineLayout;
 	textureCount = aTextureCount;
@@ -123,7 +123,7 @@ void Model::init(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipeline
 		glm::u8vec4 neautralColors[2] = {{255, 255, 255, 255}, {128, 128, 255, 0}};
 		lv::Format neutralTextureFormats[2] = {lv::Format::RGBA8Unorm_sRGB, lv::Format::RGBA8Unorm};
 		for (uint8_t i = 0; i < 2; i++) {
-			neautralTextures[i]->image = new lv::Image({
+			neautralTextures[i]->image = device->createImage({
 				.frameCount = 1,
 				.format = neutralTextureFormats[i],
 				.width = 1,
@@ -132,7 +132,7 @@ void Model::init(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipeline
 			});
 			commandBuffer->cmdStagingCopyDataToImage(neautralTextures[i]->image, &neautralColors[i]);
 			commandBuffer->cmdTransitionImageLayout(neautralTextures[i]->image, 0, lv::ImageLayout::TransferDestinationOptimal, lv::ImageLayout::ShaderReadOnlyOptimal);
-			neautralTextures[i]->sampler = new lv::Sampler({
+			neautralTextures[i]->sampler = device->createSampler({
 				.filter = lv::Filter::Linear,
 				.addressMode = lv::SamplerAddressMode::Repeat
 			});
@@ -156,7 +156,7 @@ void Model::init(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aPipeline
 		rotation.x = -90.0f;
 	}
 
-	processNode(commandBuffer, scene->mRootNode, scene);
+	processNode(device, commandBuffer, scene->mRootNode, scene);
 }
 
 void Model::destroy() {
@@ -199,19 +199,19 @@ void Model::renderNoTextures(lv::CommandBuffer* commandBuffer, uint16_t instance
     }
 }
 
-void Model::processNode(lv::CommandBuffer* commandBuffer, aiNode* node, const aiScene* scene) {
+void Model::processNode(lv::Device* device, lv::CommandBuffer* commandBuffer, aiNode* node, const aiScene* scene) {
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		processMesh(commandBuffer, node, mesh, scene);
+		processMesh(device, commandBuffer, node, mesh, scene);
 	}
 	// then do the same for each of its children
 	for (unsigned int i = 0; i < node->mNumChildren; i++) {
-		processNode(commandBuffer, node->mChildren[i], scene);
+		processNode(device, commandBuffer, node->mChildren[i], scene);
 	}
 }
 
-void Model::processMesh(lv::CommandBuffer* commandBuffer, aiNode* node, aiMesh* mesh, const aiScene* scene) {
+void Model::processMesh(lv::Device* device, lv::CommandBuffer* commandBuffer, aiNode* node, aiMesh* mesh, const aiScene* scene) {
 	std::vector<MainVertex> vertices;
 	std::vector<unsigned int> indices;
 
@@ -261,30 +261,30 @@ void Model::processMesh(lv::CommandBuffer* commandBuffer, aiNode* node, aiMesh* 
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 		Mesh& newMesh = meshes.emplace_back(textureCount);
-		newMesh.init(commandBuffer, vertices, indices);
+		newMesh.init(device, commandBuffer, vertices, indices);
 
         if (textureCount >= 1) {
-            Texture* texAlbedo = loadMaterialTextures(commandBuffer, material, aiTextureType_DIFFUSE);
+            Texture* texAlbedo = loadMaterialTextures(device, commandBuffer, material, aiTextureType_DIFFUSE);
             newMesh.setTexture(texAlbedo, 0);
         }
         if (textureCount >= 2) {
-            Texture* texMetallicRoughness = loadMaterialTextures(commandBuffer, material, aiTextureType_DIFFUSE_ROUGHNESS);
+            Texture* texMetallicRoughness = loadMaterialTextures(device, commandBuffer, material, aiTextureType_DIFFUSE_ROUGHNESS);
             if (!texMetallicRoughness)
-                texMetallicRoughness = loadMaterialTextures(commandBuffer, material, aiTextureType_METALNESS);
+                texMetallicRoughness = loadMaterialTextures(device, commandBuffer, material, aiTextureType_METALNESS);
             newMesh.setTexture(texMetallicRoughness, 1);
         }
         if (textureCount >= 3) {
-            Texture* texNormal = loadMaterialTextures(commandBuffer, material, aiTextureType_HEIGHT);
+            Texture* texNormal = loadMaterialTextures(device, commandBuffer, material, aiTextureType_HEIGHT);
             if (!texNormal)
-                texNormal = loadMaterialTextures(commandBuffer, material, aiTextureType_NORMALS);
+                texNormal = loadMaterialTextures(device, commandBuffer, material, aiTextureType_NORMALS);
             newMesh.setTexture(texNormal, 2);
         }
 
-		newMesh.initDescriptorSet(pipelineLayout, shadowPipelineLayout, descriptorSetLayoutIndex, shadowDescriptorSetLayoutIndex);
+		newMesh.initDescriptorSet(device, pipelineLayout, shadowPipelineLayout, descriptorSetLayoutIndex, shadowDescriptorSetLayoutIndex);
 	}
 }
 
-Texture* Model::loadMaterialTextures(lv::CommandBuffer* commandBuffer, aiMaterial *mat, aiTextureType type) {
+Texture* Model::loadMaterialTextures(lv::Device* device, lv::CommandBuffer* commandBuffer, aiMaterial *mat, aiTextureType type) {
 	aiString str;
 	int count = mat->GetTextureCount(type);
 
@@ -294,5 +294,5 @@ Texture* Model::loadMaterialTextures(lv::CommandBuffer* commandBuffer, aiMateria
 	if (texStr == "")
 		return nullptr;
 
-	return Mesh::loadTextureFromFile(commandBuffer, filename.c_str(), type == aiTextureType_DIFFUSE);
+	return Mesh::loadTextureFromFile(device, commandBuffer, filename.c_str(), type == aiTextureType_DIFFUSE);
 }

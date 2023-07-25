@@ -15,15 +15,12 @@ struct InstanceCreateInfo {
 
 class Instance {
 protected:
-    RenderAPI renderAPI;
     Bool validationEnable;
 
 public:
     virtual ~Instance() {}
 
     //Getters
-    inline RenderAPI getRenderAPI() { return renderAPI; }
-
     inline Bool getValidationEnable() { return validationEnable; }
 };
 

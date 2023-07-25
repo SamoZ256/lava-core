@@ -24,9 +24,9 @@ private:
 	Image* depthImage; //TODO: create depth image if required
 
 	Subpass* subpass;
-	RenderPass* _renderPass;
-	Framebuffer* _framebuffer;
-	CommandBuffer* _commandBuffer;
+	RenderPass* renderPass;
+	Framebuffer* framebuffer;
+	CommandBuffer* commandBuffer;
 	Image* image;
 
 	AttachmentLoadOperation loadOp = AttachmentLoadOperation::DontCare;
@@ -80,11 +80,17 @@ public:
 	//Getters
 	inline uint32_t imageIndex() { return _imageIndex; }
 
-	inline RenderPass* renderPass() { return _renderPass; }
+    internal::RenderPass* getRenderPass() override {
+        return renderPass;
+    }
 
-	inline Framebuffer* framebuffer() { return _framebuffer; }
+    internal::Framebuffer* getFramebuffer() override {
+        return framebuffer;
+    }
 
-	inline CommandBuffer* commandBuffer() { return _commandBuffer; }
+    internal::CommandBuffer* getCommandBuffer() override {
+        return commandBuffer;
+    }
 };
 
 extern SwapChain* g_vulkan_swapChain;

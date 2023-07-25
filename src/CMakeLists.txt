@@ -1,4 +1,5 @@
 file(GLOB src
+    lvcore.cpp
     vulkan/*.cpp
     filesystem/*.cpp
     threading/*.cpp

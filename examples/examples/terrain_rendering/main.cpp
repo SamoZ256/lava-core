@@ -4,22 +4,6 @@
 
 #include "lvcore/filesystem/filesystem.hpp"
 
-#include "lvcore/instance.hpp"
-#include "lvcore/device.hpp"
-#include "lvcore/swap_chain.hpp"
-#include "lvcore/pipeline_layout.hpp"
-#include "lvcore/shader_module.hpp"
-#include "lvcore/graphics_pipeline.hpp"
-#include "lvcore/vertex_descriptor.hpp"
-#include "lvcore/buffer.hpp"
-#include "lvcore/descriptor_set.hpp"
-#include "lvcore/image.hpp"
-#include "lvcore/sampler.hpp"
-#include "lvcore/render_pass.hpp"
-#include "lvcore/framebuffer.hpp"
-#include "lvcore/command_buffer.hpp"
-#include "lvcore/compute_pipeline.hpp"
-
 #include "model.hpp"
 #include "first_person_camera.hpp"
 
@@ -96,9 +80,7 @@ struct MainRenderPass {
     lv::Image* diffuseImage;
     lv::Image* normalImage;
     lv::Image* depthImage;
-#ifdef LV_BACKEND_METAL
-    lv::Image* depthAsColorImage;
-#endif
+    lv::Image* depthAsColorImage; //Metal only
 };
 
 glm::mat4 createMatrixFromDirection(const glm::vec3& direction) {
@@ -164,7 +146,7 @@ public:
         }
     }
 
-    void load(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* tescPipelineLayout, lv::PipelineLayout* terrainPipelineLayout, lv::PipelineLayout* grassPipelineLayout, lv::Sampler* sampler, lv::Sampler* linearSampler, siv::PerlinNoise* perlinNoiseGenerator) {
+    void load(lv::Device* device, lv::CommandBuffer* commandBuffer, lv::PipelineLayout* tescPipelineLayout, lv::PipelineLayout* terrainPipelineLayout, lv::PipelineLayout* grassPipelineLayout, lv::Sampler* sampler, lv::Sampler* linearSampler, siv::PerlinNoise* perlinNoiseGenerator) {
         //std::vector<MainVertex> vertices((depth + 1) * (width + 1) + 1);
         //std::vector<uint16_t> indices(depth * width * 2 * 3);
         uint16_t noiseWithBorders[CHUNK_TEXTURE_SIZE + 3][CHUNK_TEXTURE_SIZE + 3];//((CHUNK_TEXTURE_SIZE + 3) * (CHUNK_TEXTURE_SIZE + 3));
@@ -289,19 +271,19 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
         //    }
         //}
         
-        tessellationFactorBuffer = new lv::Buffer({
+        tessellationFactorBuffer = device->createBuffer({
             .size = PATCHES_PER_CHUNK * PATCHES_PER_CHUNK * size_t(12/* 4 * half (2) + 2 * half (2) */),
             .usage = lv::BufferUsageFlags::StorageBuffer
         });
         
-        grassModelsBuffer = new lv::Buffer({
+        grassModelsBuffer = device->createBuffer({
             .frameCount = 1,
             .size = grassModels.size() * sizeof(BasicModel),
             .usage = lv::BufferUsageFlags::StorageBuffer
         });
         commandBuffer->cmdStagingCopyDataToBuffer(grassModelsBuffer, grassModels.data());
 
-        noiseImage = new lv::Image({
+        noiseImage = device->createImage({
             .frameCount = 1,
             .format = lv::Format::R16Unorm,
             .width = uint16_t(CHUNK_TEXTURE_SIZE + 1),
@@ -310,7 +292,7 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
         });
         commandBuffer->cmdStagingCopyDataToImage(noiseImage, noise, 2);
 
-        normalImage = new lv::Image({
+        normalImage = device->createImage({
             .frameCount = 1,
             .format = lv::Format::RGBA8Snorm,
             .width = uint16_t(CHUNK_TEXTURE_SIZE + 1),
@@ -319,7 +301,7 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
         });
         commandBuffer->cmdStagingCopyDataToImage(normalImage, normals, 4);
 
-        terrainDescriptorSet = new lv::DescriptorSet({
+        terrainDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = terrainPipelineLayout,
             .layoutIndex = 1,
             .imageBindings = {
@@ -329,7 +311,7 @@ for (int8_t z2 = -radius; z2 <= radius; z2++) { \
             }
         });
 
-        grassDescriptorSet = new lv::DescriptorSet({
+        grassDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = grassPipelineLayout,
             .layoutIndex = 1,
             .bufferBindings = {
@@ -459,21 +441,21 @@ private:
     lv::Sampler* linearSampler;
 
 public:
-    Terrain(lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aTescPipelineLayout, lv::PipelineLayout* shadowPipelineLayout, lv::PipelineLayout* shadowWithAlphaPipelineLayout, lv::PipelineLayout* aTerrainPipelineLayout, lv::PipelineLayout* gbufferPipelineLayout, lv::PipelineLayout* treePipelineLayout, lv::PipelineLayout* aGrassPipelineLayout, lv::Buffer* mainUniformBuffer, lv::Sampler* aSampler, lv::Sampler* aLinearSampler) : tescPipelineLayout(aTescPipelineLayout), terrainPipelineLayout(aTerrainPipelineLayout), grassPipelineLayout(aGrassPipelineLayout), sampler(aSampler), linearSampler(aLinearSampler) {
+    Terrain(lv::Device* device, lv::CommandBuffer* commandBuffer, lv::PipelineLayout* aTescPipelineLayout, lv::PipelineLayout* shadowPipelineLayout, lv::PipelineLayout* shadowWithAlphaPipelineLayout, lv::PipelineLayout* aTerrainPipelineLayout, lv::PipelineLayout* gbufferPipelineLayout, lv::PipelineLayout* treePipelineLayout, lv::PipelineLayout* aGrassPipelineLayout, lv::Buffer* mainUniformBuffer, lv::Sampler* aSampler, lv::Sampler* aLinearSampler) : tescPipelineLayout(aTescPipelineLayout), terrainPipelineLayout(aTerrainPipelineLayout), grassPipelineLayout(aGrassPipelineLayout), sampler(aSampler), linearSampler(aLinearSampler) {
         uint16_t quadIndices[] = {
             0, 1, 2,
             0, 2, 3
         };
-        quadIndexBuffer = new lv::Buffer({
+        quadIndexBuffer = device->createBuffer({
             .frameCount = 1,
             .size = sizeof(quadIndices)
         });
         commandBuffer->cmdStagingCopyDataToBuffer(quadIndexBuffer, quadIndices);
 
         terrainGrassTexture = new Texture();
-        terrainGrassTexture->init(commandBuffer, "../examples/assets/textures/grass/grass.jpg", true, true);
+        terrainGrassTexture->init(device, commandBuffer, "../examples/assets/textures/grass/grass.jpg", true, true);
         terrainGrassAlphaCardTexture = new Texture();
-        terrainGrassAlphaCardTexture->init(commandBuffer, "../examples/assets/textures/grass/grass_alpha_card.png", true, true);
+        terrainGrassAlphaCardTexture->init(device, commandBuffer, "../examples/assets/textures/grass/grass_alpha_card.png", true, true);
 
         seed = (unsigned int)(rand() % 10000);
         perlinNoiseGenerator = new siv::PerlinNoise{seed};
@@ -481,22 +463,22 @@ public:
         //Models
 
         //LOD 0
-        treeModels[0].init(commandBuffer, gbufferPipelineLayout, shadowWithAlphaPipelineLayout, "../examples/assets/models/pine/Pine_4m.obj", 1, 1, 2);
+        treeModels[0].init(device, commandBuffer, gbufferPipelineLayout, shadowWithAlphaPipelineLayout, "../examples/assets/models/pine/Pine_4m.obj", 1, 1, 2);
 
         //LOD 1
-        treeModels[1].init(commandBuffer, gbufferPipelineLayout, shadowWithAlphaPipelineLayout, "../examples/assets/models/pine/Pine_4m_lod1.obj", 1, 1, 2);
+        treeModels[1].init(device, commandBuffer, gbufferPipelineLayout, shadowWithAlphaPipelineLayout, "../examples/assets/models/pine/Pine_4m_lod1.obj", 1, 1, 2);
 
         //LOD 2
-        treeModels[2].init(commandBuffer, gbufferPipelineLayout, shadowWithAlphaPipelineLayout, "../examples/assets/models/pine/Pine_4m_lod2.obj", 1, 1, 2);
+        treeModels[2].init(device, commandBuffer, gbufferPipelineLayout, shadowWithAlphaPipelineLayout, "../examples/assets/models/pine/Pine_4m_lod2.obj", 1, 1, 2);
 
         for (uint8_t i = 0; i < 3; i++) {
-            treeBuffers[i] = new lv::Buffer({
+            treeBuffers[i] = device->createBuffer({
                 .size = maxVisibleChunks() * TREE_CELLS_PER_SIDE * TREE_CELLS_PER_SIDE * sizeof(BasicModel),
                 .usage = lv::BufferUsageFlags::StorageBuffer,
                 .memoryType = lv::MemoryType::Shared
             });
 
-            treeDescriptorSets[i] = new lv::DescriptorSet({
+            treeDescriptorSets[i] = device->createDescriptorSet({
                 .pipelineLayout = treePipelineLayout,
                 .bufferBindings = {
                     mainUniformBuffer->descriptorInfo(0),
@@ -504,7 +486,7 @@ public:
                 }
             });
 
-            treeShadowDescriptorSets[i] = new lv::DescriptorSet({
+            treeShadowDescriptorSets[i] = device->createDescriptorSet({
                 .pipelineLayout = (i == 0 ? shadowWithAlphaPipelineLayout : shadowPipelineLayout),
                 .layoutIndex = 1,
                 .bufferBindings = {
@@ -513,7 +495,7 @@ public:
             });
         }
 
-        newChunkCommandBuffer = new lv::CommandBuffer({});
+        newChunkCommandBuffer = device->createCommandBuffer({});
     }
 
     ~Terrain() {
@@ -557,14 +539,14 @@ for (uint8_t z = 0; z < CHUNKS_PER_SIDE; z++) { \
     } \
 }
 
-    void updateVisibleChunks(Camera& camera, const glm::vec2& cameraPositionVec2) {
+    void updateVisibleChunks(lv::Device* device, Camera& camera, const glm::vec2& cameraPositionVec2) {
         glm::i32vec2 crntCameraChunk = glm::round(cameraPositionVec2 / CHUNK_SIZE);
 
         if (creationQueue.size()) {
             newChunkCommandBuffer->beginRecording();
             newChunkCommandBuffer->beginBlitCommands();
 
-            creationQueue[0]->load(newChunkCommandBuffer, tescPipelineLayout, terrainPipelineLayout, grassPipelineLayout, sampler, linearSampler, perlinNoiseGenerator);
+            creationQueue[0]->load(device, newChunkCommandBuffer, tescPipelineLayout, terrainPipelineLayout, grassPipelineLayout, sampler, linearSampler, perlinNoiseGenerator);
             creationQueue.erase(creationQueue.begin());
 
             newChunkCommandBuffer->endRecording();
@@ -785,7 +767,7 @@ public:
 
     float prevTime = 0.0f;
 
-    LavaCoreExampleApp() : Application("terrain_rendering") {
+    LavaCoreExampleApp(int argc, char* argv[]) : Application("terrain_rendering", argc, argv) {
         threadPool = new lv::ThreadPool({});
 
         instance = new lv::Instance({
@@ -793,12 +775,12 @@ public:
             .validationEnable = lv::True
         });
 
-        device = new lv::Device({
+        device = instance->createDevice({
             .window = window,
             .threadPool = threadPool
         });
 
-        swapChain = new lv::SwapChain({
+        swapChain = device->createSwapChain({
             .window = window,
             .vsyncEnable = lv::True,
             .maxFramesInFlight = 2
@@ -808,14 +790,14 @@ public:
         lvndWindowGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
 
         //Vertex descriptor
-        shadowVertexDescriptor = new lv::VertexDescriptor({
+        shadowVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
                 {0, lv::Format::RGB32Float, offsetof(MainVertex, position)}
             }
         });
 
-        shadowWithAlphaVertexDescriptor = new lv::VertexDescriptor({
+        shadowWithAlphaVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
                 {0, lv::Format::RGB32Float, offsetof(MainVertex, position)},
@@ -823,7 +805,7 @@ public:
             }
         });
 
-        mainVertexDescriptor = new lv::VertexDescriptor({
+        mainVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(MainVertex),
             .bindings = {
                 {0, lv::Format::RGB32Float, offsetof(MainVertex, position)},
@@ -832,7 +814,7 @@ public:
             }
         });
 
-        terrainVertexDescriptor = new lv::VertexDescriptor({
+        terrainVertexDescriptor = device->createVertexDescriptor({
             .size = sizeof(float) * 4,
             .inputRate = lv::VertexInputRate::PerPatchControlPoint,
             .bindings = {
@@ -841,18 +823,18 @@ public:
         });
 
         //Command buffers
-        tescCommandBuffer = new lv::CommandBuffer({});
+        tescCommandBuffer = device->createCommandBuffer({});
 
         //Samplers
-        basicSampler = new lv::Sampler({});
-        linearSampler = new lv::Sampler({
+        basicSampler = device->createSampler({});
+        linearSampler = device->createSampler({
             .filter = lv::Filter::Linear
         });
 
         //Render passes
 
         //Shadow
-        shadowRenderPass.depthImage = new lv::Image({
+        shadowRenderPass.depthImage = device->createImage({
             .format = lv::Format::D32Float,
             .width = SHADOW_MAP_SIZE,
             .height = SHADOW_MAP_SIZE,
@@ -861,16 +843,16 @@ public:
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::DepthStencilAttachment,
             .aspect = lv::ImageAspectFlags::Depth
         });
-        shadowRenderPass.depthSampler = new lv::Sampler({
+        shadowRenderPass.depthSampler = device->createSampler({
             .filter = lv::Filter::Linear,
             .compareEnable = lv::True
         });
 
-        shadowRenderPass.subpass = new lv::Subpass({
+        shadowRenderPass.subpass = device->createSubpass({
             .depthAttachment = {0, lv::ImageLayout::DepthStencilAttachmentOptimal}
         });
 
-        shadowRenderPass.renderPass = new lv::RenderPass({
+        shadowRenderPass.renderPass = device->createRenderPass({
             .subpasses = {shadowRenderPass.subpass},
             .attachments = {
                 {
@@ -884,22 +866,22 @@ public:
         });
 
 
-        shadowRenderPass.framebuffer = new lv::Framebuffer({
+        shadowRenderPass.framebuffer = device->createFramebuffer({
             .renderPass = shadowRenderPass.renderPass,
             .depthAttachment = {0, shadowRenderPass.depthImage}
         });
         
-        shadowRenderPass.commandBuffer = new lv::CommandBuffer({});
+        shadowRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Main
-        mainRenderPass.colorImage = new lv::Image({
+        mainRenderPass.colorImage = device->createImage({
             .format = lv::Format::RGBA16Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
             .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment
         });
 
-        mainRenderPass.diffuseImage = new lv::Image({
+        mainRenderPass.diffuseImage = device->createImage({
             .format = lv::Format::RGBA8Unorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -907,7 +889,7 @@ public:
             .memoryType = lv::MemoryType::Memoryless
         });
 
-        mainRenderPass.normalImage = new lv::Image({
+        mainRenderPass.normalImage = device->createImage({
             .format = lv::Format::RGBA16Snorm,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -915,7 +897,7 @@ public:
             .memoryType = lv::MemoryType::Memoryless
         });
 
-        mainRenderPass.depthImage = new lv::Image({
+        mainRenderPass.depthImage = device->createImage({
             .format = lv::Format::D32Float,
             .width = framebufferWidth,
             .height = framebufferHeight,
@@ -923,44 +905,44 @@ public:
             .aspect = lv::ImageAspectFlags::Depth
         });
 
-#ifdef LV_BACKEND_METAL
-        mainRenderPass.depthAsColorImage = new lv::Image({
-            .format = lv::Format::R32Float,
-            .width = framebufferWidth,
-            .height = framebufferHeight,
-            .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment,
-            .memoryType = lv::MemoryType::Memoryless
-        });
-#endif
-
-        mainRenderPass.gbufferSubpass = new lv::Subpass({
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal) {
+            mainRenderPass.depthAsColorImage = device->createImage({
+                .format = lv::Format::R32Float,
+                .width = framebufferWidth,
+                .height = framebufferHeight,
+                .usage = lv::ImageUsageFlags::Sampled | lv::ImageUsageFlags::ColorAttachment,
+                .memoryType = lv::MemoryType::Memoryless
+            });
+        }
+        
+        lv::SubpassCreateInfo gbufferSubpassCI{
             .colorAttachments = {
                 {1, lv::ImageLayout::ColorAttachmentOptimal},
-                {2, lv::ImageLayout::ColorAttachmentOptimal},
-#ifdef LV_BACKEND_METAL
-                {4, lv::ImageLayout::ColorAttachmentOptimal}
-#endif
+                {2, lv::ImageLayout::ColorAttachmentOptimal}
             },
             .depthAttachment = {3, lv::ImageLayout::DepthStencilAttachmentOptimal}
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            gbufferSubpassCI.colorAttachments.push_back({4, lv::ImageLayout::ColorAttachmentOptimal});
+        mainRenderPass.gbufferSubpass = device->createSubpass(gbufferSubpassCI);
 
-        mainRenderPass.deferredSubpass = new lv::Subpass({
+        lv::SubpassCreateInfo deferredSubpassCI{
             .colorAttachments = {
                 {0, lv::ImageLayout::ColorAttachmentOptimal},
             },
             .depthAttachment = {3, lv::ImageLayout::DepthStencilAttachmentOptimal},
             .inputAttachments = {
                 {1, lv::ImageLayout::ShaderReadOnlyOptimal},
-                {2, lv::ImageLayout::ShaderReadOnlyOptimal},
-#ifdef LV_BACKEND_VULKAN
-                {3, lv::ImageLayout::DepthStencilReadOnlyOptimal}
-#elif defined(LV_BACKEND_METAL)
-                {4, lv::ImageLayout::ShaderReadOnlyOptimal}
-#endif
+                {2, lv::ImageLayout::ShaderReadOnlyOptimal}
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            gbufferSubpassCI.inputAttachments.push_back({3, lv::ImageLayout::DepthStencilReadOnlyOptimal});
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            gbufferSubpassCI.inputAttachments.push_back({4, lv::ImageLayout::ShaderReadOnlyOptimal});
+        mainRenderPass.deferredSubpass = device->createSubpass(deferredSubpassCI);
 
-        mainRenderPass.renderPass = new lv::RenderPass({
+        lv::RenderPassCreateInfo mainRenderPassCI{
             .subpasses = {mainRenderPass.gbufferSubpass, mainRenderPass.deferredSubpass},
             .attachments = {
                 {
@@ -986,18 +968,19 @@ public:
                     .loadOp = lv::AttachmentLoadOperation::Clear,
                     .initialLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal,
                     .finalLayout = lv::ImageLayout::DepthStencilReadOnlyOptimal
-                },
-#ifdef LV_BACKEND_METAL
-                {
-                    .format = mainRenderPass.depthAsColorImage->format(),
-                    .index = 4,
-                    .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
                 }
-#endif
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal) {
+            mainRenderPassCI.attachments.push_back({
+                .format = mainRenderPass.depthAsColorImage->format(),
+                .index = 4,
+                .finalLayout = lv::ImageLayout::ShaderReadOnlyOptimal
+            });
+        }
+        mainRenderPass.renderPass = device->createRenderPass(mainRenderPassCI);
 
-        mainRenderPass.framebuffer = new lv::Framebuffer({
+        lv::FramebufferCreateInfo mainFramebufferCI{
             .renderPass = mainRenderPass.renderPass,
             .colorAttachments = {
                 {
@@ -1010,20 +993,20 @@ public:
                     }
                 },
                 {1, mainRenderPass.diffuseImage},
-                {2, mainRenderPass.normalImage},
-#ifdef LV_BACKEND_METAL
-                {4, mainRenderPass.depthAsColorImage},
-#endif
+                {2, mainRenderPass.normalImage}
             },
             .depthAttachment = {3, mainRenderPass.depthImage}
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            mainFramebufferCI.colorAttachments.push_back({4, mainRenderPass.depthAsColorImage});
+        mainRenderPass.framebuffer = device->createFramebuffer(mainFramebufferCI);
 
-        mainRenderPass.commandBuffer = new lv::CommandBuffer({});
+        mainRenderPass.commandBuffer = device->createCommandBuffer({});
 
         //Pipeline layout
 
         //Shadow
-        shadowPipelineLayout = new lv::PipelineLayout({
+        shadowPipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
@@ -1035,7 +1018,7 @@ public:
         });
 
         //Shadow with alpha
-        shadowWithAlphaPipelineLayout = new lv::PipelineLayout({
+        shadowWithAlphaPipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex}
@@ -1050,7 +1033,7 @@ public:
         });
 
         //Terrain tessellation control
-        tescPipelineLayout = new lv::PipelineLayout({
+        tescPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Compute,
@@ -1066,7 +1049,7 @@ public:
         });
 
         //Terrain
-        terrainPipelineLayout = new lv::PipelineLayout({
+        terrainPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Vertex,
@@ -1088,7 +1071,7 @@ public:
         });
 
         //GBuffer
-        gbufferPipelineLayout = new lv::PipelineLayout({
+        gbufferPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Vertex,
@@ -1107,7 +1090,7 @@ public:
         });
 
         //Tree
-        treePipelineLayout = new lv::PipelineLayout({
+        treePipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
@@ -1120,7 +1103,7 @@ public:
         });
 
         //Grass
-        grassPipelineLayout = new lv::PipelineLayout({
+        grassPipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::UniformBuffer, lv::ShaderStageFlags::Vertex},
@@ -1133,7 +1116,7 @@ public:
         });
 
         //Deferred
-        deferredPipelineLayout = new lv::PipelineLayout({
+        deferredPipelineLayout = device->createPipelineLayout({
             .pushConstantRanges = {
                 {
                     .stageFlags = lv::ShaderStageFlags::Fragment,
@@ -1152,7 +1135,7 @@ public:
         });
 
         //HDR
-        hdrPipelineLayout = new lv::PipelineLayout({
+        hdrPipelineLayout = device->createPipelineLayout({
             .descriptorSetLayouts = {
                 {
                     {0, lv::DescriptorType::SampledImage, lv::ShaderStageFlags::Fragment}
@@ -1163,17 +1146,17 @@ public:
         //Graphics pipeline
 
         //Shadow
-        vertShadowShaderModule = new lv::ShaderModule({
+        vertShadowShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow.vert.json").c_str())
         });
 
-        fragShadowShaderModule = new lv::ShaderModule({
+        fragShadowShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow.frag.json").c_str())
         });;
 
-        shadowGraphicsPipeline = new lv::GraphicsPipeline({
+        shadowGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertShadowShaderModule,
             .fragmentShaderModule = fragShadowShaderModule,
             .pipelineLayout = shadowPipelineLayout,
@@ -1184,17 +1167,17 @@ public:
         });
 
         //Shadow with alpha
-        vertShadowWithAlphaShaderModule = new lv::ShaderModule({
+        vertShadowWithAlphaShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow_with_alpha.vert.json").c_str())
         });
 
-        fragShadowWithAlphaShaderModule = new lv::ShaderModule({
+        fragShadowWithAlphaShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/shadow_with_alpha.frag.json").c_str())
         });;
 
-        shadowWithAlphaGraphicsPipeline = new lv::GraphicsPipeline({
+        shadowWithAlphaGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertShadowWithAlphaShaderModule,
             .fragmentShaderModule = fragShadowWithAlphaShaderModule,
             .pipelineLayout = shadowWithAlphaPipelineLayout,
@@ -1205,17 +1188,17 @@ public:
         });
 
         //Terrain
-        teseTerrainShaderModule = new lv::ShaderModule({
+        teseTerrainShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/terrain.tese.json").c_str())
         });
 
-        fragTerrainShaderModule = new lv::ShaderModule({
+        fragTerrainShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/terrain.frag.json").c_str())
         });
 
-        terrainGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo terrainGraphicsPipelineCI{
             .vertexShaderModule = teseTerrainShaderModule,
             .fragmentShaderModule = fragTerrainShaderModule,
             .pipelineLayout = terrainPipelineLayout,
@@ -1226,25 +1209,25 @@ public:
             .colorBlendAttachments = {
                 {0},
                 {1},
-                {2},
-#ifdef LV_BACKEND_METAL
-                {4}
-#endif
+                {2}
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            terrainGraphicsPipelineCI.colorBlendAttachments.push_back({4});
+        terrainGraphicsPipeline = device->createGraphicsPipeline(terrainGraphicsPipelineCI);
 
         //GBuffer
-        vertGBufferShaderModule = new lv::ShaderModule({
+        vertGBufferShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/gbuffer.vert.json").c_str())
         });
 
-        fragGBufferShaderModule = new lv::ShaderModule({
+        fragGBufferShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/gbuffer.frag.json").c_str())
         });
 
-        gbufferGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo gbufferGraphicsPipelineCI{
             .vertexShaderModule = vertGBufferShaderModule,
             .fragmentShaderModule = fragGBufferShaderModule,
             .pipelineLayout = gbufferPipelineLayout,
@@ -1255,20 +1238,20 @@ public:
             .colorBlendAttachments = {
                 {0},
                 {1},
-                {2},
-#ifdef LV_BACKEND_METAL
-                {4}
-#endif
+                {2}
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            gbufferGraphicsPipelineCI.colorBlendAttachments.push_back({4});
+        gbufferGraphicsPipeline = device->createGraphicsPipeline(gbufferGraphicsPipelineCI);
 
         //Tree
-        vertTreeShaderModule = new lv::ShaderModule({
+        vertTreeShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/tree.vert.json").c_str())
         });
 
-        treeGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo treeGraphicsPipelineCI{
             .vertexShaderModule = vertTreeShaderModule,
             .fragmentShaderModule = fragGBufferShaderModule,
             .pipelineLayout = treePipelineLayout,
@@ -1280,24 +1263,24 @@ public:
                 {0},
                 {1},
                 {2},
-#ifdef LV_BACKEND_METAL
-                {4}
-#endif
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            treeGraphicsPipelineCI.colorBlendAttachments.push_back({4});
+        treeGraphicsPipeline = device->createGraphicsPipeline(treeGraphicsPipelineCI);
 
         //Grass
-        vertQuadShaderModule = new lv::ShaderModule({
+        vertQuadShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/quad.vert.json").c_str())
         });
 
-        fragGrassShaderModule = new lv::ShaderModule({
+        fragGrassShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/grass.frag.json").c_str())
         });
 
-        grassGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo grassGraphicsPipelineCI{
             .vertexShaderModule = vertQuadShaderModule,
             .fragmentShaderModule = fragGrassShaderModule,
             .pipelineLayout = grassPipelineLayout,
@@ -1306,25 +1289,25 @@ public:
             .colorBlendAttachments = {
                 {0},
                 {1},
-                {2},
-#ifdef LV_BACKEND_METAL
-                {4}
-#endif
+                {2}
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            grassGraphicsPipelineCI.colorBlendAttachments.push_back({4});
+        grassGraphicsPipeline = device->createGraphicsPipeline(grassGraphicsPipelineCI);
 
         //Deferred
-        vertTriangleShaderModule = new lv::ShaderModule({
+        vertTriangleShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Vertex,
             .source = lv::readFile((assetDir + "/shaders/compiled/triangle.vert.json").c_str())
         });
 
-        fragDeferredShaderModule = new lv::ShaderModule({
+        fragDeferredShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/deferred.frag.json").c_str())
         });
 
-        deferredGraphicsPipeline = new lv::GraphicsPipeline({
+        lv::GraphicsPipelineCreateInfo deferredGraphicsPipelineCI{
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragDeferredShaderModule,
             .pipelineLayout = deferredPipelineLayout,
@@ -1339,24 +1322,24 @@ public:
                     .blendEnable = lv::True
                 },
                 {1},
-                {2},
-#ifdef LV_BACKEND_METAL
-                {4}
-#endif
+                {2}
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            deferredGraphicsPipelineCI.colorBlendAttachments.push_back({4});
+        deferredGraphicsPipeline = device->createGraphicsPipeline(deferredGraphicsPipelineCI);
 
         //HDR
-        fragHdrShaderModule = new lv::ShaderModule({
+        fragHdrShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Fragment,
             .source = lv::readFile((assetDir + "/shaders/compiled/hdr.frag.json").c_str())
         });
 
-        hdrGraphicsPipeline = new lv::GraphicsPipeline({
+        hdrGraphicsPipeline = device->createGraphicsPipeline({
             .vertexShaderModule = vertTriangleShaderModule,
             .fragmentShaderModule = fragHdrShaderModule,
             .pipelineLayout = hdrPipelineLayout,
-            .renderPass = swapChain->renderPass(),
+            .renderPass = swapChain->getRenderPass(),
             .colorBlendAttachments = {
                 {0}
             }
@@ -1365,42 +1348,42 @@ public:
         //Compute pipelines
 
         //Terrain tessellation control
-        tescTerrainShaderModule = new lv::ShaderModule({
+        tescTerrainShaderModule = device->createShaderModule({
             .shaderStage = lv::ShaderStageFlags::Compute,
             .source = lv::readFile((assetDir + "/shaders/compiled/terrain.tesc.json").c_str())
         });
 
-        terrainTescComputePipeline = new lv::ComputePipeline({
+        terrainTescComputePipeline = device->createComputePipeline({
             .computeShaderModule = tescTerrainShaderModule,
             .pipelineLayout = tescPipelineLayout,
             .threadGroupSizeIsMultipleOfThreadExecutionWidth = lv::False
         });
 
         //Copy commands
-        lv::CommandBuffer* copyCommandBuffer = new lv::CommandBuffer({});
+        lv::CommandBuffer* copyCommandBuffer = device->createCommandBuffer({});
         copyCommandBuffer->beginRecording();
         copyCommandBuffer->beginBlitCommands();
 
         //Buffers
-        shadowUniformBuffer = new lv::Buffer({
+        shadowUniformBuffer = device->createBuffer({
             .usage = lv::BufferUsageFlags::UniformBuffer,
             .memoryType = lv::MemoryType::Shared,
             .size = sizeof(glm::mat4) * SHADOW_CASCADE_COUNT
         });
 
-        tescUniformBuffer = new lv::Buffer({
+        tescUniformBuffer = device->createBuffer({
             .size = sizeof(glm::vec2),
             .usage = lv::BufferUsageFlags::UniformBuffer,
             .memoryType = lv::MemoryType::Shared
         });
 
-        mainUniformBuffer = new lv::Buffer({
+        mainUniformBuffer = device->createBuffer({
             .size = sizeof(glm::mat4),
             .usage = lv::BufferUsageFlags::UniformBuffer,
             .memoryType = lv::MemoryType::Shared
         });
 
-        controlPointsBuffer = new lv::Buffer({
+        controlPointsBuffer = device->createBuffer({
             .frameCount = 1,
             .size = PATCHES_PER_CHUNK * PATCHES_PER_CHUNK * 4 * sizeof(glm::vec4),
             .usage = lv::BufferUsageFlags::UniformBuffer
@@ -1419,31 +1402,31 @@ public:
         copyCommandBuffer->cmdStagingCopyDataToBuffer(controlPointsBuffer, controlPoints);
 
         //Terrain
-        terrain = new Terrain(copyCommandBuffer, tescPipelineLayout, shadowPipelineLayout, shadowWithAlphaPipelineLayout, terrainPipelineLayout, gbufferPipelineLayout, treePipelineLayout, grassPipelineLayout, mainUniformBuffer, basicSampler, linearSampler);
+        terrain = new Terrain(device, copyCommandBuffer, tescPipelineLayout, shadowPipelineLayout, shadowWithAlphaPipelineLayout, terrainPipelineLayout, gbufferPipelineLayout, treePipelineLayout, grassPipelineLayout, mainUniformBuffer, basicSampler, linearSampler);
 
         //Descriptor set
-        shadowDescriptorSet = new lv::DescriptorSet({
+        shadowDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = shadowPipelineLayout,
             .bufferBindings = {
                 shadowUniformBuffer->descriptorInfo(0)
             }
         });
 
-        shadowWithAlphaDescriptorSet = new lv::DescriptorSet({
+        shadowWithAlphaDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = shadowWithAlphaPipelineLayout,
             .bufferBindings = {
                 shadowUniformBuffer->descriptorInfo(0)
             }
         });
 
-        tescDescriptorSet = new lv::DescriptorSet({
+        tescDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = tescPipelineLayout,
             .bufferBindings = {
                 tescUniformBuffer->descriptorInfo(0)
             }
         });
 
-        terrainDescriptorSet = new lv::DescriptorSet({
+        terrainDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = terrainPipelineLayout,
             .bufferBindings = {
                 mainUniformBuffer->descriptorInfo(0)
@@ -1453,14 +1436,14 @@ public:
             }
         });
 
-        gbufferDescriptorSet = new lv::DescriptorSet({
+        gbufferDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = gbufferPipelineLayout,
             .bufferBindings = {
                 mainUniformBuffer->descriptorInfo(0)
             }
         });
 
-        grassDescriptorSet = new lv::DescriptorSet({
+        grassDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = grassPipelineLayout,
             .bufferBindings = {
                 mainUniformBuffer->descriptorInfo(0)
@@ -1470,21 +1453,21 @@ public:
             }
         });
 
-        deferredDescriptorSet = new lv::DescriptorSet({
+        lv::DescriptorSetCreateInfo deferredDescriptorSetCI{
             .pipelineLayout = deferredPipelineLayout,
             .imageBindings = {
                 mainRenderPass.diffuseImage->descriptorInfo(0, lv::DescriptorType::InputAttachment),
                 mainRenderPass.normalImage->descriptorInfo(1, lv::DescriptorType::InputAttachment),
-#ifdef LV_BACKEND_VULKAN
-                mainRenderPass.depthImage->descriptorInfo(2, lv::DescriptorType::InputAttachment),
-#elif defined(LV_BACKEND_METAL)
-                mainRenderPass.depthAsColorImage->descriptorInfo(2, lv::DescriptorType::InputAttachment),
-#endif
                 shadowRenderPass.depthSampler->descriptorInfo(shadowRenderPass.depthImage, 3)
             }
-        });
+        };
+        if (instance->getRenderAPI() == lv::RenderAPI::Vulkan)
+            deferredDescriptorSetCI.imageBindings.push_back(mainRenderPass.depthImage->descriptorInfo(2, lv::DescriptorType::InputAttachment, lv::ImageLayout::DepthStencilReadOnlyOptimal));
+        else if (instance->getRenderAPI() == lv::RenderAPI::Metal)
+            deferredDescriptorSetCI.imageBindings.push_back(mainRenderPass.depthAsColorImage->descriptorInfo(2, lv::DescriptorType::InputAttachment));
+        deferredDescriptorSet = device->createDescriptorSet(deferredDescriptorSetCI);
 
-        hdrDescriptorSet = new lv::DescriptorSet({
+        hdrDescriptorSet = device->createDescriptorSet({
             .pipelineLayout = hdrPipelineLayout,
             .imageBindings = {
                 mainRenderPass.colorImage->descriptorInfo(0)
@@ -1540,7 +1523,7 @@ public:
         camera.applyMovement();
 
         glm::vec2 cameraPosVec2 = glm::vec2(camera.position.x, camera.position.z);
-        terrain->updateVisibleChunks(camera, cameraPosVec2);
+        terrain->updateVisibleChunks(device, camera, cameraPosVec2);
 
         isOnGround = false;
         float terrainHeight = terrain->getHeightAtPosition(cameraPosVec2);
@@ -1660,16 +1643,16 @@ public:
         mainRenderPass.commandBuffer->submit();
 
         //HDR pass
-        swapChain->commandBuffer()->beginRecording();
-        swapChain->commandBuffer()->beginRenderCommands(swapChain->framebuffer());
+        swapChain->getCommandBuffer()->beginRecording();
+        swapChain->getCommandBuffer()->beginRenderCommands(swapChain->getFramebuffer());
 
-        swapChain->commandBuffer()->cmdBindGraphicsPipeline(hdrGraphicsPipeline);
+        swapChain->getCommandBuffer()->cmdBindGraphicsPipeline(hdrGraphicsPipeline);
 
-        swapChain->commandBuffer()->cmdBindDescriptorSet(hdrDescriptorSet);
+        swapChain->getCommandBuffer()->cmdBindDescriptorSet(hdrDescriptorSet);
 
-        swapChain->commandBuffer()->cmdDraw(3);
+        swapChain->getCommandBuffer()->cmdDraw(3);
 
-        swapChain->commandBuffer()->endRecording();
+        swapChain->getCommandBuffer()->endRecording();
         swapChain->renderAndPresent();
     }
 
@@ -1747,8 +1730,8 @@ public:
     }
 };
 
-int main() {
-    LavaCoreExampleApp application;
+int main(int argc, char* argv[]) {
+    LavaCoreExampleApp application(argc, argv);
     application.run();
 
     return 0;

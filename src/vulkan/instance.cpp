@@ -37,7 +37,6 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 }
 
 Instance::Instance(internal::InstanceCreateInfo createInfo) {
-    renderAPI = createInfo.renderAPI;
 	validationEnable = createInfo.validationEnable;
 	
 	_vulkanVersion = VK_API_VERSION_1_0;
